@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_map">
+
+    <fragment
+        android:id="@+id/navigation_map"
+        android:name="au.edu.anu.cs.sparkee.ui.map.MapFragment"
+        android:label="@string/title_map"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_activity"
+        android:name="au.edu.anu.cs.sparkee.ui.dashboard.DashboardFragment"
+        android:label="@string/title_activity"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="au.edu.anu.cs.sparkee.ui.notifications.NotificationsFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_notifications" />
+</navigation>
