@@ -27,6 +27,8 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import au.edu.anu.cs.sparkee.R;
@@ -98,12 +100,14 @@ public class MapFragment extends Fragment {
         mapViewModel.stopGPS();
     }
 
+    private List<Marker> markers;
 
     public void addBookmark() {
         if (datastore == null)
             datastore = new BookmarkDatastore(this);
         //add all our bookmarks to the view
-        mMapView.getOverlayManager().addAll(datastore.getBookmarksAsMarkers(mMapView));
+        markers = datastore.getBookmarksAsMarkers(mMapView);
+        mMapView.getOverlayManager().addAll(markers);
 
 
         //TODO menu item to
@@ -111,6 +115,11 @@ public class MapFragment extends Fragment {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
                 Log.d("SINGLE", p.toDoubleString());
+                Iterator i = markers.iterator();
+                while(i.hasNext()) {
+                    Marker m = (Marker) i.next();
+                    m.getInfoWindow().close();
+                }
                 return false;
             }
 
@@ -141,6 +150,8 @@ public class MapFragment extends Fragment {
         final EditText title = view.findViewById(R.id.bookmark_title);
         final EditText description = view.findViewById(R.id.bookmark_description);
 
+        Log.d("DialogLong", "" + p.getLongitude());
+        Log.d("DialogLatt", "" + p.getLatitude());
         view.findViewById(R.id.bookmark_cancel).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

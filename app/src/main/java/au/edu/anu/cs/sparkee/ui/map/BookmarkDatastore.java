@@ -90,6 +90,7 @@ public class BookmarkDatastore {
                         break;
                 }
                 cnt++;
+
                 InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view);
                 m.setInfoWindow(infoWindow);
                 m.setPosition(new GeoPoint(cur.getDouble(cur.getColumnIndex(COLUMN_LAT)),cur.getDouble(cur.getColumnIndex(COLUMN_LON))));
@@ -114,7 +115,8 @@ public class BookmarkDatastore {
         removeBookmark(bookmark.getId());
     }
 
-
+    public void hideAllInfo() {
+    }
     public void removeBookmark(String id) {
         mDatabase.delete(TABLE, COLUMN_ID, new String[]{COLUMN_ID});
     }

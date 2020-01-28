@@ -29,9 +29,9 @@ public class CustomInfoWindow extends InfoWindow {
         TextView txtDescription = (TextView) mView.findViewById(R.id.bubble_description);
         TextView txtSubdescription = (TextView) mView.findViewById(R.id.bubble_subdescription);
 
-        txtTitle.setText("Title of my marker");
-        txtDescription.setText("Click here to view details!");
-        txtSubdescription.setText("You can also edit the subdescription");
+        txtTitle.setText("Parking A103");
+        txtDescription.setText("Click button to contribute data");
+        txtSubdescription.setText("");
         layout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Override Marker's onClick behaviour here
