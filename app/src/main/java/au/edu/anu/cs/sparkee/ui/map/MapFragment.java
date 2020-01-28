@@ -88,7 +88,7 @@ public class MapFragment extends Fragment {
         });
         mapViewModel.startGPS();
 
-//        addBookmark();
+        addBookmark();
         return mMapView;
     }
 
