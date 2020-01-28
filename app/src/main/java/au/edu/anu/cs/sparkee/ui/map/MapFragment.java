@@ -178,6 +178,7 @@ public class MapFragment extends Fragment {
                     m.setId(UUID.randomUUID().toString());
                     m.setTitle(title.getText().toString());
                     m.setSubDescription(description.getText().toString());
+                    m.setIcon(getResources().getDrawable(R.drawable.lokasi));
 
                     m.setPosition(new GeoPoint(latD, lonD));
                     m.setSnippet(m.getPosition().toDoubleString());

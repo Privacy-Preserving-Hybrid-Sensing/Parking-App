@@ -71,22 +71,36 @@ public class MainActivity extends AppCompatActivity {
             String[] PERMISSIONS = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION};
             if (!hasPermissions(mContext, PERMISSIONS)) {
                 ActivityCompat.requestPermissions((Activity) mContext, PERMISSIONS, REQUEST);
-                Log.d("HAS AKSES", "YA");
+
+                String pathname = Configuration.getInstance().getOsmdroidTileCache().getAbsolutePath() + File.separator + SqlTileWriter.DATABASE_FILENAME;
+                Log.d("Lokasi", pathname);
+                File dbFile = new File(pathname);
+                if (dbFile.exists()) {
+                    Log.d("File DB", "ADA");
+                } else {
+                    Log.d("File DB", "BELUM ADA");
+                }
+
+                setContentView(R.layout.activity_main);
+                Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
+                BottomNavigationView navView = findViewById(R.id.nav_view);
+
+                AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                            R.id.navigation_map,
+                            R.id.navigation_activity,
+                            R.id.navigation_profile
+                    ).build();
+
+                NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+                NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+                NavigationUI.setupWithNavController(navView, navController);
+
             } else {
                 Log.d("HAS AKSES", "NO");
             }
         } else {
             //do here
             Log.d("SDK < 23", "NO");
-        }
-
-        String pathname = Configuration.getInstance().getOsmdroidTileCache().getAbsolutePath() + File.separator + SqlTileWriter.DATABASE_FILENAME;
-        Log.d("Lokasi", pathname);
-        File dbFile = new File(pathname);
-        if (dbFile.exists()) {
-            Log.d("File DB", "ADA");
-        } else {
-            Log.d("File DB", "BELUM ADA");
         }
 
 //        mGpsMyLocationProvider = new GpsMyLocationProvider(getApplicationContext());
@@ -99,18 +113,6 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(location.getLongitude()) + "\nLatitude:" + Double.toString(location.getLatitude()), Toast.LENGTH_LONG).show();
 //            }
 //        });
-
-        setContentView(R.layout.activity_main);
-        Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_map, R.id.navigation_activity, R.id.navigation_profile)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(navView, navController);
 
 
 //        Toast.makeText(getApplicationContext(),"my location "+ provider.getLastKnownLocation(),Toast.LENGTH_LONG).show();
