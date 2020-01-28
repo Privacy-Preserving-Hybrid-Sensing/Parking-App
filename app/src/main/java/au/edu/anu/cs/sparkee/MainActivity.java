@@ -24,7 +24,22 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
+
+    private static final int REQUEST = 112;
+    private Context mContext = MainActivity.this;
+    private GpsMyLocationProvider mGpsMyLocationProvider;
+
+    private static boolean hasPermissions(Context context, String... permissions) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -39,20 +54,6 @@ public class MainActivity extends AppCompatActivity  {
             }
         }
     }
-    private static boolean hasPermissions(Context context, String... permissions) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private static final int REQUEST = 112;
-    private Context mContext = MainActivity.this;
-    private GpsMyLocationProvider mGpsMyLocationProvider;
 
     @Override
     public void onPause() {
@@ -67,9 +68,9 @@ public class MainActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
 
         if (Build.VERSION.SDK_INT >= 23) {
-            String[] PERMISSIONS = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.ACCESS_COARSE_LOCATION,android.Manifest.permission.ACCESS_FINE_LOCATION};
+            String[] PERMISSIONS = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION};
             if (!hasPermissions(mContext, PERMISSIONS)) {
-                ActivityCompat.requestPermissions((Activity) mContext, PERMISSIONS, REQUEST );
+                ActivityCompat.requestPermissions((Activity) mContext, PERMISSIONS, REQUEST);
                 Log.d("HAS AKSES", "YA");
             } else {
                 Log.d("HAS AKSES", "NO");
@@ -110,8 +111,6 @@ public class MainActivity extends AppCompatActivity  {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-
-
 
 
 //        Toast.makeText(getApplicationContext(),"my location "+ provider.getLastKnownLocation(),Toast.LENGTH_LONG).show();

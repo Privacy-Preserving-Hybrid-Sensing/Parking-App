@@ -9,17 +9,17 @@
         android:id="@+id/navigation_map"
         android:name="au.edu.anu.cs.sparkee.ui.map.MapFragment"
         android:label="@string/title_map"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/navigation_activity"
-        android:name="au.edu.anu.cs.sparkee.ui.dashboard.DashboardFragment"
+        android:name="au.edu.anu.cs.sparkee.ui.activity.DashboardFragment"
         android:label="@string/title_activity"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_activity" />
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="au.edu.anu.cs.sparkee.ui.notifications.NotificationsFragment"
+        android:name="au.edu.anu.cs.sparkee.ui.profile.NotificationsFragment"
         android:label="@string/title_profile"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_profile" />
 </navigation>
