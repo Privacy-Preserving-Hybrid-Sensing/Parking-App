@@ -101,7 +101,7 @@ public class MapFragment extends Fragment {
 
     public void addBookmark() {
         if (datastore == null)
-            datastore = new BookmarkDatastore();
+            datastore = new BookmarkDatastore(this);
         //add all our bookmarks to the view
         mMapView.getOverlayManager().addAll(datastore.getBookmarksAsMarkers(mMapView));
 
@@ -178,7 +178,7 @@ public class MapFragment extends Fragment {
                     m.setId(UUID.randomUUID().toString());
                     m.setTitle(title.getText().toString());
                     m.setSubDescription(description.getText().toString());
-                    m.setIcon(getResources().getDrawable(R.drawable.lokasi));
+                    m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_1));
 
                     m.setPosition(new GeoPoint(latD, lonD));
                     m.setSnippet(m.getPosition().toDoubleString());

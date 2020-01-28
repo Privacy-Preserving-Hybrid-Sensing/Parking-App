@@ -8,4 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppTheme.YellowButton">
+        <item name="colorButtonNormal">@color/yellow</item>
+    </style>
+
+    <style name="AppTheme.GreenRipple">
+        <item name="colorButtonNormal">@color/green</item>
+    </style>
 </resources>

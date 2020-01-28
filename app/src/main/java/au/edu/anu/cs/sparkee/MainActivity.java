@@ -81,41 +81,28 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("File DB", "BELUM ADA");
                 }
 
+                setContentView(R.layout.activity_acknowledge);
+
+            } else {
                 setContentView(R.layout.activity_main);
                 Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
                 BottomNavigationView navView = findViewById(R.id.nav_view);
 
                 AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                            R.id.navigation_map,
-                            R.id.navigation_activity,
-                            R.id.navigation_profile
-                    ).build();
+                        R.id.navigation_map,
+                        R.id.navigation_activity,
+                        R.id.navigation_profile
+                ).build();
 
                 NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
                 NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
                 NavigationUI.setupWithNavController(navView, navController);
-
-            } else {
-                Log.d("HAS AKSES", "NO");
             }
         } else {
             //do here
             Log.d("SDK < 23", "NO");
         }
 
-//        mGpsMyLocationProvider = new GpsMyLocationProvider(getApplicationContext());
-//
-//        mGpsMyLocationProvider.startLocationProvider(new IMyLocationConsumer() {
-//            @Override
-//            public void onLocationChanged(Location location, IMyLocationProvider source) {
-//                Log.d("Long", "" + location.getLongitude());
-//                Log.d("Lat", "" + location.getLatitude());
-//                Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(location.getLongitude()) + "\nLatitude:" + Double.toString(location.getLatitude()), Toast.LENGTH_LONG).show();
-//            }
-//        });
-
-
-//        Toast.makeText(getApplicationContext(),"my location "+ provider.getLastKnownLocation(),Toast.LENGTH_LONG).show();
     }
 
 }

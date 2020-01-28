@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/bubble_layout"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:background="@drawable/curvyedge_bubble"
+android:padding="15px"
+android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/bubble_subdescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/bubble_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/bubble_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TextView" />
+
+    <Button
+        android:id="@+id/bubble_available"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:theme="@style/AppTheme.GreenRipple"
+        android:text="Available" />
+
+    <Button
+        android:id="@+id/bubble_unavailable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:theme="@style/AppTheme.YellowButton"
+        android:text="Unavailable" />
+</LinearLayout>

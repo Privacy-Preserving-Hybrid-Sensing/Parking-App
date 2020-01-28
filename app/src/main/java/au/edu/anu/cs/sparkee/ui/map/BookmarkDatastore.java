@@ -1,20 +1,26 @@
 package au.edu.anu.cs.sparkee.ui.map;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+
+import androidx.fragment.app.Fragment;
 
 import org.osmdroid.api.IMapView;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import au.edu.anu.cs.sparkee.R;
 
 /**
  * created on 2/11/2018.
@@ -33,9 +39,9 @@ public class BookmarkDatastore {
     public static final String COLUMN_DESC="description";
     protected SQLiteDatabase mDatabase;
     public static final String DATABASE_FILENAME = "bookmarks.mDatabase";
-
-    public BookmarkDatastore() {
-
+    private Fragment activity;
+    public BookmarkDatastore(Fragment activity) {
+        this.activity = activity;
         Configuration.getInstance().getOsmdroidTileCache().mkdirs();
         db_file = new File(Configuration.getInstance().getOsmdroidTileCache().getAbsolutePath() + File.separator + DATABASE_FILENAME);
 
@@ -59,11 +65,33 @@ public class BookmarkDatastore {
         try {
             //TODO order by title
             final Cursor cur = mDatabase.rawQuery("SELECT * FROM " + TABLE, null);
+            int cnt=0;
             while(cur.moveToNext()) {
                 Marker m = new Marker(view);
                 m.setId(cur.getString(cur.getColumnIndex(COLUMN_ID)));
                 m.setTitle(cur.getString(cur.getColumnIndex(COLUMN_TITLE)));
                 m.setSubDescription(cur.getString(cur.getColumnIndex(COLUMN_DESC)));
+
+                if(cnt / 4 == 1)
+                    cnt = 0;
+
+                switch(cnt) {
+                    case 0:
+                        m.setIcon(activity.getResources().getDrawable(R.drawable.confirmed_unavailable));
+                        break;
+                    case 1:
+                        m.setIcon(activity.getResources().getDrawable(R.drawable.unconfirmed_1));
+                        break;
+                    case 2:
+                        m.setIcon(activity.getResources().getDrawable(R.drawable.confirmed_available));
+                        break;
+                    case 3:
+                        m.setIcon(activity.getResources().getDrawable(R.drawable.unconfirmed_2));
+                        break;
+                }
+                cnt++;
+                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view);
+                m.setInfoWindow(infoWindow);
                 m.setPosition(new GeoPoint(cur.getDouble(cur.getColumnIndex(COLUMN_LAT)),cur.getDouble(cur.getColumnIndex(COLUMN_LON))));
                 m.setSnippet(m.getPosition().toDoubleString());
 
