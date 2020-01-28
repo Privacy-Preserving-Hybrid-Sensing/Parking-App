@@ -91,11 +91,14 @@ public class BookmarkDatastore {
                 }
                 cnt++;
 
-                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view);
-                m.setInfoWindow(infoWindow);
-                m.setPosition(new GeoPoint(cur.getDouble(cur.getColumnIndex(COLUMN_LAT)),cur.getDouble(cur.getColumnIndex(COLUMN_LON))));
-                m.setSnippet(m.getPosition().toDoubleString());
+                GeoPoint geoPoint = new GeoPoint(cur.getDouble(cur.getColumnIndex(COLUMN_LAT)),cur.getDouble(cur.getColumnIndex(COLUMN_LON)));
+                m.setPosition(geoPoint);
 
+                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view, geoPoint);
+                m.setInfoWindow(infoWindow);
+
+
+                m.setSnippet(m.getPosition().toDoubleString());
                 markers.add(m);
             }
             cur.close();

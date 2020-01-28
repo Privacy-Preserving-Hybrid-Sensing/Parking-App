@@ -26,6 +26,7 @@ import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.Iterator;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.UUID;
 
 import au.edu.anu.cs.sparkee.R;
+import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
 import au.edu.anu.cs.sparkee.receiver.AMQPBroadcaseReceiver;
 
 public class MapFragment extends Fragment {
@@ -198,7 +200,12 @@ public class MapFragment extends Fragment {
                     m.setSubDescription(description.getText().toString());
                     m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_1));
 
-                    m.setPosition(new GeoPoint(latD, lonD));
+                    GeoPoint geoPoint = new GeoPoint(latD, lonD);
+                    m.setPosition(geoPoint);
+
+                    InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, mMapView, geoPoint);
+                    m.setInfoWindow(infoWindow);
+
                     m.setSnippet(m.getPosition().toDoubleString());
                     datastore.addBookmark(m);
                     mMapView.getOverlayManager().add(m);
