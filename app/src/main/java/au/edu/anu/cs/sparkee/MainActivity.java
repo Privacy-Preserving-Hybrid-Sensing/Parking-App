@@ -2,6 +2,8 @@ package au.edu.anu.cs.sparkee;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +25,9 @@ import org.osmdroid.tileprovider.modules.SqlTileWriter;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 
 import java.io.File;
+
+import au.edu.anu.cs.sparkee.receiver.AMQPBroadcaseReceiver;
+import au.edu.anu.cs.sparkee.service.SParkeeMessagingService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,9 +63,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-//        if(mGpsMyLocationProvider != null) {
-//            mGpsMyLocationProvider.stopLocationProvider();
-//        }
+        unregisterReceiver(receiver);
+    }
+
+    AMQPBroadcaseReceiver receiver;
+    IntentFilter intentFilter;
+
+    public void launchBroadcaseReceiver() {
+        receiver = new AMQPBroadcaseReceiver();
+        intentFilter = new IntentFilter(Constants.BROADCAST_ACTION_IDENTIFIER);
+    }
+
+    public void launchSParkeeMessagingService() {
+        Intent i = new Intent(this, SParkeeMessagingService.class);
+        startService(i);
     }
 
     @Override
@@ -97,12 +113,28 @@ public class MainActivity extends AppCompatActivity {
                 NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
                 NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
                 NavigationUI.setupWithNavController(navView, navController);
+                launchSParkeeMessagingService();
+                launchBroadcaseReceiver();
             }
         } else {
             //do here
             Log.d("SDK < 23", "NO");
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, intentFilter);
+
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 
 }

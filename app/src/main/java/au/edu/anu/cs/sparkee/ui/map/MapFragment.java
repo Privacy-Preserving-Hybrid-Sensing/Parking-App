@@ -2,6 +2,7 @@ package au.edu.anu.cs.sparkee.ui.map;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 import au.edu.anu.cs.sparkee.R;
+import au.edu.anu.cs.sparkee.receiver.AMQPBroadcaseReceiver;
 
 public class MapFragment extends Fragment {
 
@@ -91,13 +93,18 @@ public class MapFragment extends Fragment {
         mapViewModel.startGPS();
 
         addBookmark();
+
         return mMapView;
     }
+
+    AMQPBroadcaseReceiver receiver;
+    IntentFilter intentFilter;
 
     @Override
     public void onPause() {
         super.onPause();
         mapViewModel.stopGPS();
+
     }
 
     private List<Marker> markers;
