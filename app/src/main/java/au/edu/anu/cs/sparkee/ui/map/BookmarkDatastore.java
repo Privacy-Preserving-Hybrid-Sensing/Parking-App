@@ -2,6 +2,8 @@ package au.edu.anu.cs.sparkee.ui.map;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 
 /**
@@ -39,12 +42,13 @@ public class BookmarkDatastore {
     public static final String COLUMN_DESC="description";
     protected SQLiteDatabase mDatabase;
     public static final String DATABASE_FILENAME = "bookmarks.mDatabase";
+    private String routing_key_uuid;
+
     private Fragment activity;
     public BookmarkDatastore(Fragment activity) {
         this.activity = activity;
         Configuration.getInstance().getOsmdroidTileCache().mkdirs();
         db_file = new File(Configuration.getInstance().getOsmdroidTileCache().getAbsolutePath() + File.separator + DATABASE_FILENAME);
-
 
         try {
             mDatabase = SQLiteDatabase.openOrCreateDatabase(db_file, null);
@@ -57,6 +61,9 @@ public class BookmarkDatastore {
         } catch (Throwable ex) {
             Log.e(IMapView.LOGTAG, "Unable to start the bookmark database. Check external storage availability.", ex);
         }
+
+        SharedPreferences sharedPref =  activity.getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+        this.routing_key_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
     }
 
     //TODO geopgrahpic bounding box?
@@ -67,34 +74,41 @@ public class BookmarkDatastore {
             final Cursor cur = mDatabase.rawQuery("SELECT * FROM " + TABLE, null);
             int cnt=0;
             while(cur.moveToNext()) {
+
                 Marker m = new Marker(view);
                 m.setId(cur.getString(cur.getColumnIndex(COLUMN_ID)));
                 m.setTitle(cur.getString(cur.getColumnIndex(COLUMN_TITLE)));
                 m.setSubDescription(cur.getString(cur.getColumnIndex(COLUMN_DESC)));
 
+                GeoPoint geoPoint = new GeoPoint(cur.getDouble(cur.getColumnIndex(COLUMN_LAT)),cur.getDouble(cur.getColumnIndex(COLUMN_LON)));
+                m.setPosition(geoPoint);
+
                 if(cnt / 4 == 1)
                     cnt = 0;
 
+                String tmp_status = "";
                 switch(cnt) {
                     case 0:
                         m.setIcon(activity.getResources().getDrawable(R.drawable.confirmed_unavailable));
+                        tmp_status = "Unavailable";
                         break;
                     case 1:
                         m.setIcon(activity.getResources().getDrawable(R.drawable.unconfirmed_1));
+                        tmp_status = "Unconfirmed (confidence 60%)";
                         break;
                     case 2:
                         m.setIcon(activity.getResources().getDrawable(R.drawable.confirmed_available));
+                        tmp_status = "Available";
                         break;
                     case 3:
                         m.setIcon(activity.getResources().getDrawable(R.drawable.unconfirmed_2));
+                        tmp_status = "Unconfirmed (confidence 30%)";
                         break;
                 }
                 cnt++;
 
-                GeoPoint geoPoint = new GeoPoint(cur.getDouble(cur.getColumnIndex(COLUMN_LAT)),cur.getDouble(cur.getColumnIndex(COLUMN_LON)));
-                m.setPosition(geoPoint);
 
-                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view, geoPoint);
+                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view, geoPoint, this.routing_key_uuid, tmp_status);
                 m.setInfoWindow(infoWindow);
 
 

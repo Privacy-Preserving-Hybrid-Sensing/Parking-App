@@ -3,6 +3,7 @@ package au.edu.anu.cs.sparkee.ui.map;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.rabbitmq.client.AlreadyClosedException;
+import com.rabbitmq.client.Channel;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
@@ -29,10 +35,14 @@ import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
 import au.edu.anu.cs.sparkee.receiver.AMQPBroadcaseReceiver;
@@ -49,8 +59,10 @@ public class MapFragment extends Fragment {
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private MyLocationNewOverlay mLocationOverlay;
     private Context context;
-    private double DEFAULT_LONG = 149.1316834;
-    private double DEFAULT_LAT= -35.2534043;
+    private double DEFAULT_LONG = 149.120385;
+    private double DEFAULT_LAT= -35.275514;
+    private String routing_key_uuid;
+    final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
 
     public MapView getmMapView() {
         return mMapView;
@@ -60,6 +72,12 @@ public class MapFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         context = inflater.getContext();
         mMapView = new MapView(context);
+        mMapView.setTilesScaledToDpi(true);
+        mMapView.setMultiTouchControls(true);
+        mMapView.setFlingEnabled(true);
+
+        SharedPreferences sharedPref = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+        routing_key_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
 
         IGeoPoint geoPoint =new GeoPoint(DEFAULT_LAT, DEFAULT_LONG);
         mMapView.getController().animateTo(geoPoint);
@@ -69,7 +87,7 @@ public class MapFragment extends Fragment {
 
         mLocationOverlay = new MyLocationNewOverlay(mMapView);
 
-        mapViewModel.getLocation().observe(this, new Observer<Location>() {
+        mapViewModel.getLocation().observe( getViewLifecycleOwner(), new Observer<Location>() {
 
             @Override
             public void onChanged(@Nullable Location loc) {
@@ -77,9 +95,6 @@ public class MapFragment extends Fragment {
                     currentLocation = loc;
 
                     if(isInitView) {
-                        mMapView.setTilesScaledToDpi(true);
-                        mMapView.setMultiTouchControls(true);
-                        mMapView.setFlingEnabled(true);
                         mLocationOverlay.enableMyLocation();
                         mLocationOverlay.enableFollowLocation();
                         mLocationOverlay.setOptionsMenuEnabled(true);
@@ -88,6 +103,8 @@ public class MapFragment extends Fragment {
                         isInitView = false;
 
                     }
+
+                    sendCurrentPosition();
                 }
 
             }
@@ -97,6 +114,72 @@ public class MapFragment extends Fragment {
         addBookmark();
 
         return mMapView;
+    }
+
+    public void sendCurrentPosition() {
+        try {
+            Channel channel = amqpConnectionHelper.getChannel();
+            JSONObject jo = new JSONObject();
+            jo.put("type", "participant_location");
+            jo.put("routing_key_uuid", routing_key_uuid);
+            jo.put("msg", "Contributor Location Changed");
+            jo.put("long", currentLocation.getLongitude());
+            jo.put("latt", currentLocation.getLatitude());
+            String str_json = jo.toString();
+            channel.basicPublish(Constants.RABBIT_EXCHANGE_OUTGOING_NAME, "", null, str_json.getBytes("UTF-8"));
+        }
+        catch (AlreadyClosedException ace) {
+            ace.printStackTrace();
+        }
+        catch (SocketException se) {
+            se.printStackTrace();
+        }
+        catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+        catch(UnsupportedEncodingException uee) {
+            uee.printStackTrace();
+        }
+        catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        catch (JSONException je) {
+            je.printStackTrace();
+        }
+
+    }
+
+    public void addNewData(GeoPoint geoPoint) {
+        try {
+            Channel channel = amqpConnectionHelper.getChannel();
+            JSONObject jo = new JSONObject();
+            jo.put("type", "parking_slot_registration");
+            jo.put("routing_key_uuid", routing_key_uuid);
+            jo.put("msg", "Parking Slot Registration");
+            jo.put("long", geoPoint.getLongitude());
+            jo.put("latt", geoPoint.getLatitude());
+            String str_json = jo.toString();
+            channel.basicPublish(Constants.RABBIT_EXCHANGE_OUTGOING_NAME, "", null, str_json.getBytes("UTF-8"));
+        }
+        catch (AlreadyClosedException ace) {
+            ace.printStackTrace();
+        }
+        catch (SocketException se) {
+            se.printStackTrace();
+        }
+        catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+        catch(UnsupportedEncodingException uee) {
+            uee.printStackTrace();
+        }
+        catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        catch (JSONException je) {
+            je.printStackTrace();
+        }
+
     }
 
     AMQPBroadcaseReceiver receiver;
@@ -156,8 +239,8 @@ public class MapFragment extends Fragment {
         lat.setText(p.getLatitude() + "");
         final TextView lon = view.findViewById(R.id.bookmark_lon);
         lon.setText(p.getLongitude() + "");
-        final EditText title = view.findViewById(R.id.bookmark_title);
-        final EditText description = view.findViewById(R.id.bookmark_description);
+//        final EditText title = view.findViewById(R.id.bookmark_title);
+//        final EditText description = view.findViewById(R.id.bookmark_description);
 
         Log.d("DialogLong", "" + p.getLongitude());
         Log.d("DialogLatt", "" + p.getLatitude());
@@ -196,22 +279,24 @@ public class MapFragment extends Fragment {
                 if (valid) {
                     Marker m = new Marker(mMapView);
                     m.setId(UUID.randomUUID().toString());
-                    m.setTitle(title.getText().toString());
-                    m.setSubDescription(description.getText().toString());
+                    m.setTitle(UUID.randomUUID().toString());
+                    m.setSubDescription(UUID.randomUUID().toString());
                     m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_1));
 
                     GeoPoint geoPoint = new GeoPoint(latD, lonD);
                     m.setPosition(geoPoint);
-
-                    InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, mMapView, geoPoint);
+                    String tmp_status = "Unconfirmed (confidence 60%)";
+                    InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, mMapView, geoPoint, routing_key_uuid, tmp_status);
                     m.setInfoWindow(infoWindow);
 
                     m.setSnippet(m.getPosition().toDoubleString());
                     datastore.addBookmark(m);
                     mMapView.getOverlayManager().add(m);
                     mMapView.invalidate();
+                    addNewData(geoPoint);
                 }
                 addBookmark.dismiss();
+
             }
         });
 

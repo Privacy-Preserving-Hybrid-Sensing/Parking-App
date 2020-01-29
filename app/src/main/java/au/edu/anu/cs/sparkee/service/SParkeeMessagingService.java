@@ -2,7 +2,9 @@ package au.edu.anu.cs.sparkee.service;
 
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.StrictMode;
 
 import com.rabbitmq.client.AMQP;
@@ -38,9 +40,12 @@ public class SParkeeMessagingService extends IntentService {
 
             final Channel channel = amqpConnectionHelper.getChannel();
 
+            SharedPreferences sharedPref =  getApplicationContext().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+            String routing_key_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
+
             channel.exchangeDeclare(Constants.RABBIT_EXCHANGE_INCOMING_NAME, "fanout");
             String queueName = channel.queueDeclare().getQueue();
-            channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, "");
+            channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, routing_key_uuid);
 
 
             boolean autoAck = false;
@@ -68,6 +73,9 @@ public class SParkeeMessagingService extends IntentService {
         }
         catch(IOException ioe) {
             ioe.printStackTrace();
+        }
+        catch (NullPointerException npe) {
+            npe.printStackTrace();
         }
 
     }

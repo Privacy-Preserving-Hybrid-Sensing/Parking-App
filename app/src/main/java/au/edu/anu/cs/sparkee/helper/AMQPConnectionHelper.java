@@ -38,7 +38,13 @@ public class AMQPConnectionHelper {
             factory.setHost(Constants.SERVER_HOST);
             factory.setUsername(Constants.RABBIT_USER);
             factory.setPassword(Constants.RABBIT_PASS);
+            factory.setAutomaticRecoveryEnabled(true);
+            factory.setNetworkRecoveryInterval(10000);
             connection = factory.newConnection();
+
+            // enable automatic recovery (e.g. Java client prior 4.0.0)
+//            factory.setAutomaticRecoveryEnabled(true);
+
             channel = connection.createChannel();
         }
         catch(IOException ioe) {
