@@ -1,23 +1,21 @@
 package au.edu.anu.cs.sparkee.ui.map;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.location.Location;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.rabbitmq.client.AlreadyClosedException;
-import com.rabbitmq.client.Channel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
+import org.threeten.bp.LocalDateTime;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -30,13 +28,16 @@ import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
 public class CustomInfoWindow extends InfoWindow {
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
     private  GeoPoint geoPoint;
-    private String routing_key_uuid;
+    private String device_uuid;
     private String status;
-    public CustomInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String routing_key_uuid, String status) {
+    private LocalDateTime ts_update;
+
+    public CustomInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update) {
         super(layoutResId, mapView);
         this.geoPoint = geoPoint;
-        this.routing_key_uuid = routing_key_uuid;
+        this.device_uuid = device_uuid;
         this.status = status;
+        this.ts_update = ts_update;
     }
 
     public void onClose() {
@@ -47,13 +48,13 @@ public class CustomInfoWindow extends InfoWindow {
         LinearLayout layout = (LinearLayout) mView.findViewById(R.id.bubble_layout);
         Button btnAvailable = (Button) mView.findViewById(R.id.bubble_available);
         Button btnUnavailable = (Button) mView.findViewById(R.id.bubble_unavailable);
-        TextView txtTitle = (TextView) mView.findViewById(R.id.bubble_title);
-        TextView txtDescription = (TextView) mView.findViewById(R.id.bubble_description);
-        TextView txtSubdescription = (TextView) mView.findViewById(R.id.bubble_subdescription);
+        TextView txtBubbleStatus = (TextView) mView.findViewById(R.id.bubble_status);
+        TextView txtLastUpdate = (TextView) mView.findViewById(R.id.bubble_last_update);
+        TextView txtLocation = (TextView) mView.findViewById(R.id.bubble_location);
 
-        txtTitle.setText(status);
-        txtDescription.setText("Click button to contribute data");
-        txtSubdescription.setText("");
+        txtBubbleStatus.setText(status);
+        txtLastUpdate.setText( ts_update.toString());
+        txtLocation.setText(geoPoint.getLatitude() + ", " + geoPoint.getLongitude());
         layout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Override Marker's onClick behaviour here
@@ -84,15 +85,14 @@ public class CustomInfoWindow extends InfoWindow {
 
     public void send(String msg, GeoPoint geoPoint) {
         try {
-            Channel channel = amqpConnectionHelper.getChannel();
             JSONObject jo = new JSONObject();
-            jo.put("type", "parking_availability");
-            jo.put("routing_key_uuid", routing_key_uuid);
+            jo.put("action", "parking_availability");
+            jo.put("device_uuid", device_uuid);
+            jo.put("device_type", Constants.DEVICE_TYPE);
             jo.put("msg", msg);
             jo.put("long", geoPoint.getLongitude());
             jo.put("latt", geoPoint.getLatitude());
-            String str_json = jo.toString();
-            channel.basicPublish(Constants.RABBIT_EXCHANGE_OUTGOING_NAME, "", null, str_json.getBytes("UTF-8"));
+            amqpConnectionHelper.send(jo);
         }
         catch (AlreadyClosedException ace) {
             ace.printStackTrace();

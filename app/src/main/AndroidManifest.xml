@@ -29,12 +29,6 @@
             android:name=".service.SParkeeMessagingService"
             android:exported="false"/>
 
-        <receiver android:name=".receiver.AMQPBroadcaseReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
-
     </application>
 
 

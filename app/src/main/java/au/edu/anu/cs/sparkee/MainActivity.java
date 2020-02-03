@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,7 +29,6 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import java.io.File;
 import java.util.UUID;
 
-import au.edu.anu.cs.sparkee.receiver.AMQPBroadcaseReceiver;
 import au.edu.anu.cs.sparkee.service.SParkeeMessagingService;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,16 +65,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+//        unregisterReceiver(receiver);
     }
 
-    AMQPBroadcaseReceiver receiver;
+//    AMQPBroadcaseReceiver receiver;
     IntentFilter intentFilter;
 
-    public void launchBroadcaseReceiver() {
-        receiver = new AMQPBroadcaseReceiver();
-        intentFilter = new IntentFilter(Constants.BROADCAST_ACTION_IDENTIFIER);
-    }
+//    public void launchBroadcaseReceiver() {
+//        receiver = new AMQPBroadcaseReceiver();
+//        intentFilter = new IntentFilter(Constants.BROADCAST_ACTION_IDENTIFIER);
+//    }
 
     public void launchSParkeeMessagingService() {
         Intent i = new Intent(this, SParkeeMessagingService.class);
@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AndroidThreeTen.init(this);
 
         SharedPreferences sharedPref =  getApplicationContext().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
                 NavigationUI.setupWithNavController(navView, navController);
                 launchSParkeeMessagingService();
-                launchBroadcaseReceiver();
+//                launchBroadcaseReceiver();
             }
         } else {
             //do here
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(receiver, intentFilter);
+//        registerReceiver(receiver, intentFilter);
 
     }
 
@@ -142,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(receiver);
+//        unregisterReceiver(receiver);
     }
 
 }

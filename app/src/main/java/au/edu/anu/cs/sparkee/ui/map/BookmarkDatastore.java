@@ -1,6 +1,5 @@
 package au.edu.anu.cs.sparkee.ui.map;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,6 +15,7 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
+import org.threeten.bp.LocalDateTime;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
+import au.edu.anu.cs.sparkee.model.ParkingSlot;
 
 /**
  * created on 2/11/2018.
@@ -42,7 +43,7 @@ public class BookmarkDatastore {
     public static final String COLUMN_DESC="description";
     protected SQLiteDatabase mDatabase;
     public static final String DATABASE_FILENAME = "bookmarks.mDatabase";
-    private String routing_key_uuid;
+    private String device_uuid;
 
     private Fragment activity;
     public BookmarkDatastore(Fragment activity) {
@@ -62,8 +63,8 @@ public class BookmarkDatastore {
             Log.e(IMapView.LOGTAG, "Unable to start the bookmark database. Check external storage availability.", ex);
         }
 
-        SharedPreferences sharedPref =  activity.getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
-        this.routing_key_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
+        SharedPreferences sharedPref =  activity.getActivity().getApplicationContext().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+        this.device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
     }
 
     //TODO geopgrahpic bounding box?
@@ -108,7 +109,7 @@ public class BookmarkDatastore {
                 cnt++;
 
 
-                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view, geoPoint, this.routing_key_uuid, tmp_status);
+                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view, geoPoint, this.device_uuid, tmp_status, LocalDateTime.now() );
                 m.setInfoWindow(infoWindow);
 
 
