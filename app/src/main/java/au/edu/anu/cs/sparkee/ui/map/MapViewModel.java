@@ -121,16 +121,18 @@ public class MapViewModel extends AndroidViewModel {
                 ParkingSlot [] tmp_parkingSlots = new ParkingSlot[ja.length()];
                 for(int i=0; i < ja.length() ; i++) {
                     JSONObject jo = ja.getJSONObject(i);
-                    Log.d("LATTITUDE", "" + jo.getDouble("lattitude"));
+                    Log.d("RECV DATA", "" + jo.toString());
                     tmp_parkingSlots[i] = new ParkingSlot();
                     tmp_parkingSlots[i].setId (jo.getInt("id"));
                     tmp_parkingSlots[i].setLatitude(jo.getDouble("lattitude"));
                     tmp_parkingSlots[i].setLongitude(jo.getDouble("longitude"));
                     tmp_parkingSlots[i].setTs_register(jo.getString("ts_register"));
                     tmp_parkingSlots[i].setTs_update(jo.getString("ts_update"));
-                    tmp_parkingSlots[i].setConfidence_available(jo.getDouble("confidence_available"));
-                    tmp_parkingSlots[i].setConfidence_unavailable(jo.getDouble("confidence_available"));
+                    tmp_parkingSlots[i].setTotal_available(jo.getDouble("total_available"));
+                    tmp_parkingSlots[i].setTotal_unavailable(jo.getDouble("total_unavailable"));
                     tmp_parkingSlots[i].setStatus(jo.getInt("status"));
+                    tmp_parkingSlots[i].setZone_id(jo.getInt("zone_id"));
+                    tmp_parkingSlots[i].setZone_name(jo.getString("zone_name"));
                 }
                 mParkingSlots.setValue(tmp_parkingSlots);
             }

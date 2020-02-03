@@ -121,6 +121,9 @@ public class MapFragment extends Fragment {
                     Log.d("BANYAK PARKING SLOTS", "" +parkingSlots.length);
                     addParkingSlots(parkingSlots);
                 }
+                else {
+                    addParkingSlots(new ParkingSlot[0]);
+                }
             }
         });
 
@@ -225,21 +228,33 @@ public class MapFragment extends Fragment {
                 int id_status = parkingSlots[i].getStatus();
                 String tmp_status = "";
                 switch(id_status) {
+                    case -3:
+                        m.setIcon( getResources().getDrawable(R.drawable.confirmed_unavailable));
+                        tmp_status = "Unavailable";
+                        break;
+                    case -2:
+                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_2));
+                        tmp_status = "Unconfirmed";
+                        break;
+                    case -1:
+                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_1));
+                        tmp_status = "Unconfirmed";
+                        break;
                     case 0:
-                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_1));
+                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_0));
                         tmp_status = "Unconfirmed";
                         break;
                     case 1:
-                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_2));
+                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_1));
                         tmp_status = "Unconfirmed";
                         break;
                     case 2:
-                        m.setIcon( getResources().getDrawable(R.drawable.confirmed_available));
-                        tmp_status = "Available";
+                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_2));
+                        tmp_status = "Unconfirmed";
                         break;
                     case 3:
-                        m.setIcon( getResources().getDrawable(R.drawable.confirmed_unavailable));
-                        tmp_status = "Unavailable";
+                        m.setIcon( getResources().getDrawable(R.drawable.confirmed_available));
+                        tmp_status = "Available";
                         break;
                 }
 
@@ -264,8 +279,6 @@ public class MapFragment extends Fragment {
         }
         return markers;
     }
-
-
 
     public void addParkingSlots(ParkingSlot [] parkingSlots) {
 
@@ -293,6 +306,7 @@ public class MapFragment extends Fragment {
                 showDialog(p);
                 return true;
             }
+
         });
         mMapView.getOverlayManager().add(events);
 
@@ -386,7 +400,7 @@ public class MapFragment extends Fragment {
                     m.setId(UUID.randomUUID().toString());
                     m.setTitle(UUID.randomUUID().toString());
                     m.setSubDescription(UUID.randomUUID().toString());
-                    m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_1));
+                    m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_0));
 
                     GeoPoint geoPoint = new GeoPoint(latD, lonD);
                     m.setPosition(geoPoint);

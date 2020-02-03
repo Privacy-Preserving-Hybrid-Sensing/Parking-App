@@ -87,10 +87,15 @@ public class MainActivity extends AppCompatActivity {
         AndroidThreeTen.init(this);
 
         SharedPreferences sharedPref =  getApplicationContext().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        String newUUID = UUID.randomUUID().toString();
-        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, newUUID);
-        editor.commit();
+
+        String device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
+
+        if(device_uuid.equalsIgnoreCase("")) {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            String newUUID = UUID.randomUUID().toString();
+            editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, newUUID);
+            editor.commit();
+        }
 
         if (Build.VERSION.SDK_INT >= 23) {
             String[] PERMISSIONS = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION};

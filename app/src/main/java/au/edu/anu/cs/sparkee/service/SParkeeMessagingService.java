@@ -41,7 +41,7 @@ public class SParkeeMessagingService extends IntentService {
 //            Log.d("DEVICE UUID", device_uuid);
 
             String queueName = channel.queueDeclare().getQueue();
-            channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, device_uuid);
+            channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, Constants.RABBIT_EXCHANGE_ZONE_TOPIC);
 
 
             boolean autoAck = false;

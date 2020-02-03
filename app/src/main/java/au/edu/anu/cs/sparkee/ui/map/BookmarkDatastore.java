@@ -68,6 +68,7 @@ public class BookmarkDatastore {
     }
 
     //TODO geopgrahpic bounding box?
+    //UNUSED, it's just an example
     public List<Marker> getBookmarksAsMarkers(MapView view) {
         List<Marker> markers = new ArrayList<>();
         try {
@@ -84,33 +85,33 @@ public class BookmarkDatastore {
                 GeoPoint geoPoint = new GeoPoint(cur.getDouble(cur.getColumnIndex(COLUMN_LAT)),cur.getDouble(cur.getColumnIndex(COLUMN_LON)));
                 m.setPosition(geoPoint);
 
-                if(cnt / 4 == 1)
-                    cnt = 0;
+//                if(cnt / 4 == 1)
+//                    cnt = 0;
+//
+//                String tmp_status = "";
+//                switch(cnt) {
+//                    case 0:
+//                        m.setIcon(activity.getResources().getDrawable(R.drawable.confirmed_unavailable));
+//                        tmp_status = "Unavailable";
+//                        break;
+//                    case 1:
+//                        m.setIcon(activity.getResources().getDrawable(R.drawable.unconfirmed_1));
+//                        tmp_status = "Unconfirmed (confidence 60%)";
+//                        break;
+//                    case 2:
+//                        m.setIcon(activity.getResources().getDrawable(R.drawable.confirmed_available));
+//                        tmp_status = "Available";
+//                        break;
+//                    case 3:
+//                        m.setIcon(activity.getResources().getDrawable(R.drawable.unconfirmed_2));
+//                        tmp_status = "Unconfirmed (confidence 30%)";
+//                        break;
+//                }
+//                cnt++;
+//
 
-                String tmp_status = "";
-                switch(cnt) {
-                    case 0:
-                        m.setIcon(activity.getResources().getDrawable(R.drawable.confirmed_unavailable));
-                        tmp_status = "Unavailable";
-                        break;
-                    case 1:
-                        m.setIcon(activity.getResources().getDrawable(R.drawable.unconfirmed_1));
-                        tmp_status = "Unconfirmed (confidence 60%)";
-                        break;
-                    case 2:
-                        m.setIcon(activity.getResources().getDrawable(R.drawable.confirmed_available));
-                        tmp_status = "Available";
-                        break;
-                    case 3:
-                        m.setIcon(activity.getResources().getDrawable(R.drawable.unconfirmed_2));
-                        tmp_status = "Unconfirmed (confidence 30%)";
-                        break;
-                }
-                cnt++;
-
-
-                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view, geoPoint, this.device_uuid, tmp_status, LocalDateTime.now() );
-                m.setInfoWindow(infoWindow);
+//                InfoWindow infoWindow = new CustomInfoWindow(R.layout.bubble_layout, view, geoPoint, this.device_uuid, tmp_status, LocalDateTime.now() );
+//                m.setInfoWindow(infoWindow);
 
 
                 m.setSnippet(m.getPosition().toDoubleString());
