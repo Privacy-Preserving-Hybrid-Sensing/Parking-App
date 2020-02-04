@@ -10,9 +10,31 @@ public class ParkingSlot extends Location {
     private LocalDateTime ts_update;
     private double total_available;
     private double total_unavailable;
-    private int status;
+    private int parking_status;
+    private int participation_status;
     private int zone_id;
     private String zone_name;
+
+    public ParkingSlot() {
+        super("");
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getParticipation_status() {
+        return participation_status;
+    }
+
+    public void setParticipation_status(int participation_status) {
+        this.participation_status = participation_status;
+    }
+
 
     public int getZone_id() {
         return zone_id;
@@ -30,22 +52,14 @@ public class ParkingSlot extends Location {
         this.zone_name = zone_name;
     }
 
-    public int getStatus() {
-        return status;
+    public int getParking_status() {
+        return parking_status;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public void setParking_status(int parking_status) {
+        this.parking_status = parking_status;
     }
 
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
 
     public LocalDateTime getTs_register() {
@@ -81,7 +95,4 @@ public class ParkingSlot extends Location {
         this.total_unavailable = total_unavailable;
     }
 
-    public ParkingSlot() {
-        super("");
-    }
 }

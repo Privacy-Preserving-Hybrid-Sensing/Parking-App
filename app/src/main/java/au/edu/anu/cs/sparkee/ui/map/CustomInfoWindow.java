@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.threeten.bp.LocalDateTime;
 
@@ -31,20 +32,23 @@ public class CustomInfoWindow extends InfoWindow {
     private String device_uuid;
     private String status;
     private LocalDateTime ts_update;
+    private Marker marker;
 
-    public CustomInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update) {
+    public CustomInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update, Marker marker) {
         super(layoutResId, mapView);
         this.geoPoint = geoPoint;
         this.device_uuid = device_uuid;
         this.status = status;
         this.ts_update = ts_update;
+        this.marker = marker;
     }
 
     public void onClose() {
+        super.close();
     }
 
     public void onOpen(Object arg0) {
-
+        mIsVisible = true;
         LinearLayout layout = (LinearLayout) mView.findViewById(R.id.bubble_layout);
         Button btnAvailable = (Button) mView.findViewById(R.id.bubble_available);
         Button btnUnavailable = (Button) mView.findViewById(R.id.bubble_unavailable);
@@ -69,6 +73,8 @@ public class CustomInfoWindow extends InfoWindow {
                 Log.d("Btn", "Available");
                 close();
                 send("Available", geoPoint);
+                marker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_plus_1));
+                mMapView.invalidate();
             }
         });
 
@@ -79,6 +85,8 @@ public class CustomInfoWindow extends InfoWindow {
                 Log.d("Btn", "Unavailable");
                 close();
                 send("Unavailable", geoPoint);
+                marker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_minus_1));
+                mMapView.invalidate();
             }
         });
     }
@@ -90,8 +98,8 @@ public class CustomInfoWindow extends InfoWindow {
             jo.put("device_uuid", device_uuid);
             jo.put("device_type", Constants.DEVICE_TYPE);
             jo.put("msg", msg);
-            jo.put("long", geoPoint.getLongitude());
-            jo.put("latt", geoPoint.getLatitude());
+            jo.put("lon", geoPoint.getLongitude());
+            jo.put("lat", geoPoint.getLatitude());
             amqpConnectionHelper.send(jo);
         }
         catch (AlreadyClosedException ace) {

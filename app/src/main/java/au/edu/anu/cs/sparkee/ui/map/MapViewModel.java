@@ -126,12 +126,12 @@ public class MapViewModel extends AndroidViewModel {
             String msg = bundle.getString(Constants.BROADCAST_ACTION_IDENTIFIER);
             try {
                 JSONObject jo = new JSONObject(msg);
-                Log.d("InternapAMQP", msg);
+//                Log.d("InternapAMQP", msg);
                 String payload_type = jo.getString("type");
                 if(payload_type.equalsIgnoreCase("parking_slots")) {
                     process_parking_slots(jo.getJSONArray("payload"));
                 }
-                else if(payload_type.equalsIgnoreCase("participant_credit")) {
+                else if(payload_type.equalsIgnoreCase("participant_credits")) {
                     process_participant_credit(jo.getJSONArray("payload"));
                 }
             }
@@ -142,6 +142,23 @@ public class MapViewModel extends AndroidViewModel {
 
         void process_participant_credit(JSONArray ja) throws  JSONException {
             // TODO:
+            ParticipantCredit [] tmp_participant_credit = new ParticipantCredit[ja.length()];
+            for(int i=0; i < ja.length() ; i++) {
+                JSONObject jo = ja.getJSONObject(i);
+                tmp_participant_credit[i] = new ParticipantCredit();
+                tmp_participant_credit[i].setId_participation(jo.getInt("id_participation"));
+                tmp_participant_credit[i].setId_credit(jo.getInt("id_credit"));
+                tmp_participant_credit[i].setTs_credit_update(jo.getString("ts_credit"));
+                tmp_participant_credit[i].setTs_participation_update(jo.getString("ts_participation"));
+                tmp_participant_credit[i].setLongitude( Double.parseDouble(jo.getString("longitude")));
+                tmp_participant_credit[i].setLatitude( Double.parseDouble(jo.getString("latitude")));
+                tmp_participant_credit[i].setAvailability_value(jo.getDouble("availability_value"));
+                tmp_participant_credit[i].setCredit_value(jo.getDouble("credit_value"));
+                tmp_participant_credit[i].setParticipation_processed(jo.getBoolean("participation_processed"));
+                tmp_participant_credit[i].setCredit_processed(jo.getBoolean("credit_processed"));
+
+            }
+            mParticipantCredit.setValue(tmp_participant_credit);
         }
 
         void process_parking_slots(JSONArray ja) throws  JSONException{
@@ -150,19 +167,40 @@ public class MapViewModel extends AndroidViewModel {
             for(int i=0; i < ja.length() ; i++) {
                 JSONObject jo = ja.getJSONObject(i);
                 tmp_parkingSlots[i] = new ParkingSlot();
-                tmp_parkingSlots[i].setId (jo.getInt("id"));
-                tmp_parkingSlots[i].setLatitude(jo.getDouble("lattitude"));
-                tmp_parkingSlots[i].setLongitude(jo.getDouble("longitude"));
+                tmp_parkingSlots[i].setId(jo.getInt("id"));
+
+                tmp_parkingSlots[i].setLongitude( Double.parseDouble(jo.getString("longitude")));
+                tmp_parkingSlots[i].setLatitude( Double.parseDouble(jo.getString("latitude")));
+
                 tmp_parkingSlots[i].setTs_register(jo.getString("ts_register"));
                 tmp_parkingSlots[i].setTs_update(jo.getString("ts_update"));
                 tmp_parkingSlots[i].setTotal_available(jo.getDouble("total_available"));
                 tmp_parkingSlots[i].setTotal_unavailable(jo.getDouble("total_unavailable"));
-                tmp_parkingSlots[i].setStatus(jo.getInt("status"));
+                tmp_parkingSlots[i].setParking_status(jo.getInt("status"));
                 tmp_parkingSlots[i].setZone_id(jo.getInt("zone_id"));
                 tmp_parkingSlots[i].setZone_name(jo.getString("zone_name"));
+                tmp_parkingSlots[i].setParticipation_status( getParticipationValue( Double.parseDouble(jo.getString("latitude")), Double.parseDouble(jo.getString("longitude"))));
             }
             mParkingSlots.setValue(tmp_parkingSlots);
 
+        }
+
+        int getParticipationValue(double latitude, double longitude) {
+            ParticipantCredit [] participation = mParticipantCredit.getValue();
+            int participation_value = 0;
+
+            if(participation == null)
+                return participation_value;
+
+            for(int i=0; i < participation.length; i++) {
+
+                if(participation[i].getLatitude() == latitude && participation[i].getLongitude() == longitude) {
+                    Log.d("SAMPAI MANA", "Lat: " + latitude + ", Lon: " + longitude + ", Availability Value: " + participation[i].getAvailability_value() +", Last update: " + participation[i].getTs_participation_update().toString());
+                    participation_value += participation[i].getAvailability_value();
+                    break;
+                }
+            }
+            return participation_value;
         }
     }
 }

@@ -6,12 +6,31 @@ import org.threeten.bp.LocalDateTime;
 
 public class ParticipantCredit extends Location {
 
+    private int id_participation;
+    private int id_credit;
     private LocalDateTime ts_credit_update;
     private LocalDateTime ts_participation_update;
     private double availability_value;
     private double credit_value;
     private boolean participation_processed;
     private boolean credit_processed;
+
+    public int getId_participation() {
+        return id_participation;
+    }
+
+    public void setId_participation(int id_participation) {
+        this.id_participation = id_participation;
+    }
+
+    public int getId_credit() {
+        return id_credit;
+    }
+
+    public void setId_credit(int id_credit) {
+        this.id_credit = id_credit;
+    }
+
 
     public LocalDateTime getTs_credit_update() {
         return ts_credit_update;
