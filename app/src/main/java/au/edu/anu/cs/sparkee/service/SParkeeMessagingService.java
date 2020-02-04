@@ -41,7 +41,9 @@ public class SParkeeMessagingService extends IntentService {
 //            Log.d("DEVICE UUID", device_uuid);
 
             String queueName = channel.queueDeclare().getQueue();
+            String specificSubscriberUUIDTopic = "subscriber." + device_uuid;
             channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, Constants.RABBIT_EXCHANGE_ZONE_TOPIC);
+            channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, specificSubscriberUUIDTopic);
 
 
             boolean autoAck = false;
@@ -57,7 +59,8 @@ public class SParkeeMessagingService extends IntentService {
                             String contentType = properties.getContentType();
                             long deliveryTag = envelope.getDeliveryTag();
                             // (process the message components here ...)
-//                            Log.d("RECV AMQP", new String(body));
+                            Log.d("Routing KEY", routingKey);
+                            Log.d("RECV DATA", new String(body));
                             channel.basicAck(deliveryTag, false);
 
                             Intent intent = new Intent();
