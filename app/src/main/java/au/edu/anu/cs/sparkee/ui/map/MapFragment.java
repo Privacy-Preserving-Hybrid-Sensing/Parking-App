@@ -6,6 +6,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,8 @@ import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.OverlayManager;
+import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import org.threeten.bp.LocalDateTime;
@@ -128,6 +131,7 @@ public class MapFragment extends Fragment {
         mapViewModel.startViewModel();
         addLocalDatastore();
         addHandleMapEvent();
+        addOverlayRotation();
 
         markers = new HashMap<>();
         return mMapView;
@@ -162,6 +166,21 @@ public class MapFragment extends Fragment {
         catch (JSONException je) {
             je.printStackTrace();
         }
+    }
+
+    public void addOverlayRotation(){
+
+        final DisplayMetrics dm = getActivity().getResources().getDisplayMetrics();
+        RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(mMapView);
+        mRotationGestureOverlay.setEnabled(true);
+        mMapView.getOverlays().add(mRotationGestureOverlay);
+
+        ScaleBarOverlay mScaleBarOverlay = new ScaleBarOverlay(mMapView);
+        mScaleBarOverlay.setScaleBarOffset(0,(int)(40 * dm.density));
+        mScaleBarOverlay.setCentred(true);
+        mScaleBarOverlay.setScaleBarOffset(dm.widthPixels / 2, 10);
+        mMapView.getOverlays().add(mScaleBarOverlay);
+
     }
 
     public void addNewData(GeoPoint geoPoint) {
