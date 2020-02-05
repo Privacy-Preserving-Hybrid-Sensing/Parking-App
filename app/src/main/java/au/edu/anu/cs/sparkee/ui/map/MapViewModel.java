@@ -131,7 +131,6 @@ public class MapViewModel extends AndroidViewModel {
             String msg = bundle.getString(Constants.BROADCAST_ACTION_IDENTIFIER);
             try {
                 JSONObject jo = new JSONObject(msg);
-//                Log.d("InternapAMQP", msg);
                 String payload_type = jo.getString("type");
                 if(payload_type.equalsIgnoreCase("parking_slots")) {
                     process_parking_slots(jo.getJSONArray("payload"));
@@ -181,20 +180,24 @@ public class MapViewModel extends AndroidViewModel {
                 tmp_parkingSlots[i].setTs_update(jo.getString("ts_update"));
                 tmp_parkingSlots[i].setTotal_available(jo.getDouble("total_available"));
                 tmp_parkingSlots[i].setTotal_unavailable(jo.getDouble("total_unavailable"));
+                tmp_parkingSlots[i].setConfidence_level(jo.getDouble("confidence_level"));
                 tmp_parkingSlots[i].setParking_status(jo.getInt("status"));
                 tmp_parkingSlots[i].setZone_id(jo.getInt("zone_id"));
                 tmp_parkingSlots[i].setZone_name(jo.getString("zone_name"));
 
-                Pair <Integer, Integer> participation_data= getParticipationAndMarkerValue( jo.getString("ts_update"), jo.getInt("status"), Double.parseDouble(jo.getString("latitude")), Double.parseDouble(jo.getString("longitude")));
+                Pair <Integer, Integer> participation_data= getParticipationAndMarkerValue(
+                        jo.getString("ts_update"),
+                        jo.getInt("status"),
+                        Double.parseDouble(jo.getString("latitude")),
+                        Double.parseDouble(jo.getString("longitude"))
+                );
                 int participation_value = participation_data.first.intValue();
                 int marker_value = participation_data.second.intValue();
 
                 tmp_parkingSlots[i].setParticipation_status(participation_value);
-
                 tmp_parkingSlots[i].setMarker_status(marker_value);
             }
             mParkingSlots.setValue(tmp_parkingSlots);
-
         }
 
         Pair <Integer, Integer> getParticipationAndMarkerValue(String last_parking_update_str, int parking_status, double latitude, double longitude) {
@@ -204,18 +207,19 @@ public class MapViewModel extends AndroidViewModel {
             LocalDateTime last_participation = LocalDateTime.MIN;
             LocalDateTime last_parking_update = LocalDateTime.parse(last_parking_update_str);
 
-            if(participation == null)
-                return new Pair<>(participation_value, marker_value);
-
-            for(int i=0; i < participation.length; i++) {
-
-                if(participation[i].getLatitude() == latitude && participation[i].getLongitude() == longitude) {
-                    participation_value += participation[i].getAvailability_value();
-                    last_participation = participation[i].getTs_participation_update();
-                    break;
+            if(participation != null) {
+                for (int i = 0; i < participation.length; i++) {
+                    if (participation[i].getLatitude() == latitude && participation[i].getLongitude() == longitude) {
+                        participation_value += participation[i].getAvailability_value();
+                        last_participation = participation[i].getTs_participation_update();
+                        break;
+                    }
                 }
             }
 
+//            Log.d("LAST_PARTICIPATION", last_participation.toString());
+//            Log.d("LAST_PARKING UPDATE", last_parking_update.toString());
+//            Log.d("PARKING STATUS", "" + parking_status);
             if(last_participation.isAfter(last_parking_update)) {
                 if(participation_value > 0)
                     marker_value = Constants.MARKER_PARTICIPATION_AVAILABLE_RECEIVED;

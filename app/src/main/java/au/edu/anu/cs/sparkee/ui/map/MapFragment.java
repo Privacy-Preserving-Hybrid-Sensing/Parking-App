@@ -39,10 +39,8 @@ import org.threeten.bp.LocalDateTime;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -128,7 +126,7 @@ public class MapFragment extends Fragment {
         });
 
         mapViewModel.startViewModel();
-        addBookmark();
+        addLocalDatastore();
         addHandleMapEvent();
 
         markers = new HashMap<>();
@@ -198,18 +196,15 @@ public class MapFragment extends Fragment {
 
     }
 
-//    AMQPBroadcaseReceiver receiver;
     IntentFilter intentFilter;
 
     @Override
     public void onPause() {
         super.onPause();
         mapViewModel.stopViewModel();
-
     }
 
     private HashMap<Integer, ParkingSlotMarker> markers;
-
 
     public ParkingSlotMarker setParkingSlotAsMarker(MapView view, ParkingSlot parkingSlot) {
         ParkingSlotMarker m = new ParkingSlotMarker(view, parkingSlot);
@@ -223,6 +218,8 @@ public class MapFragment extends Fragment {
 
 
             String tmp_status = "";
+            double confidence_level = parkingSlot.getConfidence_level();
+            int tmp_confidence = (int) Math.round(confidence_level * 100);
             int marker_status = parkingSlot.getMarker_status();
             switch (marker_status) {
                 case Constants.MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED:
@@ -239,11 +236,11 @@ public class MapFragment extends Fragment {
                     break;
                 case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2:
                     m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_2));
-                    tmp_status = "Unconfirmed";
+                    tmp_status = "Unavailable ("+ tmp_confidence +"%)";
                     break;
                 case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1:
                     m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_1));
-                    tmp_status = "Unconfirmed";
+                    tmp_status = "Unavailable ("+ tmp_confidence +"%)";
                     break;
                 case Constants.MARKER_PARKING_UNCONFIRMED:
                     m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_0));
@@ -251,18 +248,17 @@ public class MapFragment extends Fragment {
                     break;
                 case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1:
                     m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_1));
-                    tmp_status = "Unconfirmed";
+                    tmp_status = "Available ("+ tmp_confidence +"%)";
                     break;
                 case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2:
                     m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_2));
-                    tmp_status = "Unconfirmed";
+                    tmp_status = "Available ("+ tmp_confidence +"%)";
                     break;
                 case Constants.MARKER_PARKING_AVAILABLE_CONFIRMED:
                     m.setIcon( getResources().getDrawable(R.drawable.confirmed_available));
                     tmp_status = "Available";
                     break;
             }
-
 
             InfoWindow infoWindow = new CustomInfoWindow(
                     R.layout.bubble_layout,
@@ -274,10 +270,7 @@ public class MapFragment extends Fragment {
                     m
             );
             m.setInfoWindow(infoWindow);
-
-
             m.setSnippet(m.getPosition().toDoubleString());
-
         }
         catch (final Exception e) {
             Log.w(IMapView.LOGTAG,"Error getting tile sources: ", e);
@@ -286,34 +279,30 @@ public class MapFragment extends Fragment {
     }
 
     public void addHandleMapEvent() {
-        //TODO menu item to
+
         MapEventsOverlay events = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-                Log.d("ACTION", "SINGLE TAP");
                 Set set = markers.entrySet();
                 Iterator iterator = set.iterator();
-                int x = 0;
                 while(iterator.hasNext()) {
-                    x++;
                     Map.Entry mentry = (Map.Entry)iterator.next();
                     ParkingSlotMarker m = (ParkingSlotMarker) mentry.getValue();
                     ((CustomInfoWindow) m.getInfoWindow()).close();
                 }
-                Log.d("BANYAK ITR", "" + x);
                 return false;
             }
 
             @Override
             public boolean longPressHelper(GeoPoint p) {
+                // TODO: Only for admin to add new ParkingSlot
+
                 Log.d("ACTION", "LONG PRESS");
                 showDialog(p);
                 return true;
             }
-
         });
         mMapView.getOverlayManager().add(events);
-
     }
 
     public void modifyParkingSlots(ParkingSlot [] parkingSlots) {
@@ -323,10 +312,8 @@ public class MapFragment extends Fragment {
             int new_parking_status = parkingSlots[i].getParking_status();
             ParkingSlotMarker existing_marker = markers.get(new_id);
             if(existing_marker != null) {
-                // modify
                 // check is current & previous data has changed?
-
-                if(existing_marker.getParkingSlot().getParticipation_status() != parkingSlots[i].getParticipation_status()) {
+                if(existing_marker.getParkingSlot().getMarker_status() != parkingSlots[i].getMarker_status()) {
                     om.remove(existing_marker);
                     markers.remove(new_id);
                     ParkingSlotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
@@ -341,40 +328,11 @@ public class MapFragment extends Fragment {
             }
         }
         mMapView.invalidate();
-
     }
 
-    public void addBookmark() {
+    public void addLocalDatastore() {
         if (datastore == null)
             datastore = new BookmarkDatastore(this);
-
-        //add all our bookmarks to the view
-//        markers = datastore.getBookmarksAsMarkers(mMapView);
-//        mMapView.getOverlayManager().addAll(markers);
-//
-//
-//        //TODO menu item to
-//        MapEventsOverlay events = new MapEventsOverlay(new MapEventsReceiver() {
-//            @Override
-//            public boolean singleTapConfirmedHelper(GeoPoint p) {
-//                Log.d("SINGLE", p.toDoubleString());
-//                Iterator i = markers.iterator();
-//                while(i.hasNext()) {
-//                    Marker m = (Marker) i.next();
-//                    m.getInfoWindow().close();
-//                }
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean longPressHelper(GeoPoint p) {
-//                Log.d("LONG", p.toDoubleString());
-//                showDialog(p);
-//                return true;
-//            }
-//        });
-//        mMapView.getOverlayManager().add(events);
-
     }
 
     private void showDialog(GeoPoint p) {
@@ -390,8 +348,6 @@ public class MapFragment extends Fragment {
         lat.setText(p.getLatitude() + "");
         final TextView lon = view.findViewById(R.id.bookmark_lon);
         lon.setText(p.getLongitude() + "");
-//        final EditText title = view.findViewById(R.id.bookmark_title);
-//        final EditText description = view.findViewById(R.id.bookmark_description);
 
         Log.d("DialogLong", "" + p.getLongitude());
         Log.d("DialogLat", "" + p.getLatitude());
@@ -405,62 +361,53 @@ public class MapFragment extends Fragment {
         view.findViewById(R.id.bookmark_ok).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+            boolean valid = true;
+            double latD = 0;
+            double lonD = 0;
 
+            //basic validate input
+            try {
+                latD = Double.parseDouble(lat.getText().toString());
+                lonD = Double.parseDouble(lon.getText().toString());
+            } catch (Exception ex) {
+                valid = false;
+            }
 
-                boolean valid = true;
-                double latD = 0;
-                double lonD = 0;
-                //basic validate input
-                try {
-                    latD = Double.parseDouble(lat.getText().toString());
-                } catch (Exception ex) {
-                    valid = false;
-                }
-                try {
-                    lonD = Double.parseDouble(lon.getText().toString());
-                } catch (Exception ex) {
-                    valid = false;
-                }
+            if (!mMapView.getTileSystem().isValidLatitude(latD))
+                valid = false;
+            if (!mMapView.getTileSystem().isValidLongitude(lonD))
+                valid = false;
 
-                if (!mMapView.getTileSystem().isValidLatitude(latD))
-                    valid = false;
-                if (!mMapView.getTileSystem().isValidLongitude(lonD))
-                    valid = false;
+            if (valid) {
+                Marker m = new Marker(mMapView);
+                m.setId(UUID.randomUUID().toString());
+                m.setTitle(UUID.randomUUID().toString());
+                m.setSubDescription(UUID.randomUUID().toString());
+                m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_0));
 
-                if (valid) {
-                    Marker m = new Marker(mMapView);
-                    m.setId(UUID.randomUUID().toString());
-                    m.setTitle(UUID.randomUUID().toString());
-                    m.setSubDescription(UUID.randomUUID().toString());
-                    m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_0));
+                GeoPoint geoPoint = new GeoPoint(latD, lonD);
+                m.setPosition(geoPoint);
+                String tmp_status = "Unconfirmed (confidence 60%)";
+                InfoWindow infoWindow = new CustomInfoWindow(
+                    R.layout.bubble_layout,
+                    mMapView,
+                    geoPoint,
+                    device_uuid,
+                    tmp_status,
+                    LocalDateTime.now(),
+                    m
+                );
 
-                    GeoPoint geoPoint = new GeoPoint(latD, lonD);
-                    m.setPosition(geoPoint);
-                    String tmp_status = "Unconfirmed (confidence 60%)";
-                    InfoWindow infoWindow = new CustomInfoWindow(
-                            R.layout.bubble_layout,
-                            mMapView,
-                            geoPoint,
-                            device_uuid,
-                            tmp_status,
-                            LocalDateTime.now(),
-                            m
-                    );
-
-                    m.setInfoWindow(infoWindow);
-
-                    m.setSnippet(m.getPosition().toDoubleString());
-                    datastore.addBookmark(m);
-                    mMapView.getOverlayManager().add(m);
-                    mMapView.invalidate();
-                    addNewData(geoPoint);
-                }
-                addBookmark.dismiss();
-
+                m.setInfoWindow(infoWindow);
+                m.setSnippet(m.getPosition().toDoubleString());
+                datastore.addBookmark(m);
+                mMapView.getOverlayManager().add(m);
+                mMapView.invalidate();
+                addNewData(geoPoint);
+            }
+            addBookmark.dismiss();
             }
         });
-
         addBookmark = builder.show();
     }
-
 }

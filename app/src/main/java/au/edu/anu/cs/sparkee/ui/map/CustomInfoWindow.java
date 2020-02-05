@@ -12,15 +12,20 @@ import com.rabbitmq.client.AlreadyClosedException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.ZoneId;
+import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
@@ -56,8 +61,12 @@ public class CustomInfoWindow extends InfoWindow {
         TextView txtLastUpdate = (TextView) mView.findViewById(R.id.bubble_last_update);
         TextView txtLocation = (TextView) mView.findViewById(R.id.bubble_location);
 
+        PrettyTime p = new PrettyTime();
+        String date_str = ts_update.atZone(ZoneId.systemDefault()).toLocalDate().toString();
+        String time_str = ts_update.atZone(ZoneId.systemDefault()).toLocalTime().toString();
+        String time_pretty = p.format(Timestamp.valueOf( date_str + " " + time_str ));
         txtBubbleStatus.setText(status);
-        txtLastUpdate.setText( ts_update.toString());
+        txtLastUpdate.setText( time_pretty );
         txtLocation.setText(geoPoint.getLatitude() + ", " + geoPoint.getLongitude());
         layout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

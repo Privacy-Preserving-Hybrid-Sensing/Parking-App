@@ -34,5 +34,5 @@ dependencies {
     implementation 'org.osmdroid:osmdroid-android:6.1.5'
     implementation 'com.rabbitmq:amqp-client:4.11.3'
     implementation 'com.jakewharton.threetenabp:threetenabp:1.2.2'
-
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
 }

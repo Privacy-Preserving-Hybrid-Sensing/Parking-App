@@ -14,10 +14,20 @@ public class ParkingSlot extends Location {
     private int participation_status;
     private int marker_status;
     private int zone_id;
+    private double confidence_level;
     private String zone_name;
 
     public ParkingSlot() {
         super("");
+    }
+
+
+    public double getConfidence_level() {
+        return confidence_level;
+    }
+
+    public void setConfidence_level(double confidence_level) {
+        this.confidence_level = confidence_level;
     }
 
     public int getMarker_status() {
