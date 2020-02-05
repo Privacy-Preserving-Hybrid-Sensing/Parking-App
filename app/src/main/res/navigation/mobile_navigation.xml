@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_activity"
-        android:name="au.edu.anu.cs.sparkee.ui.activity.DashboardFragment"
+        android:name="au.edu.anu.cs.sparkee.ui.activity.ActivityFragment"
         android:label="@string/title_activity"
         tools:layout="@layout/fragment_activity" />
 

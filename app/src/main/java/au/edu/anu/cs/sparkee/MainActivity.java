@@ -9,15 +9,21 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
+
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -36,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST = 112;
     private Context mContext = MainActivity.this;
     private GpsMyLocationProvider mGpsMyLocationProvider;
-
+    private NavController navController;
     private static boolean hasPermissions(Context context, String... permissions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
             for (String permission : permissions) {
@@ -115,6 +121,13 @@ public class MainActivity extends AppCompatActivity {
 
             } else {
                 setContentView(R.layout.activity_main);
+                Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+                setSupportActionBar(myToolbar);
+
+                getSupportActionBar().setDisplayShowHomeEnabled(true);
+//                getSupportActionBar().setLogo(R.mipmap.ic_launcher);
+                getSupportActionBar().setDisplayUseLogoEnabled(true);
+
                 Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
                 BottomNavigationView navView = findViewById(R.id.nav_view);
 
@@ -124,8 +137,16 @@ public class MainActivity extends AppCompatActivity {
                         R.id.navigation_profile
                 ).build();
 
-                NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+
+                navController = Navigation.findNavController(this, R.id.nav_host_fragment);
                 NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+
+//                navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
+//                    @Override
+//                    public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
+//                        Toast.makeText(MainActivity.this, "Change To " + destination.getLabel(), Toast.LENGTH_SHORT).show();
+//                    }
+//                });
                 NavigationUI.setupWithNavController(navView, navController);
                 launchSParkeeMessagingService();
 //                launchBroadcaseReceiver();
@@ -144,6 +165,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.top_nav_menu, menu);
+        return true;
+    }
 
     @Override
     protected void onDestroy() {
@@ -151,4 +178,18 @@ public class MainActivity extends AppCompatActivity {
 //        unregisterReceiver(receiver);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        String label = (String) navController.getCurrentDestination().getLabel();
+        switch (item.getItemId()) {
+            // action with ID action_refresh was selected
+            case R.id.configure:
+                Toast.makeText(this, "Menu at " + label , Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
+
+        return true;
+    }
 }

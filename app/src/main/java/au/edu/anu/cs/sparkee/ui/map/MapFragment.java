@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -34,6 +35,8 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.OverlayManager;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.compass.CompassOverlay;
+import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
@@ -62,9 +65,11 @@ public class MapFragment extends Fragment {
     private Location currentLocation;
     private BookmarkDatastore datastore = null;
     AlertDialog addBookmark = null;
+    protected ImageButton btCenterMap;
 
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private MyLocationNewOverlay mLocationOverlay;
+
     private Context context;
     private double DEFAULT_LONG = 149.120385;
     private double DEFAULT_LAT= -35.275514;
@@ -77,13 +82,22 @@ public class MapFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        context = inflater.getContext();
-        mMapView = new MapView(context);
+        View v = inflater.inflate(R.layout.fragment_map, null);
+        mMapView = v.findViewById(R.id.mapview);
         mMapView.setTilesScaledToDpi(true);
         mMapView.setMultiTouchControls(true);
         mMapView.setFlingEnabled(true);
 
-        SharedPreferences sharedPref = getActivity().getApplicationContext().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+        return v;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+
+        this.context = this.getActivity();
+        final DisplayMetrics dm = context.getResources().getDisplayMetrics();
+
+        SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
         device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
 
         IGeoPoint geoPoint =new GeoPoint(DEFAULT_LAT, DEFAULT_LONG);
@@ -103,7 +117,7 @@ public class MapFragment extends Fragment {
 
                     if(isInitView) {
                         mLocationOverlay.enableMyLocation();
-                        mLocationOverlay.enableFollowLocation();
+//                        mLocationOverlay.enableFollowLocation();
                         mLocationOverlay.setOptionsMenuEnabled(true);
                         mMapView.getOverlays().add(mLocationOverlay);
                         mMapView.getController().setZoom(18.0);
@@ -127,14 +141,26 @@ public class MapFragment extends Fragment {
                 }
             }
         });
-
         mapViewModel.startViewModel();
+
+        btCenterMap = view.findViewById(R.id.ic_center_map);
+
+        btCenterMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("CENTER MAP", "centerMap clicked ");
+                if (currentLocation != null) {
+                    GeoPoint myPosition = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    mMapView.getController().animateTo(myPosition);
+                }
+            }
+        });
+
         addLocalDatastore();
         addHandleMapEvent();
         addOverlayRotation();
 
         markers = new HashMap<>();
-        return mMapView;
     }
 
     public void sendCurrentPosition() {
@@ -167,6 +193,7 @@ public class MapFragment extends Fragment {
             je.printStackTrace();
         }
     }
+
 
     public void addOverlayRotation(){
 
@@ -429,4 +456,6 @@ public class MapFragment extends Fragment {
         });
         addBookmark = builder.show();
     }
+
+
 }
