@@ -223,47 +223,44 @@ public class MapFragment extends Fragment {
 
 
             String tmp_status = "";
-            int id_participation_status = parkingSlot.getParticipation_status();
-            if(id_participation_status < 0) {
-                m.setIcon( getResources().getDrawable(R.drawable.participate_minus_1_confirmed));
-                tmp_status = "Participate: Unvailable";
-            }
-            else if(id_participation_status > 0) {
-                m.setIcon( getResources().getDrawable(R.drawable.participate_plus_1_confirmed));
-                tmp_status = "Participate: Available";
-            }
-            else {
-                int id_parking_status = parkingSlot.getParking_status();
-                switch(id_parking_status) {
-                    case -3:
-                        m.setIcon( getResources().getDrawable(R.drawable.confirmed_unavailable));
-                        tmp_status = "Unavailable";
-                        break;
-                    case -2:
-                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_2));
-                        tmp_status = "Unconfirmed";
-                        break;
-                    case -1:
-                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_1));
-                        tmp_status = "Unconfirmed";
-                        break;
-                    case 0:
-                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_0));
-                        tmp_status = "Unconfirmed";
-                        break;
-                    case 1:
-                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_1));
-                        tmp_status = "Unconfirmed";
-                        break;
-                    case 2:
-                        m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_2));
-                        tmp_status = "Unconfirmed";
-                        break;
-                    case 3:
-                        m.setIcon( getResources().getDrawable(R.drawable.confirmed_available));
-                        tmp_status = "Available";
-                        break;
-                }
+            int marker_status = parkingSlot.getMarker_status();
+            switch (marker_status) {
+                case Constants.MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED:
+                    m.setIcon( getResources().getDrawable(R.drawable.participate_minus_1_confirmed));
+                    tmp_status = "Participate: Unvailable";
+                    break;
+                case Constants.MARKER_PARTICIPATION_AVAILABLE_RECEIVED:
+                    m.setIcon( getResources().getDrawable(R.drawable.participate_plus_1_confirmed));
+                    tmp_status = "Participate: Available";
+                    break;
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIRMED:
+                    m.setIcon( getResources().getDrawable(R.drawable.confirmed_unavailable));
+                    tmp_status = "Unavailable";
+                    break;
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2:
+                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_2));
+                    tmp_status = "Unconfirmed";
+                    break;
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1:
+                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_1));
+                    tmp_status = "Unconfirmed";
+                    break;
+                case Constants.MARKER_PARKING_UNCONFIRMED:
+                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_0));
+                    tmp_status = "Unconfirmed";
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1:
+                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_1));
+                    tmp_status = "Unconfirmed";
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2:
+                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_2));
+                    tmp_status = "Unconfirmed";
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIRMED:
+                    m.setIcon( getResources().getDrawable(R.drawable.confirmed_available));
+                    tmp_status = "Available";
+                    break;
             }
 
 

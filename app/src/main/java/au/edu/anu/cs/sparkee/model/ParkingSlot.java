@@ -12,11 +12,20 @@ public class ParkingSlot extends Location {
     private double total_unavailable;
     private int parking_status;
     private int participation_status;
+    private int marker_status;
     private int zone_id;
     private String zone_name;
 
     public ParkingSlot() {
         super("");
+    }
+
+    public int getMarker_status() {
+        return marker_status;
+    }
+
+    public void setMarker_status(int marker_status) {
+        this.marker_status = marker_status;
     }
 
     public int getId() {
