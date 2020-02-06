@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -26,7 +27,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapView;
+import org.osmdroid.events.DelayedMapListener;
 import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.events.MapListener;
+import org.osmdroid.events.ScrollEvent;
+import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
@@ -34,9 +39,8 @@ import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.OverlayManager;
+import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
-import org.osmdroid.views.overlay.compass.CompassOverlay;
-import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
@@ -54,7 +58,10 @@ import java.util.UUID;
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
+import au.edu.anu.cs.sparkee.model.OSMBookmarkDatastore;
 import au.edu.anu.cs.sparkee.model.ParkingSlot;
+import au.edu.anu.cs.sparkee.model.ParkingZone;
+import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSlotMarker;
 //import au.edu.anu.cs.sparkee.receiver.AMQPBroadcaseReceiver;
 
 public class MapFragment extends Fragment {
@@ -63,12 +70,15 @@ public class MapFragment extends Fragment {
     private boolean isInitView = true;
     protected MapView mMapView;
     private Location currentLocation;
-    private BookmarkDatastore datastore = null;
+    private OSMBookmarkDatastore datastore = null;
     AlertDialog addBookmark = null;
     protected ImageButton btCenterMap;
 
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private MyLocationNewOverlay mLocationOverlay;
+
+    protected static final int DEFAULT_INACTIVITY_DELAY_IN_MILLISECS = 1000;
+    protected static final double MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE = 19;
 
     private Context context;
     private double DEFAULT_LONG = 149.120385;
@@ -112,22 +122,20 @@ public class MapFragment extends Fragment {
 
             @Override
             public void onChanged(@Nullable Location loc) {
-                if(loc != null) {
-                    currentLocation = loc;
+            if(loc != null) {
+                currentLocation = loc;
 
-                    if(isInitView) {
-                        mLocationOverlay.enableMyLocation();
-//                        mLocationOverlay.enableFollowLocation();
-                        mLocationOverlay.setOptionsMenuEnabled(true);
-                        mMapView.getOverlays().add(mLocationOverlay);
-                        mMapView.getController().setZoom(18.0);
-                        isInitView = false;
+                if(isInitView) {
+                    mLocationOverlay.enableMyLocation();
+//                  mLocationOverlay.enableFollowLocation();
+                    mLocationOverlay.setOptionsMenuEnabled(true);
+                    mMapView.getOverlays().add(mLocationOverlay);
+                    mMapView.getController().setZoom(18.0);
+                    isInitView = false;
 
-                    }
-
-                    sendCurrentPosition();
                 }
-
+                sendCurrentPosition();
+            }
             }
         });
 
@@ -141,6 +149,19 @@ public class MapFragment extends Fragment {
                 }
             }
         });
+
+
+        mapViewModel.getParkingZones().observe( getViewLifecycleOwner(), new Observer<ParkingZone[]>() {
+
+            @Override
+            public void onChanged(@Nullable ParkingZone[] parkingZones) {
+                if(parkingZones!= null && polygons == null) {
+                    Log.d("BANYAK PARKING ZONES", "" + parkingZones.length);
+                    modifyParkingZones(parkingZones);
+                }
+            }
+        });
+
         mapViewModel.startViewModel();
 
         btCenterMap = view.findViewById(R.id.ic_center_map);
@@ -161,6 +182,7 @@ public class MapFragment extends Fragment {
         addOverlayRotation();
 
         markers = new HashMap<>();
+        polygons = new HashMap<>();
     }
 
     public void sendCurrentPosition() {
@@ -251,6 +273,7 @@ public class MapFragment extends Fragment {
     }
 
     private HashMap<Integer, ParkingSlotMarker> markers;
+    private HashMap<Integer, Polygon> polygons;
 
     public ParkingSlotMarker setParkingSlotAsMarker(MapView view, ParkingSlot parkingSlot) {
         ParkingSlotMarker m = new ParkingSlotMarker(view, parkingSlot);
@@ -306,7 +329,7 @@ public class MapFragment extends Fragment {
                     break;
             }
 
-            InfoWindow infoWindow = new CustomInfoWindow(
+            InfoWindow infoWindow = new ParkingSlotInfoWindow(
                     R.layout.bubble_layout,
                     view,
                     geoPoint,
@@ -324,6 +347,40 @@ public class MapFragment extends Fragment {
         return m;
     }
 
+    public void setVisibleAllMarkers(boolean visible) {
+        OverlayManager om = mMapView.getOverlayManager();
+        Set set = markers.entrySet();
+        Iterator iterator = set.iterator();
+        while(iterator.hasNext()) {
+            Map.Entry mentry = (Map.Entry)iterator.next();
+            ParkingSlotMarker m = (ParkingSlotMarker) mentry.getValue();
+            if(visible)
+                om.add(m);
+            else
+                om.remove(m);
+            m.setVisible(visible);
+        }
+        mMapView.invalidate();
+    }
+
+    public void setVisibleAllPolygons(boolean visible) {
+        OverlayManager om = mMapView.getOverlayManager();
+        Set set = polygons.entrySet();
+        Iterator iterator = set.iterator();
+        while(iterator.hasNext()) {
+            Map.Entry mentry = (Map.Entry)iterator.next();
+            Polygon p = (Polygon) mentry.getValue();
+            if(visible)
+                om.add(p);
+            else
+                om.remove(p);
+            p.setEnabled(visible);
+            p.setVisible(visible);
+        }
+        mMapView.invalidate();
+    }
+
+
     public void addHandleMapEvent() {
 
         MapEventsOverlay events = new MapEventsOverlay(new MapEventsReceiver() {
@@ -334,7 +391,7 @@ public class MapFragment extends Fragment {
                 while(iterator.hasNext()) {
                     Map.Entry mentry = (Map.Entry)iterator.next();
                     ParkingSlotMarker m = (ParkingSlotMarker) mentry.getValue();
-                    ((CustomInfoWindow) m.getInfoWindow()).close();
+                    ((ParkingSlotInfoWindow) m.getInfoWindow()).close();
                 }
                 return false;
             }
@@ -349,6 +406,29 @@ public class MapFragment extends Fragment {
             }
         });
         mMapView.getOverlayManager().add(events);
+
+        mMapView.addMapListener(new DelayedMapListener(new MapListener() {
+            @Override
+            public boolean onScroll(ScrollEvent event) {
+                return false;
+            }
+
+            @Override
+            public boolean onZoom(ZoomEvent event) {
+                Log.d("ZOOM TO", "" + event.getZoomLevel());
+                if(event.getZoomLevel() > MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE) {
+                    setVisibleAllMarkers(true);
+                    setVisibleAllPolygons(false);
+                    Log.d("ZOOM", "PERBESAR");
+                }
+                else {
+                    setVisibleAllMarkers(false);
+                    setVisibleAllPolygons(true);
+                    Log.d("ZOOM", "PERKECIL");
+                }
+                return true;
+            }
+        }, DEFAULT_INACTIVITY_DELAY_IN_MILLISECS));
     }
 
     public void modifyParkingSlots(ParkingSlot [] parkingSlots) {
@@ -376,9 +456,32 @@ public class MapFragment extends Fragment {
         mMapView.invalidate();
     }
 
+    public void modifyParkingZones(ParkingZone[] parkingZones) {
+        OverlayManager om = mMapView.getOverlayManager();
+        if(parkingZones == null)
+            return;
+
+        for(int i=0; i < parkingZones.length; i++) {
+            int geopoint_cnt = parkingZones[i].getGeoPoints().size();
+
+            if(geopoint_cnt > 0) {
+                // check is current & previous data has changed?
+                // Polygon
+                Polygon tmp_polygon = new Polygon(mMapView);
+                tmp_polygon.setPoints(parkingZones[i].getGeoPoints());
+                tmp_polygon.getOutlinePaint().setColor(Color.parseColor("#990000FF"));
+                tmp_polygon.getOutlinePaint().setStrokeWidth(2);
+                tmp_polygon.getFillPaint().setColor(Color.parseColor("#330000FF"));
+                mMapView.getOverlays().add(tmp_polygon);
+                polygons.put(parkingZones[i].getId(), tmp_polygon);
+            }
+        }
+        mMapView.invalidate();
+    }
+
     public void addLocalDatastore() {
         if (datastore == null)
-            datastore = new BookmarkDatastore(this);
+            datastore = new OSMBookmarkDatastore(this);
     }
 
     private void showDialog(GeoPoint p) {
@@ -434,7 +537,7 @@ public class MapFragment extends Fragment {
                 GeoPoint geoPoint = new GeoPoint(latD, lonD);
                 m.setPosition(geoPoint);
                 String tmp_status = "Unconfirmed (confidence 60%)";
-                InfoWindow infoWindow = new CustomInfoWindow(
+                InfoWindow infoWindow = new ParkingSlotInfoWindow(
                     R.layout.bubble_layout,
                     mMapView,
                     geoPoint,

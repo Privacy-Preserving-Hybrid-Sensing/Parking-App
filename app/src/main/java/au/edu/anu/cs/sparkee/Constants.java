@@ -6,7 +6,7 @@ public class Constants {
     public static final String RABBIT_PASS = "ieGh4thi";
     public static final String RABBIT_EXCHANGE_OUTGOING_NAME = "amq.topic";
     public static final String RABBIT_EXCHANGE_INCOMING_NAME = "amq.topic";
-    public static final String RABBIT_EXCHANGE_ZONE_TOPIC = "zone.*";
+    public static final String RABBIT_EXCHANGE_PARKING_SLOTS_TOPIC = "parking_slot.zone.*";
 
     public static final String DEFAULT_PARTICIPANT_TO_SERVER_ROUTING_KEY = "PARTICIPANT_TO_SERVER";
     public static final String BROADCAST_ACTION_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.AMQP";

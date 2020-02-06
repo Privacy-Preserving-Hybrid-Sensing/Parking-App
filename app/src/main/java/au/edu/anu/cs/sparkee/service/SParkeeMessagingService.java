@@ -42,7 +42,8 @@ public class SParkeeMessagingService extends IntentService {
 
             String queueName = channel.queueDeclare().getQueue();
             String specificSubscriberUUIDTopic = "participant." + device_uuid;
-            channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, Constants.RABBIT_EXCHANGE_ZONE_TOPIC);
+            channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, Constants.RABBIT_EXCHANGE_PARKING_SLOTS_TOPIC);
+
             channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, specificSubscriberUUIDTopic);
 
 
