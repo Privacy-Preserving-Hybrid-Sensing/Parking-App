@@ -77,7 +77,7 @@ public class MapFragment extends Fragment {
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private MyLocationNewOverlay mLocationOverlay;
 
-    protected static final int DEFAULT_INACTIVITY_DELAY_IN_MILLISECS = 1000;
+    protected static final int DEFAULT_INACTIVITY_DELAY_IN_MILLISECS = 10;
     protected static final double MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE = 19;
 
     private Context context;
@@ -155,7 +155,7 @@ public class MapFragment extends Fragment {
 
             @Override
             public void onChanged(@Nullable ParkingZone[] parkingZones) {
-                if(parkingZones!= null && polygons == null) {
+                if(parkingZones!= null && polygons.size() == 0) {
                     Log.d("BANYAK PARKING ZONES", "" + parkingZones.length);
                     modifyParkingZones(parkingZones);
                 }
@@ -354,11 +354,12 @@ public class MapFragment extends Fragment {
         while(iterator.hasNext()) {
             Map.Entry mentry = (Map.Entry)iterator.next();
             ParkingSlotMarker m = (ParkingSlotMarker) mentry.getValue();
-            if(visible)
-                om.add(m);
-            else
-                om.remove(m);
+//            if(visible)
+//                om.add(m);
+//            else
+//                om.remove(m);
             m.setVisible(visible);
+            m.setEnabled(visible);
         }
         mMapView.invalidate();
     }
@@ -370,12 +371,13 @@ public class MapFragment extends Fragment {
         while(iterator.hasNext()) {
             Map.Entry mentry = (Map.Entry)iterator.next();
             Polygon p = (Polygon) mentry.getValue();
-            if(visible)
-                om.add(p);
-            else
-                om.remove(p);
-            p.setEnabled(visible);
+//            if(visible)
+//                om.add(p);
+//            else
+//                om.remove(p);
+//            p.setEnabled(visible);
             p.setVisible(visible);
+            p.setEnabled(visible);
         }
         mMapView.invalidate();
     }
@@ -417,19 +419,27 @@ public class MapFragment extends Fragment {
             public boolean onZoom(ZoomEvent event) {
                 Log.d("ZOOM TO", "" + event.getZoomLevel());
                 if(event.getZoomLevel() > MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE) {
-                    setVisibleAllMarkers(true);
-                    setVisibleAllPolygons(false);
+                    if(!isShowParkingSlots) {
+                        setVisibleAllMarkers(true);
+                        setVisibleAllPolygons(false);
+                    }
+                    isShowParkingSlots = true;
                     Log.d("ZOOM", "PERBESAR");
                 }
                 else {
-                    setVisibleAllMarkers(false);
-                    setVisibleAllPolygons(true);
+                    if(isShowParkingSlots) {
+                        setVisibleAllMarkers(false);
+                        setVisibleAllPolygons(true);
+                    }
+                    isShowParkingSlots = false;
                     Log.d("ZOOM", "PERKECIL");
                 }
                 return true;
             }
         }, DEFAULT_INACTIVITY_DELAY_IN_MILLISECS));
     }
+
+    private boolean isShowParkingSlots;
 
     public void modifyParkingSlots(ParkingSlot [] parkingSlots) {
         OverlayManager om = mMapView.getOverlayManager();
