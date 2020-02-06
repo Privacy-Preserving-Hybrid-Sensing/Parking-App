@@ -96,6 +96,7 @@ public class ParkingSlotInfoWindow extends InfoWindow {
                 send("Unavailable", geoPoint);
                 marker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_minus_1));
                 mMapView.invalidate();
+
             }
         });
     }
