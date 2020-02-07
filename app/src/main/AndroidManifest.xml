@@ -27,7 +27,7 @@
         </activity>
 
         <service
-            android:name=".service.SParkeeMessagingService"
+            android:name=".helper.AMQPChannelHelper"
             android:exported="false"/>
 
     </application>

@@ -1,4 +1,4 @@
-package au.edu.anu.cs.sparkee.ui.map;
+package au.edu.anu.cs.sparkee.ui.map.infowindow;
 
 import android.location.Location;
 import android.util.Log;
@@ -30,6 +30,7 @@ import java.util.Date;
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
+import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSlotMarker;
 
 public class ParkingSlotInfoWindow extends InfoWindow {
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
@@ -37,9 +38,9 @@ public class ParkingSlotInfoWindow extends InfoWindow {
     private String device_uuid;
     private String status;
     private LocalDateTime ts_update;
-    private Marker marker;
+    private ParkingSlotMarker marker;
 
-    public ParkingSlotInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update, Marker marker) {
+    public ParkingSlotInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update, ParkingSlotMarker marker) {
         super(layoutResId, mapView);
         this.geoPoint = geoPoint;
         this.device_uuid = device_uuid;
@@ -53,6 +54,9 @@ public class ParkingSlotInfoWindow extends InfoWindow {
     }
 
     public void onOpen(Object arg0) {
+        if(! marker.isEnabled())
+            return;
+
         mIsVisible = true;
         LinearLayout layout = (LinearLayout) mView.findViewById(R.id.bubble_layout);
         Button btnAvailable = (Button) mView.findViewById(R.id.bubble_available);

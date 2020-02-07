@@ -1,11 +1,10 @@
-package au.edu.anu.cs.sparkee.service;
+package au.edu.anu.cs.sparkee.helper;
 
 
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -18,11 +17,11 @@ import java.io.IOException;
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
 
-public class SParkeeMessagingService extends IntentService {
+public class AMQPChannelHelper extends IntentService {
     // Must create a default constructor
-    public SParkeeMessagingService() {
+    public AMQPChannelHelper() {
         // Used to name the worker thread, important only for debugging.
-        super("SParkeeMessagingService");
+        super("AMQPChannelHelper");
     }
 
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
@@ -37,9 +36,6 @@ public class SParkeeMessagingService extends IntentService {
 
             SharedPreferences sharedPref =  getApplicationContext().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
             String device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
-
-//            Log.d("DEVICE UUID", device_uuid);
-
             String queueName = channel.queueDeclare().getQueue();
             String specificSubscriberUUIDTopic = "participant." + device_uuid;
             channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, Constants.RABBIT_EXCHANGE_PARKING_SLOTS_TOPIC);
@@ -59,14 +55,10 @@ public class SParkeeMessagingService extends IntentService {
                             String routingKey = envelope.getRoutingKey();
                             String contentType = properties.getContentType();
                             long deliveryTag = envelope.getDeliveryTag();
-                            // (process the message components here ...)
-//                            Log.d("Routing KEY", routingKey);
-//                            Log.d("RECV DATA", new String(body));
                             channel.basicAck(deliveryTag, false);
-
                             Intent intent = new Intent();
-                            intent.setAction(Constants.BROADCAST_ACTION_IDENTIFIER);
-                            intent.putExtra(Constants.BROADCAST_ACTION_IDENTIFIER, new String(body));
+                            intent.setAction(Constants.BROADCAST_AMQP_IDENTIFIER);
+                            intent.putExtra(Constants.BROADCAST_AMQP_IDENTIFIER, new String(body));
                             sendBroadcast(intent);
                         }
                     });

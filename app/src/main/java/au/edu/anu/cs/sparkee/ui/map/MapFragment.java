@@ -34,15 +34,14 @@ import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.FolderOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.MapEventsOverlay;
-import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.OverlayManager;
 import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
-import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import org.threeten.bp.LocalDateTime;
 
@@ -61,6 +60,7 @@ import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
 import au.edu.anu.cs.sparkee.model.OSMBookmarkDatastore;
 import au.edu.anu.cs.sparkee.model.ParkingSlot;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
+import au.edu.anu.cs.sparkee.ui.map.infowindow.ParkingSlotInfoWindow;
 import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSlotMarker;
 //import au.edu.anu.cs.sparkee.receiver.AMQPBroadcaseReceiver;
 
@@ -86,6 +86,7 @@ public class MapFragment extends Fragment {
     private String device_uuid;
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
 
+    private FolderOverlay overlayParkingMarkers;
     public MapView getmMapView() {
         return mMapView;
     }
@@ -157,7 +158,7 @@ public class MapFragment extends Fragment {
             public void onChanged(@Nullable ParkingZone[] parkingZones) {
                 if(parkingZones!= null && polygons.size() == 0) {
                     Log.d("BANYAK PARKING ZONES", "" + parkingZones.length);
-                    modifyParkingZones(parkingZones);
+//                    modifyParkingZones(parkingZones);
                 }
             }
         });
@@ -329,7 +330,7 @@ public class MapFragment extends Fragment {
                     break;
             }
 
-            InfoWindow infoWindow = new ParkingSlotInfoWindow(
+            ParkingSlotInfoWindow infoWindow = new ParkingSlotInfoWindow(
                     R.layout.bubble_layout,
                     view,
                     geoPoint,
@@ -347,38 +348,40 @@ public class MapFragment extends Fragment {
         return m;
     }
 
-    public void setVisibleAllMarkers(boolean visible) {
-        OverlayManager om = mMapView.getOverlayManager();
-        Set set = markers.entrySet();
-        Iterator iterator = set.iterator();
-        while(iterator.hasNext()) {
-            Map.Entry mentry = (Map.Entry)iterator.next();
-            ParkingSlotMarker m = (ParkingSlotMarker) mentry.getValue();
+//    public void setVisibleAllMarkers(boolean visible) {
+//        OverlayManager om = mMapView.getOverlayManager();
+//
+//        Set set = markers.entrySet();
+//        Iterator iterator = set.iterator();
+////        Iterator iterator = om.iterator();
+//        while(iterator.hasNext()) {
+//            ParkingSlotMarker obj = (ParkingSlotMarker) iterator.next();
 //            if(visible)
-//                om.add(m);
+//                om.add(obj);
 //            else
-//                om.remove(m);
-            m.setVisible(visible);
-            m.setEnabled(visible);
-        }
-        mMapView.invalidate();
-    }
+//                om.remove(obj);
+//        }
+//        mMapView.invalidate();
+//    }
 
     public void setVisibleAllPolygons(boolean visible) {
-        OverlayManager om = mMapView.getOverlayManager();
-        Set set = polygons.entrySet();
-        Iterator iterator = set.iterator();
-        while(iterator.hasNext()) {
-            Map.Entry mentry = (Map.Entry)iterator.next();
-            Polygon p = (Polygon) mentry.getValue();
-//            if(visible)
-//                om.add(p);
-//            else
-//                om.remove(p);
+//        OverlayManager om = mMapView.getOverlayManager();
+//        Iterator iterator = om.iterator();
+//        while(iterator.hasNext()) {
+//            Object obj = iterator.next();
+//            if (obj instanceof Polygon) {
+//                ((Polygon) obj).setVisible(visible);
+//                ((Polygon) obj).setEnabled(visible);
+//            }
+//        }
+//        Set set = polygons.entrySet();
+//        Iterator iterator = set.iterator();
+//        while(iterator.hasNext()) {
+//            Map.Entry mentry = (Map.Entry)iterator.next();
+//            Polygon p = (Polygon) mentry.getValue();
+//            p.setVisible(visible);
 //            p.setEnabled(visible);
-            p.setVisible(visible);
-            p.setEnabled(visible);
-        }
+//        }
         mMapView.invalidate();
     }
 
@@ -419,50 +422,108 @@ public class MapFragment extends Fragment {
             public boolean onZoom(ZoomEvent event) {
                 Log.d("ZOOM TO", "" + event.getZoomLevel());
                 if(event.getZoomLevel() > MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE) {
-                    if(!isShowParkingSlots) {
-                        setVisibleAllMarkers(true);
-                        setVisibleAllPolygons(false);
-                    }
-                    isShowParkingSlots = true;
-                    Log.d("ZOOM", "PERBESAR");
+                    setParkingSlotsVisibile(true);
+                    setParkingZonesVisibile(false);
                 }
                 else {
-                    if(isShowParkingSlots) {
-                        setVisibleAllMarkers(false);
-                        setVisibleAllPolygons(true);
-                    }
-                    isShowParkingSlots = false;
-                    Log.d("ZOOM", "PERKECIL");
+                    setParkingSlotsVisibile(false);
+                    setParkingZonesVisibile(true);
                 }
                 return true;
             }
         }, DEFAULT_INACTIVITY_DELAY_IN_MILLISECS));
     }
 
-    private boolean isShowParkingSlots;
+    private void showParkingSlots() {
+        OverlayManager om = mMapView.getOverlayManager();
+        Set set = markers.entrySet();
+        Iterator iterator = set.iterator();
+        while(iterator.hasNext()) {
+            ParkingSlotMarker existing_marker = (ParkingSlotMarker) iterator.next();
+            om.add(existing_marker);
+        }
+//        for(int i=0; i < markers.length; i++) {
+//            int new_id = parkingSlots[i].getId();
+//            int new_parking_status = parkingSlots[i].getParking_status();
+//            ParkingSlotMarker existing_marker = markers.get(new_id);
+//            if(existing_marker != null) {
+//                // check is current & previous data has changed?
+//                if(existing_marker.getParkingSlot().getMarker_status() != parkingSlots[i].getMarker_status()) {
+//                    om.remove(existing_marker);
+//                    markers.remove(new_id);
+//                    ParkingSlotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
+//                    om.add(new_marker);
+//                    markers.put(new_id, new_marker);
+//                }
+//            }
+//            else {
+//                ParkingSlotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
+//                om.add(new_marker);
+//                markers.put(new_id, new_marker);
+//            }
+//        }
+
+    }
+    public boolean isParkingSlotsVisibile() {
+        return parkingSlotsVisibile;
+    }
+
+    public void setParkingSlotsVisibile(boolean parkingSlotsVisibile) {
+        this.parkingSlotsVisibile = parkingSlotsVisibile;
+    }
+
+    public boolean isParkingZonesVisibile() {
+        return parkingZonesVisibile;
+    }
+
+    public void setParkingZonesVisibile(boolean parkingZonesVisibile) {
+        this.parkingZonesVisibile = parkingZonesVisibile;
+    }
+
+    boolean parkingSlotsVisibile;
+    boolean parkingZonesVisibile;
 
     public void modifyParkingSlots(ParkingSlot [] parkingSlots) {
-        OverlayManager om = mMapView.getOverlayManager();
-        for(int i=0; i < parkingSlots.length; i++) {
-            int new_id = parkingSlots[i].getId();
-            int new_parking_status = parkingSlots[i].getParking_status();
+//        overlayParkingMarkers.
+//        overlayParkingMarkers.getItems()
+        for( ParkingSlot parkingSlot: parkingSlots) {
+            int new_id = parkingSlot.getId();
+            ParkingSlotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlot);
             ParkingSlotMarker existing_marker = markers.get(new_id);
             if(existing_marker != null) {
                 // check is current & previous data has changed?
-                if(existing_marker.getParkingSlot().getMarker_status() != parkingSlots[i].getMarker_status()) {
-                    om.remove(existing_marker);
+                if(existing_marker.getParkingSlot().getMarker_status() != parkingSlot.getMarker_status()) {
                     markers.remove(new_id);
-                    ParkingSlotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
-                    om.add(new_marker);
                     markers.put(new_id, new_marker);
+                    overlayParkingMarkers.add(new_marker);
+//                    overlayParkingMarkers.
                 }
             }
             else {
-                ParkingSlotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
-                om.add(new_marker);
                 markers.put(new_id, new_marker);
             }
         }
+//        OverlayManager om = mMapView.getOverlayManager();
+//        for(int i=0; i < parkingSlots.length; i++) {
+//            int new_id = parkingSlots[i].getId();
+//            int new_parking_status = parkingSlots[i].getParking_status();
+//            ParkingSlotMarker existing_marker = markers.get(new_id);
+//            if(existing_marker != null) {
+//                // check is current & previous data has changed?
+//                if(existing_marker.getParkingSlot().getMarker_status() != parkingSlots[i].getMarker_status()) {
+//                    om.remove(existing_marker);
+//                    markers.remove(new_id);
+//                    ParkingSlotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
+//                    om.add(new_marker);
+//                    markers.put(new_id, new_marker);
+//                }
+//            }
+//            else {
+//                ParkingSlotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
+//                om.add(new_marker);
+//                markers.put(new_id, new_marker);
+//            }
+//        }
         mMapView.invalidate();
     }
 
@@ -538,7 +599,9 @@ public class MapFragment extends Fragment {
                 valid = false;
 
             if (valid) {
-                Marker m = new Marker(mMapView);
+                ParkingSlot newParkingSlot = new ParkingSlot();
+
+                ParkingSlotMarker m = new ParkingSlotMarker(mMapView, newParkingSlot);
                 m.setId(UUID.randomUUID().toString());
                 m.setTitle(UUID.randomUUID().toString());
                 m.setSubDescription(UUID.randomUUID().toString());
@@ -547,7 +610,7 @@ public class MapFragment extends Fragment {
                 GeoPoint geoPoint = new GeoPoint(latD, lonD);
                 m.setPosition(geoPoint);
                 String tmp_status = "Unconfirmed (confidence 60%)";
-                InfoWindow infoWindow = new ParkingSlotInfoWindow(
+                ParkingSlotInfoWindow infoWindow = new ParkingSlotInfoWindow(
                     R.layout.bubble_layout,
                     mMapView,
                     geoPoint,

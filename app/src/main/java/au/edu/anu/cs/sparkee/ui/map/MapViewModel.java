@@ -109,7 +109,7 @@ public class MapViewModel extends AndroidViewModel {
         mParkingZones.setValue( null );
 
         receiver = new InternalAMQPBroadcaseReceiver();
-        intentFilter = new IntentFilter(Constants.BROADCAST_ACTION_IDENTIFIER);
+        intentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
 
     }
 
@@ -138,7 +138,7 @@ public class MapViewModel extends AndroidViewModel {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
-            String msg = bundle.getString(Constants.BROADCAST_ACTION_IDENTIFIER);
+            String msg = bundle.getString(Constants.BROADCAST_AMQP_IDENTIFIER);
             try {
                 JSONObject jo = new JSONObject(msg);
                 String payload_type = jo.getString("type");

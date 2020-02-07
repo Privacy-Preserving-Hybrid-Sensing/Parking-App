@@ -18,12 +18,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -35,7 +33,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import java.io.File;
 import java.util.UUID;
 
-import au.edu.anu.cs.sparkee.service.SParkeeMessagingService;
+import au.edu.anu.cs.sparkee.helper.AMQPChannelHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,11 +77,11 @@ public class MainActivity extends AppCompatActivity {
 
 //    public void launchBroadcaseReceiver() {
 //        receiver = new AMQPBroadcaseReceiver();
-//        intentFilter = new IntentFilter(Constants.BROADCAST_ACTION_IDENTIFIER);
+//        intentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
 //    }
 
     public void launchSParkeeMessagingService() {
-        Intent i = new Intent(this, SParkeeMessagingService.class);
+        Intent i = new Intent(this, AMQPChannelHelper.class);
         startService(i);
     }
 

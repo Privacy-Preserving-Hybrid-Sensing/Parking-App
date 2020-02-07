@@ -1,4 +1,4 @@
-package au.edu.anu.cs.sparkee.ui.map;
+package au.edu.anu.cs.sparkee.ui.map.infowindow;
 
 import android.util.Log;
 import android.view.View;
