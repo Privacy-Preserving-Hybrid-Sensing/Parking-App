@@ -26,7 +26,6 @@ public class AMQPChannelHelper extends IntentService {
 
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
 
-    @Override
     public void onCreate() {
         super.onCreate(); // if you override onCreate(), make sure to call super().
         // If a Context object is needed, call getApplicationContext() here.

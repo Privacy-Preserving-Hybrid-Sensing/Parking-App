@@ -3,12 +3,15 @@ package au.edu.anu.cs.sparkee.helper;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -21,61 +24,62 @@ import au.edu.anu.cs.sparkee.Constants;
 
 public class HTTPConnectionHelper extends IntentService {
     private static HTTPConnectionHelper singleton;
+    private static Context context;
 
     public HTTPConnectionHelper() {
         // Used to name the worker thread, important only for debugging.
         super("HTTPConnectionHelper");
     }
 
-    public static HTTPConnectionHelper getInstance() {
+    public static HTTPConnectionHelper getInstance(Context ctx) {
         if (singleton == null)
             singleton = new HTTPConnectionHelper();
+        context = ctx;
         return singleton;
     }
 
-    private Response.Listener okListener = new Response.Listener<JSONObject>() {
+    private Response.Listener okListener = new Response.Listener<String>() {
         @Override
-        public void onResponse(JSONObject response) {
+        public void onResponse(String msg) {
             Intent intent = new Intent();
             intent.setAction(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
             intent.putExtra(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER, Constants.BROADCAST_HTTP_STATUS_OK);
-            intent.putExtra(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER, response.toString());
-            sendBroadcast(intent);
+            intent.putExtra(Constants.BROADCAST_HTTP_BODY_IDENTIFIER, msg);
+            context.sendBroadcast(intent);
         }
     };
 
     private Response.ErrorListener errorListener =  new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
+            Log.d("EROR", error.toString());
             Intent intent = new Intent();
             intent.setAction(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
             intent.putExtra(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER, Constants.BROADCAST_HTTP_STATUS_ERR);
-            intent.putExtra(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER, error.getMessage());
-            sendBroadcast(intent);
+            intent.putExtra(Constants.BROADCAST_HTTP_BODY_IDENTIFIER, error.toString());
+            context.sendBroadcast(intent);
         }
     };
 
-    public boolean sendPost(Context context, String url, final String device_uuid, String tag) {
+
+    public boolean sendPost(String url, final Map<String, String> params) {
         RequestQueue queue = Volley.newRequestQueue(context);
 
-        try {
-            JSONObject postparams = new JSONObject();
-            postparams.put("city", "london");
-            postparams.put("timestamp", "1500134255");
-            JsonObjectRequest request = new JsonObjectRequest(url, postparams, okListener, errorListener) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("Device-UUID", device_uuid);
-                    return params;
-                }
+        StringRequest request = new StringRequest(Request.Method.POST, url, okListener, errorListener) {
+            protected Map<String, String> getParams()  {
+                return params;
             };
-            request.setTag(tag);
-            queue.add(request);
-        }
-        catch(JSONException je) {
-            je.printStackTrace();
-        }
+        };
+        queue.add(request);
+        return true;
+    }
+
+    public boolean sendGet(String url) {
+        Log.d("PANGGIL", "URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
+        Log.d("GET", url);
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest request = new StringRequest(Request.Method.GET, url, okListener, errorListener);
+        queue.add(request);
         return true;
     }
 

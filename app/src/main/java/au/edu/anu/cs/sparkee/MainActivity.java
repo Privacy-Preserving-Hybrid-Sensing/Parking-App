@@ -34,6 +34,7 @@ import java.io.File;
 import java.util.UUID;
 
 import au.edu.anu.cs.sparkee.helper.AMQPChannelHelper;
+import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,20 +70,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-//        unregisterReceiver(receiver);
+//        unregisterReceiver(amqpReceiver);
     }
 
-//    AMQPBroadcaseReceiver receiver;
+//    AMQPBroadcaseReceiver amqpReceiver;
     IntentFilter intentFilter;
 
 //    public void launchBroadcaseReceiver() {
-//        receiver = new AMQPBroadcaseReceiver();
+//        amqpReceiver = new AMQPBroadcaseReceiver();
 //        intentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
 //    }
 
     public void launchSParkeeMessagingService() {
-        Intent i = new Intent(this, AMQPChannelHelper.class);
-        startService(i);
+        Intent amqpService = new Intent(this, AMQPChannelHelper.class);
+        Intent httpService = new Intent(this, HTTPConnectionHelper.class);
+        startService(amqpService);
+        startService(httpService);
     }
 
     @Override
@@ -159,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        registerReceiver(receiver, intentFilter);
+//        registerReceiver(amqpReceiver, intentFilter);
 
     }
 
@@ -173,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        unregisterReceiver(receiver);
+//        unregisterReceiver(amqpReceiver);
     }
 
     @Override

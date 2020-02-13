@@ -31,7 +31,7 @@ public class AMQPConnectionHelper {
 
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost(Constants.SERVER_HOST);
+            factory.setHost(Constants.RABBIT_HOST);
             factory.setUsername(Constants.RABBIT_USER);
             factory.setPassword(Constants.RABBIT_PASS);
             factory.setAutomaticRecoveryEnabled(true);

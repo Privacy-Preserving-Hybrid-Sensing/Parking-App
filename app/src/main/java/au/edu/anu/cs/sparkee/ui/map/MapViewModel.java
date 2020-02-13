@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,12 +31,16 @@ import org.threeten.bp.LocalDateTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import au.edu.anu.cs.sparkee.Constants;
+import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
 import au.edu.anu.cs.sparkee.model.ParkingSlot;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 import au.edu.anu.cs.sparkee.model.ParticipantCredit;
+import au.edu.anu.cs.sparkee.model.SParkeeJSONObject;
 
 public class MapViewModel extends AndroidViewModel {
 
@@ -45,6 +50,7 @@ public class MapViewModel extends AndroidViewModel {
     private RotationGestureOverlay mRotationGestureOverlay;
     private MutableLiveData<Location> mLocation;
     private MutableLiveData<ParkingSlot []> mParkingSlots;
+    private MutableLiveData<Integer> creditValue;
     private MutableLiveData<ParkingZone []> mParkingZones;
     private MutableLiveData<ParticipantCredit[]> mParticipantCredit;
 
@@ -52,11 +58,12 @@ public class MapViewModel extends AndroidViewModel {
 
     public void stopViewModel() {
         stopGPS();
-        stopAMQPListener();
+        stopListeners();
     }
 
-    private void stopAMQPListener() {
-        context.unregisterReceiver(receiver);
+    private void stopListeners() {
+        context.unregisterReceiver(amqpReceiver);
+        context.unregisterReceiver(httpReceiver);
     }
 
     private void stopGPS() {
@@ -66,8 +73,28 @@ public class MapViewModel extends AndroidViewModel {
     }
 
     public void startViewModel() {
+
         startGPS();
-        startAMQPListener();
+        startListeners();
+
+        initData();
+    }
+
+    private void initData() {
+        String url = "";
+
+        // Get Info All Zone
+        url = Constants.BASE_URL + Constants.URL_API_ZONES_INFO_ALL;
+        HTTPConnectionHelper.getInstance(context).sendGet(url);
+
+        // Get Profile Credit Value
+        SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+        String device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
+
+        url = Constants.BASE_URL + Constants.URL_API_PROFILE_CREDIT;
+        Map<String, String> arg = new HashMap<>();
+        arg.put("subscriver_uuid", device_uuid);
+        HTTPConnectionHelper.getInstance(context).sendPost(url, arg);
     }
 
     private void startGPS() {
@@ -89,8 +116,9 @@ public class MapViewModel extends AndroidViewModel {
 
     }
 
-    private void startAMQPListener() {
-        context.registerReceiver(receiver, intentFilter);
+    private void startListeners() {
+        context.registerReceiver(amqpReceiver, amqpIntentFilter);
+        context.registerReceiver(httpReceiver, httpIntentFilter);
     }
 
     public MapViewModel(@NonNull Application application) {
@@ -98,6 +126,9 @@ public class MapViewModel extends AndroidViewModel {
         context = application.getApplicationContext();
         mLocation = new MutableLiveData<>();
         mLocation.setValue( null );
+
+        creditValue= new MutableLiveData<>();
+        creditValue.setValue( 0 );
 
         mParkingSlots = new MutableLiveData<>();
         mParkingSlots.setValue( null );
@@ -108,30 +139,103 @@ public class MapViewModel extends AndroidViewModel {
         mParkingZones = new MutableLiveData<>();
         mParkingZones.setValue( null );
 
-        receiver = new InternalAMQPBroadcaseReceiver();
-        intentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
+        amqpReceiver = new InternalAMQPBroadcaseReceiver();
+        amqpIntentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
+
+        httpReceiver = new InternalHTTPBroadcaseReceiver();
+        httpIntentFilter = new IntentFilter(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
+
 
     }
 
+    public LiveData<Integer> getCreditValue() {
+        return creditValue;
+    }
     public LiveData<Location> getLocation() {
         return mLocation;
     }
-
-
     public LiveData<ParkingSlot []> getParkingSlots() {
         return mParkingSlots;
     }
-
     public LiveData<ParticipantCredit[]> getParticipantCredit() {
         return mParticipantCredit;
     }
-
     public LiveData<ParkingZone[]> getParkingZones() {
         return mParkingZones;
     }
 
-    public InternalAMQPBroadcaseReceiver receiver;
-    private IntentFilter intentFilter;
+    private InternalAMQPBroadcaseReceiver amqpReceiver;
+    private IntentFilter amqpIntentFilter;
+
+    private InternalHTTPBroadcaseReceiver httpReceiver;
+    private IntentFilter httpIntentFilter;
+
+    public class InternalHTTPBroadcaseReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            String msg = bundle.getString(Constants.BROADCAST_HTTP_BODY_IDENTIFIER);
+            String status = bundle.getString(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER);
+            if(status.equalsIgnoreCase(Constants.BROADCAST_HTTP_STATUS_OK)) {
+                try {
+                    onSuccess(SParkeeJSONObject.parse(msg));
+                } catch (JSONException je) {
+                    je.printStackTrace();
+                }
+            }
+            else {
+                onError(msg);
+            }
+        }
+        void onSuccess(SParkeeJSONObject jo) throws JSONException{
+            Log.d("SUCCESS", jo.toString());
+            JSONArray data = jo.getData();
+            switch (jo.getPath()) {
+                case Constants.URL_API_ZONES_INFO_ALL:
+                    process_parking_zones(data);
+                    break;
+                case Constants.URL_API_PROFILE_CREDIT:
+                    process_profile_credit(data);
+                    break;
+            }
+        }
+
+
+        void process_profile_credit(JSONArray ja) throws  JSONException {
+            Log.d("CCC", "AAAAAAAAAAAAAAAAAAAAAAAAA");
+            JSONObject jo = ja.getJSONObject(0);
+            int credit_value = jo.getInt("credit_value");
+            creditValue.setValue(credit_value);
+        }
+
+        void process_parking_zones(JSONArray ja) throws  JSONException {
+            ParkingZone [] tmp_parkingZone = new ParkingZone[ja.length()];
+            for(int i=0; i < ja.length(); i++) {
+                JSONObject jo = ja.getJSONObject(i);
+                tmp_parkingZone[i] = new ParkingZone();
+                tmp_parkingZone[i].setId(jo.getInt("id"));
+                tmp_parkingZone[i].setName(jo.getString("name"));
+                tmp_parkingZone[i].setDescription(jo.getString("description"));
+                tmp_parkingZone[i].setCenter_latitude(jo.getString("center_longitude"));
+                tmp_parkingZone[i].setCenter_latitude(jo.getString("center_latitude"));
+                tmp_parkingZone[i].setAllowed_minimum_credit(jo.getInt("allowed_minimum_credit"));
+                JSONArray ja2 = jo.getJSONArray("geopoints");
+                List<GeoPoint> tmp_geopoints = new ArrayList<GeoPoint>();
+                for(int j=0; j < ja2.length(); j++) {
+                    JSONObject jo2 = ja2.getJSONObject(j);
+                    GeoPoint tmp = new GeoPoint( Double.parseDouble(jo2.getString("latitude") ), Double.parseDouble(jo2.getString("longitude")));
+                    tmp_geopoints.add(tmp);
+                }
+                tmp_parkingZone[i].setGeoPoints(tmp_geopoints);
+            }
+            mParkingZones.setValue(tmp_parkingZone);
+        }
+
+
+        void onError(String msg) {
+            Log.d("ERROR", msg);
+        }
+    }
 
 
     public class InternalAMQPBroadcaseReceiver extends BroadcastReceiver {
@@ -148,9 +252,9 @@ public class MapViewModel extends AndroidViewModel {
                 else if(payload_type.equalsIgnoreCase("participant_credits")) {
                     process_participant_credit(jo.getJSONArray("payload"));
                 }
-                else if(payload_type.equalsIgnoreCase("parking_zones")) {
-                    process_parking_zones(jo.getJSONArray("payload"));
-                }
+//                else if(payload_type.equalsIgnoreCase("parking_zones")) {
+//                    process_parking_zones(jo.getJSONArray("payload"));
+//                }
             }
             catch(JSONException je) {
                 je.printStackTrace();
@@ -177,28 +281,6 @@ public class MapViewModel extends AndroidViewModel {
             mParticipantCredit.setValue(tmp_participant_credit);
         }
 
-        void process_parking_zones(JSONArray ja) throws  JSONException {
-            ParkingZone [] tmp_parkingZone = new ParkingZone[ja.length()];
-            for(int i=0; i < ja.length(); i++) {
-                JSONObject jo = ja.getJSONObject(i);
-                tmp_parkingZone[i] = new ParkingZone();
-                tmp_parkingZone[i].setId(jo.getInt("id"));
-                tmp_parkingZone[i].setName(jo.getString("name"));
-                tmp_parkingZone[i].setDescription(jo.getString("description"));
-                tmp_parkingZone[i].setCenter_latitude(jo.getString("center_longitude"));
-                tmp_parkingZone[i].setCenter_latitude(jo.getString("center_latitude"));
-                tmp_parkingZone[i].setAllowed_minimum_credit(jo.getInt("allowed_minimum_credit"));
-                JSONArray ja2 = jo.getJSONArray("geopoints");
-                List<GeoPoint> tmp_geopoints = new ArrayList<GeoPoint>();
-                for(int j=0; j < ja2.length(); j++) {
-                    JSONObject jo2 = ja2.getJSONObject(j);
-                    GeoPoint tmp = new GeoPoint( Double.parseDouble(jo2.getString("latitude") ), Double.parseDouble(jo2.getString("longitude")));
-                    tmp_geopoints.add(tmp);
-                }
-                tmp_parkingZone[i].setGeoPoints(tmp_geopoints);
-            }
-            mParkingZones.setValue(tmp_parkingZone);
-        }
 
         void process_parking_slots(JSONArray ja) throws  JSONException{
 
