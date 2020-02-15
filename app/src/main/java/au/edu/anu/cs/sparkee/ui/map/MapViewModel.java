@@ -37,7 +37,7 @@ import java.util.Map;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
-import au.edu.anu.cs.sparkee.model.ParkingSlot;
+import au.edu.anu.cs.sparkee.model.ParkingSpot;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 import au.edu.anu.cs.sparkee.model.ParticipantCredit;
 import au.edu.anu.cs.sparkee.model.SParkeeJSONObject;
@@ -49,9 +49,10 @@ public class MapViewModel extends AndroidViewModel {
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private RotationGestureOverlay mRotationGestureOverlay;
     private MutableLiveData<Location> mLocation;
-    private MutableLiveData<ParkingSlot []> mParkingSlots;
+    private MutableLiveData<ParkingSpot[]> mParkingSlots;
     private MutableLiveData<Integer> creditValue;
     private MutableLiveData<ParkingZone []> mParkingZones;
+    private MutableLiveData<Boolean> httpConnectionEstablished;
     private MutableLiveData<ParticipantCredit[]> mParticipantCredit;
 
     final Context context;
@@ -83,17 +84,19 @@ public class MapViewModel extends AndroidViewModel {
     private void initData() {
         String url = "";
 
-        // Get Info All Zone
-        url = Constants.BASE_URL + Constants.URL_API_ZONES_INFO_ALL;
-        HTTPConnectionHelper.getInstance(context).sendGet(url);
-
-        // Get Profile Credit Value
         SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
         String device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
 
-        url = Constants.BASE_URL + Constants.URL_API_PROFILE_CREDIT;
         Map<String, String> arg = new HashMap<>();
-        arg.put("subscriver_uuid", device_uuid);
+        arg.put("subscriber_uuid", device_uuid);
+
+        // Get Info All Zone
+        url = Constants.BASE_URL + Constants.URL_API_ZONES_INFO_ALL;
+        HTTPConnectionHelper.getInstance(context).sendPost(url, arg);
+
+        // Get Profile Credit Value
+
+        url = Constants.BASE_URL + Constants.URL_API_PROFILE_CREDIT;
         HTTPConnectionHelper.getInstance(context).sendPost(url, arg);
     }
 
@@ -139,6 +142,9 @@ public class MapViewModel extends AndroidViewModel {
         mParkingZones = new MutableLiveData<>();
         mParkingZones.setValue( null );
 
+        httpConnectionEstablished= new MutableLiveData<>();
+        httpConnectionEstablished.setValue( Boolean.FALSE );
+
         amqpReceiver = new InternalAMQPBroadcaseReceiver();
         amqpIntentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
 
@@ -154,7 +160,7 @@ public class MapViewModel extends AndroidViewModel {
     public LiveData<Location> getLocation() {
         return mLocation;
     }
-    public LiveData<ParkingSlot []> getParkingSlots() {
+    public LiveData<ParkingSpot[]> getParkingSlots() {
         return mParkingSlots;
     }
     public LiveData<ParticipantCredit[]> getParticipantCredit() {
@@ -162,6 +168,9 @@ public class MapViewModel extends AndroidViewModel {
     }
     public LiveData<ParkingZone[]> getParkingZones() {
         return mParkingZones;
+    }
+    public LiveData<Boolean> getHttpConnectionEstablished() {
+        return httpConnectionEstablished;
     }
 
     private InternalAMQPBroadcaseReceiver amqpReceiver;
@@ -187,8 +196,8 @@ public class MapViewModel extends AndroidViewModel {
                 onError(msg);
             }
         }
+
         void onSuccess(SParkeeJSONObject jo) throws JSONException{
-            Log.d("SUCCESS", jo.toString());
             JSONArray data = jo.getData();
             switch (jo.getPath()) {
                 case Constants.URL_API_ZONES_INFO_ALL:
@@ -198,11 +207,15 @@ public class MapViewModel extends AndroidViewModel {
                     process_profile_credit(data);
                     break;
             }
+            httpConnectionEstablished.setValue(Boolean.TRUE);
         }
 
+        void onError(String msg) {
+//            Log.d("ERROR", msg);
+            httpConnectionEstablished.setValue(Boolean.FALSE);
+        }
 
         void process_profile_credit(JSONArray ja) throws  JSONException {
-            Log.d("CCC", "AAAAAAAAAAAAAAAAAAAAAAAAA");
             JSONObject jo = ja.getJSONObject(0);
             int credit_value = jo.getInt("credit_value");
             creditValue.setValue(credit_value);
@@ -218,7 +231,10 @@ public class MapViewModel extends AndroidViewModel {
                 tmp_parkingZone[i].setDescription(jo.getString("description"));
                 tmp_parkingZone[i].setCenter_latitude(jo.getString("center_longitude"));
                 tmp_parkingZone[i].setCenter_latitude(jo.getString("center_latitude"));
-                tmp_parkingZone[i].setAllowed_minimum_credit(jo.getInt("allowed_minimum_credit"));
+                tmp_parkingZone[i].setCredit_charge(jo.getInt("credit_charge"));
+                tmp_parkingZone[i].setTs_update(jo.getString("ts_update"));
+                tmp_parkingZone[i].setAuthorized(jo.getBoolean("authorized"));
+
                 JSONArray ja2 = jo.getJSONArray("geopoints");
                 List<GeoPoint> tmp_geopoints = new ArrayList<GeoPoint>();
                 for(int j=0; j < ja2.length(); j++) {
@@ -227,14 +243,12 @@ public class MapViewModel extends AndroidViewModel {
                     tmp_geopoints.add(tmp);
                 }
                 tmp_parkingZone[i].setGeoPoints(tmp_geopoints);
+//                Log.d("NAME", tmp_parkingZone[i].getName());
             }
             mParkingZones.setValue(tmp_parkingZone);
         }
 
 
-        void onError(String msg) {
-            Log.d("ERROR", msg);
-        }
     }
 
 
@@ -284,23 +298,23 @@ public class MapViewModel extends AndroidViewModel {
 
         void process_parking_slots(JSONArray ja) throws  JSONException{
 
-            ParkingSlot [] tmp_parkingSlots = new ParkingSlot[ja.length()];
+            ParkingSpot[] tmp_parkingSpots = new ParkingSpot[ja.length()];
             for(int i=0; i < ja.length() ; i++) {
                 JSONObject jo = ja.getJSONObject(i);
-                tmp_parkingSlots[i] = new ParkingSlot();
-                tmp_parkingSlots[i].setId(jo.getInt("id"));
+                tmp_parkingSpots[i] = new ParkingSpot();
+                tmp_parkingSpots[i].setId(jo.getInt("id"));
 
-                tmp_parkingSlots[i].setLongitude( Double.parseDouble(jo.getString("longitude")));
-                tmp_parkingSlots[i].setLatitude( Double.parseDouble(jo.getString("latitude")));
+                tmp_parkingSpots[i].setLongitude( Double.parseDouble(jo.getString("longitude")));
+                tmp_parkingSpots[i].setLatitude( Double.parseDouble(jo.getString("latitude")));
 
-                tmp_parkingSlots[i].setTs_register(jo.getString("ts_register"));
-                tmp_parkingSlots[i].setTs_update(jo.getString("ts_update"));
-                tmp_parkingSlots[i].setTotal_available(jo.getDouble("total_available"));
-                tmp_parkingSlots[i].setTotal_unavailable(jo.getDouble("total_unavailable"));
-                tmp_parkingSlots[i].setConfidence_level(jo.getDouble("confidence_level"));
-                tmp_parkingSlots[i].setParking_status(jo.getInt("status"));
-                tmp_parkingSlots[i].setZone_id(jo.getInt("zone_id"));
-                tmp_parkingSlots[i].setZone_name(jo.getString("zone_name"));
+                tmp_parkingSpots[i].setTs_register(jo.getString("ts_register"));
+                tmp_parkingSpots[i].setTs_update(jo.getString("ts_update"));
+                tmp_parkingSpots[i].setTotal_available(jo.getDouble("total_available"));
+                tmp_parkingSpots[i].setTotal_unavailable(jo.getDouble("total_unavailable"));
+                tmp_parkingSpots[i].setConfidence_level(jo.getDouble("confidence_level"));
+                tmp_parkingSpots[i].setParking_status(jo.getInt("status"));
+                tmp_parkingSpots[i].setZone_id(jo.getInt("zone_id"));
+                tmp_parkingSpots[i].setZone_name(jo.getString("zone_name"));
 
                 Pair <Integer, Integer> participation_data= getParticipationAndMarkerValue(
                         jo.getString("ts_update"),
@@ -311,10 +325,10 @@ public class MapViewModel extends AndroidViewModel {
                 int participation_value = participation_data.first.intValue();
                 int marker_value = participation_data.second.intValue();
 
-                tmp_parkingSlots[i].setParticipation_status(participation_value);
-                tmp_parkingSlots[i].setMarker_status(marker_value);
+                tmp_parkingSpots[i].setParticipation_status(participation_value);
+                tmp_parkingSpots[i].setMarker_status(marker_value);
             }
-            mParkingSlots.setValue(tmp_parkingSlots);
+            mParkingSlots.setValue(tmp_parkingSpots);
         }
 
         Pair <Integer, Integer> getParticipationAndMarkerValue(String last_parking_update_str, int parking_status, double latitude, double longitude) {

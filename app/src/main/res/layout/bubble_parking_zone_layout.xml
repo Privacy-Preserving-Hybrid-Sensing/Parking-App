@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bubble_parking_zone_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bonuspack_bubble"
+    android:padding="15px"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/bubble_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="          -            "
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/bubble_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="        -                   "
+        android:textSize="10sp" />
+
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/layout_table_information"
+        android:layout_weight="1">
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/txt_parking_spot_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="10px"
+                android:text="Total"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="40px"
+                android:text="-"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/txt_parking_spot_available"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="10px"
+                android:text="Available"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/bubble_parking_spot_available"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="40px"
+                android:text="-"
+                android:textSize="10sp" />
+
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/txt_parking_spot_unavailable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="10px"
+                android:text="Unavailable"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/bubble_parking_spot_unavailable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingRight="40px"
+                android:text="-"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/txt_parking_spot_undefined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="10px"
+                android:text="Undefined"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/bubble_parking_spot_undefined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingRight="40px"
+                android:text="-"
+                android:textSize="10sp" />
+
+        </TableRow>
+
+    </TableLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txt_last_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="10px"
+            android:text="Last Update"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/bubble_last_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="-"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/bubble_use_credit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Use Credit (10)"
+            android:theme="@style/AppTheme.GreenRipple" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text=""
+        android:textSize="18sp" />
+
+</LinearLayout>

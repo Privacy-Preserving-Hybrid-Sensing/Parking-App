@@ -1,5 +1,7 @@
 package au.edu.anu.cs.sparkee.model;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +52,7 @@ public class SParkeeJSONObject {
     }
 
     public static SParkeeJSONObject parse(String json) throws JSONException {
+        Log.d("JSON", json);
         JSONObject jo = new JSONObject(json);
         String status = jo.getString("status");
         String path = jo.getString("path");

@@ -3,7 +3,6 @@ package au.edu.anu.cs.sparkee.ui.map.marker;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
-import au.edu.anu.cs.sparkee.model.ParkingSlot;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 
 public class ParkingZoneMarker extends Marker {

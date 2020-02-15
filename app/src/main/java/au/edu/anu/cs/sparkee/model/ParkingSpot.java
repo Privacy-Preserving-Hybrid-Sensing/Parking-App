@@ -2,9 +2,10 @@ package au.edu.anu.cs.sparkee.model;
 
 import android.location.Location;
 
+import org.json.JSONArray;
 import org.threeten.bp.LocalDateTime;
 
-public class ParkingSlot extends Location {
+public class ParkingSpot extends Location {
     private int id;
     private LocalDateTime ts_register;
     private LocalDateTime ts_update;
@@ -17,7 +18,7 @@ public class ParkingSlot extends Location {
     private double confidence_level;
     private String zone_name;
 
-    public ParkingSlot() {
+    public ParkingSpot() {
         super("");
     }
 

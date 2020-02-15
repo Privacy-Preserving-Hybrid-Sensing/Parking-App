@@ -1,6 +1,5 @@
 package au.edu.anu.cs.sparkee.ui.map.infowindow;
 
-import android.location.Location;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,32 +14,29 @@ import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZoneId;
-import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.sql.Timestamp;
-import java.util.Date;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
-import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSlotMarker;
+import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSpotMarker;
 
-public class ParkingSlotInfoWindow extends InfoWindow {
+public class ParkingSpotInfoWindow extends InfoWindow {
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
     private  GeoPoint geoPoint;
     private String device_uuid;
     private String status;
     private LocalDateTime ts_update;
-    private ParkingSlotMarker marker;
+    private ParkingSpotMarker marker;
 
-    public ParkingSlotInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update, ParkingSlotMarker marker) {
+    public ParkingSpotInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update, ParkingSpotMarker marker) {
         super(layoutResId, mapView);
         this.geoPoint = geoPoint;
         this.device_uuid = device_uuid;
@@ -58,7 +54,7 @@ public class ParkingSlotInfoWindow extends InfoWindow {
             return;
 
         mIsVisible = true;
-        LinearLayout layout = (LinearLayout) mView.findViewById(R.id.bubble_layout);
+        LinearLayout layout = (LinearLayout) mView.findViewById(R.id.bubble_parking_spot_layout);
         Button btnAvailable = (Button) mView.findViewById(R.id.bubble_available);
         Button btnUnavailable = (Button) mView.findViewById(R.id.bubble_unavailable);
         TextView txtBubbleStatus = (TextView) mView.findViewById(R.id.bubble_status);

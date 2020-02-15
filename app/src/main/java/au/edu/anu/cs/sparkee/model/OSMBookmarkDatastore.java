@@ -14,8 +14,6 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
-import org.osmdroid.views.overlay.infowindow.InfoWindow;
-import org.threeten.bp.LocalDateTime;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,8 +21,6 @@ import java.util.List;
 import java.util.UUID;
 
 import au.edu.anu.cs.sparkee.Constants;
-import au.edu.anu.cs.sparkee.R;
-import au.edu.anu.cs.sparkee.model.ParkingSlot;
 
 /**
  * created on 2/11/2018.
@@ -110,7 +106,7 @@ public class OSMBookmarkDatastore {
 //                cnt++;
 //
 
-//                InfoWindow infoWindow = new ParkingSlotInfoWindow(R.layout.bubble_layout, view, geoPoint, this.device_uuid, tmp_status, LocalDateTime.now() );
+//                InfoWindow infoWindow = new ParkingSpotInfoWindow(R.layout.bubble_parking_spot_layout, view, geoPoint, this.device_uuid, tmp_status, LocalDateTime.now() );
 //                m.setInfoWindow(infoWindow);
 
 
