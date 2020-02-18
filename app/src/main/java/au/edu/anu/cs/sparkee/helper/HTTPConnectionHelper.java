@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import au.edu.anu.cs.sparkee.Constants;
 
@@ -45,6 +46,7 @@ public class HTTPConnectionHelper extends IntentService {
             intent.setAction(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
             intent.putExtra(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER, Constants.BROADCAST_HTTP_STATUS_OK);
             intent.putExtra(Constants.BROADCAST_HTTP_BODY_IDENTIFIER, msg);
+            Log.d("RESP", msg);
             context.sendBroadcast(intent);
         }
     };
@@ -62,6 +64,16 @@ public class HTTPConnectionHelper extends IntentService {
     };
 
 
+    public String sendPost(String url, String device_uuid) {
+        Map<String, String> arg = new HashMap<>();
+        arg.put("subscriber_uuid", device_uuid);
+        Random rand = new Random();
+        String trx_id = "" + rand.nextInt(10000);
+        arg.put("trx_id", trx_id);
+        sendPost(url, arg);
+        return trx_id;
+    }
+
     public boolean sendPost(String url, final Map<String, String> params) {
         RequestQueue queue = Volley.newRequestQueue(context);
 
@@ -75,7 +87,6 @@ public class HTTPConnectionHelper extends IntentService {
     }
 
     public boolean sendGet(String url) {
-        Log.d("PANGGIL", "URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
         Log.d("GET", url);
         RequestQueue queue = Volley.newRequestQueue(context);
         StringRequest request = new StringRequest(Request.Method.GET, url, okListener, errorListener);

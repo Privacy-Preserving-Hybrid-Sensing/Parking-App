@@ -31,19 +31,28 @@ android:orientation="vertical">
         android:text="TextView"
         android:textSize="10sp" />
 
-    <Button
-        android:id="@+id/bubble_available"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:theme="@style/AppTheme.GreenRipple"
-        android:text="Available" />
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/bubble_unavailable"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:theme="@style/AppTheme.YellowButton"
-        android:text="Unavailable" />
+        <Button
+            android:id="@+id/bubble_available"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Available"
+            android:theme="@style/AppTheme.BlueButton" />
+
+        <Button
+            android:id="@+id/bubble_unavailable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:theme="@style/AppTheme.BlackButton"
+            android:text="Unavailable" />
+    </LinearLayout>
+
+
 </LinearLayout>

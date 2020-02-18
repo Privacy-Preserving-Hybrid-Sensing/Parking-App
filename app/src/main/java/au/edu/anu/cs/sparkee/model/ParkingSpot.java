@@ -2,15 +2,14 @@ package au.edu.anu.cs.sparkee.model;
 
 import android.location.Location;
 
-import org.json.JSONArray;
 import org.threeten.bp.LocalDateTime;
 
 public class ParkingSpot extends Location {
     private int id;
     private LocalDateTime ts_register;
     private LocalDateTime ts_update;
-    private double total_available;
-    private double total_unavailable;
+    private double voting_available;
+    private double voting_unavailable;
     private int parking_status;
     private int participation_status;
     private int marker_status;
@@ -99,20 +98,20 @@ public class ParkingSpot extends Location {
         this.ts_update = LocalDateTime.parse(ts_update);
     }
 
-    public double getTotal_available() {
-        return total_available;
+    public double getVoting_available() {
+        return voting_available;
     }
 
-    public void setTotal_available(double total_available) {
-        this.total_available = total_available;
+    public void setVoting_available(double voting_available) {
+        this.voting_available = voting_available;
     }
 
-    public double getTotal_unavailable() {
-        return total_unavailable;
+    public double getVoting_unavailable() {
+        return voting_unavailable;
     }
 
-    public void setTotal_unavailable(double total_unavailable) {
-        this.total_unavailable = total_unavailable;
+    public void setVoting_unavailable(double voting_unavailable) {
+        this.voting_unavailable = voting_unavailable;
     }
 
 }

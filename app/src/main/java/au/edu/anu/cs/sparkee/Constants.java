@@ -3,18 +3,25 @@ package au.edu.anu.cs.sparkee;
 public class Constants {
 
 //    public static final String BASE_URL = "http://192.168.0.218:8000";
-    public static final String BASE_URL = "http://10.234.0.5:8000";
+//    public static final String BASE_URL = "http://10.234.0.5:8000";
+    public static final String BASE_URL = "http://ec2-3-133-91-181.us-east-2.compute.amazonaws.com:8000";
 
     public static final String URL_API_ZONES_INFO_ALL = "/api/zones/info/all";
     public static final String URL_API_ZONES_DETAIL = "/api/zones/detail";
     public static final String URL_API_ZONES_SUBSCRIBE = "/api/zones/subscribe";
     public static final String URL_API_PROFILE_CREDIT = "/api/profile/credit";
+    public static final String URL_API_PARTICIPATE= "/api/participate";
+
     public static final String RABBIT_HOST = "ec2-3-133-91-181.us-east-2.compute.amazonaws.com";
     public static final String RABBIT_USER = "mobile";
     public static final String RABBIT_PASS = "ieGh4thi";
     public static final String RABBIT_EXCHANGE_OUTGOING_NAME = "amq.topic";
     public static final String RABBIT_EXCHANGE_INCOMING_NAME = "amq.topic";
     public static final String RABBIT_EXCHANGE_PARKING_SLOTS_TOPIC = "parking_slot.zone.*";
+
+
+    public static final int MAP_LAYER_ID_PARKING_ZONE = 1000;
+    public static final int MAP_LAYER_ID_PARKING_SPOT = 1001;
 
     public static final String DEFAULT_PARTICIPANT_TO_SERVER_ROUTING_KEY = "PARTICIPANT_TO_SERVER";
     public static final String BROADCAST_AMQP_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.AMQP";

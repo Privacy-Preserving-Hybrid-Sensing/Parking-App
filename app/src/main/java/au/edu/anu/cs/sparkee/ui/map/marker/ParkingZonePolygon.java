@@ -2,11 +2,12 @@ package au.edu.anu.cs.sparkee.ui.map.marker;
 
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polygon;
 
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 
-public class ParkingZoneMarker extends Marker {
-    public ParkingZone getParkingSlot() {
+public class ParkingZonePolygon extends Polygon {
+    public ParkingZone getParkingZone() {
         return parkingZone;
     }
 
@@ -15,7 +16,7 @@ public class ParkingZoneMarker extends Marker {
     }
 
     ParkingZone parkingZone;
-    public ParkingZoneMarker(MapView mapView, ParkingZone parkingZone) {
+    public ParkingZonePolygon(MapView mapView, ParkingZone parkingZone) {
         super(mapView);
         this.parkingZone = parkingZone;
     }

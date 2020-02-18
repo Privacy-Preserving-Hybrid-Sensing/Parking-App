@@ -1,6 +1,8 @@
 package au.edu.anu.cs.sparkee.model;
 
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.Polygon;
 import org.threeten.bp.LocalDateTime;
 
 import java.util.List;
@@ -16,6 +18,16 @@ public class ParkingZone {
     private boolean authorized;
     private List<GeoPoint> geoPoints;
     private LocalDateTime ts_update;
+
+    private ParkingSpot[] parking_spots;
+
+    public ParkingSpot[] getParking_spots() {
+        return parking_spots;
+    }
+
+    public void setParking_spots(ParkingSpot[] parking_spots) {
+        this.parking_spots = parking_spots;
+    }
 
     public boolean isAuthorized() {
         return authorized;
@@ -62,6 +74,10 @@ public class ParkingZone {
         return center_latitude;
     }
 
+    public GeoPoint getCenterGeopoint() {
+        return new GeoPoint( Double.parseDouble( getCenter_latitude() ), Double.parseDouble(getCenter_longitude()));
+    }
+
     public void setCenter_latitude(String center_latitude) {
         this.center_latitude = center_latitude;
     }
@@ -88,6 +104,10 @@ public class ParkingZone {
 
     public void setTs_update(String ts_update) {
         this.ts_update = LocalDateTime.parse(ts_update);
+    }
+
+    public void setTs_update(LocalDateTime ts_update) {
+        this.ts_update = ts_update;
     }
 
 }

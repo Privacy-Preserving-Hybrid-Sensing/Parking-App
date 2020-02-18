@@ -38,6 +38,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.FolderOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.OverlayManager;
 import org.osmdroid.views.overlay.Polygon;
@@ -51,6 +52,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -64,6 +66,7 @@ import au.edu.anu.cs.sparkee.model.ParkingZone;
 import au.edu.anu.cs.sparkee.ui.map.infowindow.ParkingSpotInfoWindow;
 import au.edu.anu.cs.sparkee.ui.map.infowindow.ParkingZoneInfoWindow;
 import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSpotMarker;
+import au.edu.anu.cs.sparkee.ui.map.marker.ParkingZonePolygon;
 //import au.edu.anu.cs.sparkee.amqpReceiver.AMQPBroadcaseReceiver;
 
 public class MapFragment extends Fragment {
@@ -79,7 +82,7 @@ public class MapFragment extends Fragment {
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private MyLocationNewOverlay mLocationOverlay;
 
-    protected static final int DEFAULT_INACTIVITY_DELAY_IN_MILLISECS = 1000;
+    protected static final int DEFAULT_INACTIVITY_DELAY_IN_MILLISECS = 200;
     protected static final double MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE = 19;
 
     private Context context;
@@ -90,10 +93,12 @@ public class MapFragment extends Fragment {
     private String device_uuid;
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
 
-    private FolderOverlay overlayParkingMarkers;
+    private FolderOverlay folderOverlayParkingSpot;
+    private FolderOverlay folderOverlayParkingZone;
     public MapView getmMapView() {
         return mMapView;
     }
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -120,7 +125,8 @@ public class MapFragment extends Fragment {
 
         double map_lon =  Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_LON, DEFAULT_LON));
         double map_lat = Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_LAT, DEFAULT_LAT));
-        double map_zoom = Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_ZOOM, DEFAULT_ZOOM));
+//        double map_zoom = Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_ZOOM, DEFAULT_ZOOM));
+        double map_zoom = Double.parseDouble(DEFAULT_ZOOM);
 
         IGeoPoint geoPoint =new GeoPoint(map_lat, map_lon);
         mMapView.getController().animateTo(geoPoint);
@@ -130,13 +136,17 @@ public class MapFragment extends Fragment {
 
         mLocationOverlay = new MyLocationNewOverlay(mMapView);
 
-
+        folderOverlayParkingZone = new FolderOverlay();
+        folderOverlayParkingSpot = new FolderOverlay();
 
         mapViewModel.getHttpConnectionEstablished().observe( getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean stat) {
                 initHTTP = stat;
-                evaluateInitView();
+//                evaluateInitView();
+
+                if(stat == Boolean.FALSE)
+                    Toast.makeText(context, "Connecting to server (retrying)...", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -154,7 +164,7 @@ public class MapFragment extends Fragment {
                     mMapView.getOverlays().add(mLocationOverlay);
                 }
                 initGPS = true;
-                evaluateInitView();
+//                evaluateInitView();
             }
             }
         });
@@ -177,9 +187,15 @@ public class MapFragment extends Fragment {
 
             @Override
             public void onChanged(@Nullable ParkingZone[] parkingZones) {
-                if(parkingZones!= null && polygons.size() == 0) {
-                    Log.d("BANYAK PARKING ZONES", "" + parkingZones.length);
-                    modifyParkingZones(parkingZones);
+                if(parkingZones!= null ) {
+                    if( folderOverlayParkingZone.getItems().size() == 0) {
+                        Log.d("BANYAK PARKING ZONES", "" + parkingZones.length);
+                        addParkingZones(parkingZones);
+                    }
+                    else {
+                        Log.d("UPDATE PARKING ZONES", "" + parkingZones.length);
+                        modifyParkingZones(parkingZones);
+                    }
                 }
             }
         });
@@ -188,9 +204,11 @@ public class MapFragment extends Fragment {
 
             @Override
             public void onChanged(@Nullable Integer val) {
-                evaluateInitView();
-                if(isInitView)
-                    Toast.makeText(context, "Current Credit: " + val.toString(), Toast.LENGTH_LONG).show();
+                TextView ic_credit = (TextView) getView().findViewById(R.id.ic_credit);
+                if(initHTTP)
+                    ic_credit.setText(val.toString());
+                else
+                    ic_credit.setText("-");
                 creditValue = val;
             }
         });
@@ -224,12 +242,12 @@ public class MapFragment extends Fragment {
 //    private boolean initAMQP;
     private boolean initHTTP;
 
-    private void evaluateInitView() {
-        if(! ( initGPS || initHTTP)) { // && initAMQP
-            isInitView = false;
-            Toast.makeText(context, "Initalizing ...", Toast.LENGTH_LONG).show();
-        }
-    }
+//    private void evaluateInitView() {
+//        if(! ( initGPS || initHTTP)) { // && initAMQP
+//            isInitView = false;
+//            Toast.makeText(context, "Initializing ...", Toast.LENGTH_LONG).show();
+//        }
+//    }
 
     private int creditValue;
 //    public void getParkingZones() {
@@ -325,7 +343,7 @@ public class MapFragment extends Fragment {
     private HashMap<Integer, ParkingSpotMarker> markers;
     private HashMap<Integer, Polygon> polygons;
 
-    public ParkingSpotMarker setParkingSlotAsMarker(MapView view, ParkingSpot parkingSpot) {
+    public ParkingSpotMarker setParkingSpotAsMarker(MapView view, ParkingSpot parkingSpot) {
         ParkingSpotMarker m = new ParkingSpotMarker(view, parkingSpot);
         try {
             m.setId("" + parkingSpot.getId() );
@@ -394,6 +412,7 @@ public class MapFragment extends Fragment {
         catch (final Exception e) {
             Log.w(IMapView.LOGTAG,"Error getting tile sources: ", e);
         }
+//        Log.d("SET PARKING SPOT", "" + parkingSpot.getId() + " " + parkingSpot.getLatitude()+ " ---- " + parkingSpot.getLongitude());
         return m;
     }
 
@@ -440,25 +459,16 @@ public class MapFragment extends Fragment {
         MapEventsOverlay events = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-
-                Set set = markers.entrySet();
-                Iterator iterator = set.iterator();
-
-                // Hide All Marker ParkingSpotInfoWindow
-                while(iterator.hasNext()) {
-                    Map.Entry mentry = (Map.Entry)iterator.next();
-                    ParkingSpotMarker m = (ParkingSpotMarker) mentry.getValue();
-                    ((ParkingSpotInfoWindow) m.getInfoWindow()).close();
+                for (Overlay item :folderOverlayParkingZone.getItems()) {
+                    ParkingZonePolygon tmp_polygon = (ParkingZonePolygon) item;
+                    tmp_polygon.getInfoWindow().close();
                 }
 
-                // Hide All Polygon ParkingZoneInfoWindow
-                set = polygons.entrySet();
-                iterator = set.iterator();
-                while(iterator.hasNext()) {
-                    Map.Entry mentry = (Map.Entry)iterator.next();
-                    Polygon m = (Polygon) mentry.getValue();
-                    ((ParkingZoneInfoWindow) m.getInfoWindow()).close();
+                for (Overlay item :folderOverlayParkingSpot.getItems()) {
+                    ParkingSpotMarker tmp_parking_spot = (ParkingSpotMarker) item;
+                    tmp_parking_spot.getInfoWindow().close();
                 }
+
                 return false;
             }
 
@@ -467,13 +477,14 @@ public class MapFragment extends Fragment {
                 // TODO: Only for admin to add new ParkingSpot
 
                 Log.d("ACTION", "LONG PRESS");
-                showDialog(p);
+//                showDialog(p);
                 return true;
             }
         });
         mMapView.getOverlayManager().add(events);
 
         mMapView.addMapListener(new DelayedMapListener(new MapListener() {
+
             @Override
             public boolean onScroll(ScrollEvent event) {
                 IGeoPoint map_center = event.getSource().getMapCenter();
@@ -481,35 +492,69 @@ public class MapFragment extends Fragment {
                 SharedPreferences.Editor editor = sharedPref.edit();
                 double lon = map_center.getLongitude();
                 double lat = map_center.getLatitude();
-                Log.d("CENTER LON", "" + lon);
-                Log.d("CENTER LAT", "" + lat);
+//                Log.d("CENTER LON", "" + lon);
+//                Log.d("CENTER LAT", "" + lat);
                 editor.putString(Constants.CURRENT_LOCATION_LON, "" + lon);
                 editor.putString(Constants.CURRENT_LOCATION_LAT, "" + lat);
                 editor.commit();
-                return false;
+                return true;
             }
+
 
 
             @Override
             public boolean onZoom(ZoomEvent event) {
-                Log.d("ZOOM TO", "" + event.getZoomLevel());
-                double zoom_level = event.getZoomLevel();
-                SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString(Constants.CURRENT_LOCATION_ZOOM, "" + zoom_level);
-                editor.commit();
-
-                if(zoom_level > MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE) {
-                    setParkingSlotsVisibile(true);
-                    setParkingZonesVisibile(false);
-                }
-                else {
-                    setParkingSlotsVisibile(false);
-                    setParkingZonesVisibile(true);
-                }
+//                double zoom_level = event.getZoomLevel();
+//                SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+//                SharedPreferences.Editor editor = sharedPref.edit();
+//                editor.putString(Constants.CURRENT_LOCATION_ZOOM, "" + zoom_level);
+//                editor.commit();
                 return true;
             }
         }, DEFAULT_INACTIVITY_DELAY_IN_MILLISECS));
+
+        mMapView.addMapListener(new MapListener() {
+
+            @Override
+            public boolean onScroll(ScrollEvent event) {
+                return true;
+            }
+
+
+
+            @Override
+            public boolean onZoom(ZoomEvent event) {
+//                Log.d("ZOOM TO", "" + event.getZoomLevel());
+                double zoom_level = event.getZoomLevel();
+
+                if(zoom_level > MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE) {
+                    if(! mMapView.getOverlays().contains(folderOverlayParkingSpot)) {
+                        mMapView.getOverlays().add(folderOverlayParkingSpot);
+                        mMapView.invalidate();
+                    }
+                }
+                else {
+                    if(mMapView.getOverlays().contains(folderOverlayParkingSpot)) {
+                        mMapView.getOverlays().remove(folderOverlayParkingSpot);
+
+                        Log.d("DIPANGGIL", "INII");
+                        for (Overlay item:folderOverlayParkingZone.getItems()) {
+                            ParkingZonePolygon polygon = (ParkingZonePolygon) item;
+                            ParkingZone p = polygon.getParkingZone();
+
+                            if(!polygon.getInfoWindow().isOpen()) {
+                                polygon.getInfoWindow().open(polygon, p.getCenterGeopoint(), 0, 0);
+                                Log.d("TAMPILKAN", p.getCenter_latitude() + " " + p.getCenter_longitude());
+                            }
+                        }
+                        mMapView.invalidate();
+                    }
+                }
+
+                return true;
+            }
+        });
+
     }
 
     private void showParkingSlots() {
@@ -529,51 +574,51 @@ public class MapFragment extends Fragment {
 //                if(existing_marker.getParkingSpot().getMarker_status() != parkingSlots[i].getMarker_status()) {
 //                    om.remove(existing_marker);
 //                    markers.remove(new_id);
-//                    ParkingSpotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
+//                    ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parkingSlots[i]);
 //                    om.add(new_marker);
 //                    markers.put(new_id, new_marker);
 //                }
 //            }
 //            else {
-//                ParkingSpotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSlots[i]);
+//                ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parkingSlots[i]);
 //                om.add(new_marker);
 //                markers.put(new_id, new_marker);
 //            }
 //        }
 
     }
-    public boolean isParkingSlotsVisibile() {
-        return parkingSlotsVisibile;
-    }
+//    public boolean isParkingSlotsVisibile() {
+//        return parkingSlotsVisibile;
+//    }
+//
+//    public void setParkingSlotsVisibile(boolean parkingSlotsVisibile) {
+//        this.parkingSlotsVisibile = parkingSlotsVisibile;
+//    }
+//
+//    public boolean isParkingZonesVisibile() {
+//        return parkingZonesVisibile;
+//    }
+//
+//    public void setParkingZonesVisibile(boolean parkingZonesVisibile) {
+//        this.parkingZonesVisibile = parkingZonesVisibile;
+//    }
 
-    public void setParkingSlotsVisibile(boolean parkingSlotsVisibile) {
-        this.parkingSlotsVisibile = parkingSlotsVisibile;
-    }
-
-    public boolean isParkingZonesVisibile() {
-        return parkingZonesVisibile;
-    }
-
-    public void setParkingZonesVisibile(boolean parkingZonesVisibile) {
-        this.parkingZonesVisibile = parkingZonesVisibile;
-    }
-
-    boolean parkingSlotsVisibile;
-    boolean parkingZonesVisibile;
+//    boolean parkingSlotsVisibile;
+//    boolean parkingZonesVisibile;
 
     public void modifyParkingSlots(ParkingSpot[] parkingSpots) {
 //        overlayParkingMarkers.
 //        overlayParkingMarkers.getItems()
         for( ParkingSpot parkingSpot : parkingSpots) {
             int new_id = parkingSpot.getId();
-            ParkingSpotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSpot);
+            ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parkingSpot);
             ParkingSpotMarker existing_marker = markers.get(new_id);
             if(existing_marker != null) {
                 // check is current & previous data has changed?
                 if(existing_marker.getParkingSpot().getMarker_status() != parkingSpot.getMarker_status()) {
                     markers.remove(new_id);
                     markers.put(new_id, new_marker);
-                    overlayParkingMarkers.add(new_marker);
+//                    overlayParkingMarkers.add(new_marker);
 //                    overlayParkingMarkers.
                 }
             }
@@ -591,13 +636,13 @@ public class MapFragment extends Fragment {
 //                if(existing_marker.getParkingSpot().getMarker_status() != parkingSpots[i].getMarker_status()) {
 //                    om.remove(existing_marker);
 //                    markers.remove(new_id);
-//                    ParkingSpotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSpots[i]);
+//                    ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parkingSpots[i]);
 //                    om.add(new_marker);
 //                    markers.put(new_id, new_marker);
 //                }
 //            }
 //            else {
-//                ParkingSpotMarker new_marker = setParkingSlotAsMarker(mMapView, parkingSpots[i]);
+//                ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parkingSpots[i]);
 //                om.add(new_marker);
 //                markers.put(new_id, new_marker);
 //            }
@@ -605,10 +650,68 @@ public class MapFragment extends Fragment {
         mMapView.invalidate();
     }
 
+    public ParkingZonePolygon findParkingZoneByID(int id) {
+        ParkingZonePolygon ret = null;
+        Log.d("FIND", ""+ id);
+
+        for (Overlay item: folderOverlayParkingZone.getItems()) {
+            ParkingZonePolygon tmp = (ParkingZonePolygon) item;
+            Log.d("TES", "" + tmp.getParkingZone().getId());
+            if(tmp.getParkingZone().getId() == id) {
+                ret = tmp;
+                break;
+            }
+        };
+        Log.d("KETEMU FIND", ""+ id);
+        return ret;
+    }
+
     public void modifyParkingZones(ParkingZone[] parkingZones) {
-        OverlayManager om = mMapView.getOverlayManager();
+
+        for(int k=0; k < parkingZones.length; k++) {
+
+            if(parkingZones[k] != null) {
+                int id = parkingZones[k].getId();
+                ParkingZonePolygon polygon = findParkingZoneByID(id);
+                ParkingZone existing_pz = polygon.getParkingZone();
+
+                boolean authorized = parkingZones[k].isAuthorized();
+                LocalDateTime new_ts_update = parkingZones[k].getTs_update();
+                ParkingSpot [] parking_spots = parkingZones[k].getParking_spots();
+
+                if(existing_pz != null) {
+                    existing_pz = parkingZones[k];
+                    polygon.setParkingZone(existing_pz);
+
+
+                    if(parking_spots != null) {
+                        for(int i=0; i < parking_spots.length; i++) {
+                            int new_id = parking_spots[i].getId();
+                            int new_parking_status = parking_spots[i].getParking_status();
+                            ParkingSpotMarker existing_marker = markers.get(new_id);
+
+                            ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parking_spots[i]);
+                            folderOverlayParkingSpot.add(new_marker);
+                        }
+
+
+
+                    }
+                    Log.d("PS IS NULL", "" + (parking_spots == null) );
+
+
+                }
+            }
+        }
+        mMapView.getOverlays().add(folderOverlayParkingSpot);
+        mMapView.invalidate();
+    }
+
+    public void addParkingZones(ParkingZone[] parkingZones) {
+
         if(parkingZones == null)
             return;
+
 
         for(int i=0; i < parkingZones.length; i++) {
             int geopoint_cnt = parkingZones[i].getGeoPoints().size();
@@ -616,7 +719,7 @@ public class MapFragment extends Fragment {
             if(geopoint_cnt > 0) {
                 // check is current & previous data has changed?
                 // Polygon
-                Polygon tmp_polygon = new Polygon(mMapView);
+                ParkingZonePolygon tmp_polygon = new ParkingZonePolygon(mMapView, parkingZones[i]);
                 tmp_polygon.setPoints(parkingZones[i].getGeoPoints());
                 tmp_polygon.setTitle(parkingZones[i].getName());
                 tmp_polygon.getOutlinePaint().setColor(Color.parseColor("#990000FF"));
@@ -629,29 +732,44 @@ public class MapFragment extends Fragment {
                         this.device_uuid,
                         parkingZones[i]
                 );
-
+//                Log.d("PZ", "PARKING ZONE ADDED");
 //                tmp_polygon.setInfoWindow(new ParkingZoneInfoWindow(R.layout.bubble_parking_zone_layout, mMapView));
                 tmp_polygon.setInfoWindow(infoWindow);
                 tmp_polygon.setOnClickListener(new Polygon.OnClickListener() {
                     @Override
                     public boolean onClick(Polygon polygon, MapView mapView, GeoPoint eventPos) {
                         // Hide All Polygon ParkingZoneInfoWindow
-                        Set set = polygons.entrySet();
-                        Iterator iterator = set.iterator();
-                        while(iterator.hasNext()) {
-                            Map.Entry mentry = (Map.Entry)iterator.next();
-                            Polygon m = (Polygon) mentry.getValue();
-                            ((ParkingZoneInfoWindow) m.getInfoWindow()).close();
+                        for (Overlay item:folderOverlayParkingZone.getItems()) {
+                            ParkingZonePolygon p = (ParkingZonePolygon) item;
+                            p.closeInfoWindow();
                         }
+
                         polygon.getInfoWindow().open(polygon, eventPos,0, 0);
                         return true;
                     }
                 });
 
-                mMapView.getOverlays().add(tmp_polygon);
-                polygons.put(parkingZones[i].getId(), tmp_polygon);
+
+                tmp_polygon.getInfoWindow().open(tmp_polygon, tmp_polygon.getParkingZone().getCenterGeopoint(),0, 0);
+
+                folderOverlayParkingZone.add(tmp_polygon);
+//                polygons.put(parkingZones[i].getId(), tmp_polygon);
+
+                if(parkingZones[i].getParking_spots() == null)
+                    Log.d("BANYAK SPOT", "0");
+                else
+                    Log.d("BANYAK SPOT", "" + parkingZones[i].getParking_spots().length);
+
+
+//                for(int j=0; j< parkingZones[i])
             }
+//            om.add(folderOverlayParkingZone);
+            Log.d("MASUK", "FOLDER BRO");
+            Log.d("BANYAK OVERLAY", "" + folderOverlayParkingZone.getItems().size());
         }
+
+        if(!mMapView.getOverlays().contains(folderOverlayParkingZone))
+            mMapView.getOverlays().add(folderOverlayParkingZone);
         mMapView.invalidate();
     }
 

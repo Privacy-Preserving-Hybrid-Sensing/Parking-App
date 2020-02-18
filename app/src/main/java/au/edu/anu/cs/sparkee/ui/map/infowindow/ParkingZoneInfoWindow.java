@@ -11,11 +11,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
+import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
@@ -23,14 +25,11 @@ import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZoneId;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
-import au.edu.anu.cs.sparkee.model.ParkingZoneDetail;
 import au.edu.anu.cs.sparkee.model.SParkeeJSONObject;
 
 
@@ -53,8 +52,12 @@ public class ParkingZoneInfoWindow extends InfoWindow {
         super.close();
     }
 
-    private String url_identifier;
+    private String url_identifier_detail;
+    private String url_identifier_credit;
 
+    String trx_id_subscribe = "";
+    String trx_id_detail = "";
+    String trx_id_credit = "";
 
     public class InternalHTTPBroadcaseReceiver extends BroadcastReceiver {
         @Override
@@ -74,20 +77,43 @@ public class ParkingZoneInfoWindow extends InfoWindow {
         }
 
         void onSuccess(SParkeeJSONObject jo) throws JSONException {
-            if(jo.getPath().startsWith(Constants.URL_API_ZONES_DETAIL)) {
+            Log.d("PATH", jo.getPath() + " vs " + url_identifier_detail);
+            Log.d("TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
+            if(jo.getPath().startsWith(Constants.URL_API_ZONES_DETAIL) && jo.getTrx_id().equalsIgnoreCase(trx_id_detail)) {
                 processZoneDetail(jo);
             }
-            else if(jo.getPath().startsWith(Constants.URL_API_ZONES_SUBSCRIBE)) {
+            else if(jo.getPath().startsWith(Constants.URL_API_ZONES_SUBSCRIBE) && jo.getTrx_id().equalsIgnoreCase(trx_id_subscribe)) {
                 processZoneSubscribe(jo);
             }
 
         }
 
         void processZoneSubscribe(SParkeeJSONObject jo) throws  JSONException {
+            Log.d("JSON SUBSCRIBE", jo.getStatus() );
+            if(jo.getStatus().equalsIgnoreCase("OK")) {
+                JSONArray ja = jo.getData();
+                JSONObject obj_zone = ja.getJSONObject(0);
+                Log.d("OBJ ZONE", obj_zone.toString());
+                parkingZone.setAuthorized(true);
 
+                url_identifier_detail = Constants.BASE_URL + Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
+                trx_id_detail  = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(url_identifier_detail, device_uuid);
+                Log.d("trx_id_detail", trx_id_detail);
+
+
+                url_identifier_credit = Constants.BASE_URL + Constants.URL_API_PROFILE_CREDIT;
+                trx_id_credit = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(url_identifier_credit , device_uuid);
+
+
+            }
+            else {
+                Toast.makeText(getMapView().getContext(), jo.getMsg(), Toast.LENGTH_LONG).show();
+            }
         }
+
         void processZoneDetail(SParkeeJSONObject jo) throws  JSONException{
 
+            Log.d("DEB", "PPPPPPPPPPPPPPPPPPPP");
             if (mView==null) {
                 Log.d("ERR", "Error trapped, BasicInfoWindow.open, mView is null!");
                 return;
@@ -97,7 +123,6 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             JSONArray data = jo.getData();
             JSONObject obj = data.getJSONObject(0);
 
-            ParkingZoneDetail pzd = new ParkingZoneDetail();
             JSONArray parkingSpots = obj.getJSONArray("parking_spots");
             LocalDateTime ts_update = LocalDateTime.parse(obj.getString("ts_update"));
 
@@ -190,10 +215,8 @@ public class ParkingZoneInfoWindow extends InfoWindow {
                 public void onClick(View view) {
                     Log.d("Btn", "Use Credit");
 
-                    Map<String, String> arg = new HashMap<>();
-                    arg.put("subscriber_uuid", device_uuid);
-                    url_identifier = Constants.URL_API_ZONES_SUBSCRIBE+ "/" + parkingZone.getId();
-                    HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier, arg);
+                    url_identifier_detail = Constants.URL_API_ZONES_SUBSCRIBE+ "/" + parkingZone.getId();
+                    trx_id_subscribe = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier_detail, device_uuid);
 
                     onClose();
                 }
@@ -202,13 +225,25 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             layout_btn.setVisibility(View.VISIBLE);
         }
 
+        bubble_parking_zone_layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(parkingZone != null) {
+                    GeoPoint tmp_geopoint = new GeoPoint(Double.parseDouble(parkingZone.getCenter_latitude()), Double.parseDouble(parkingZone.getCenter_longitude()));
+                    long speed = 1000;
+                    double zoom = 20.0;
+                    mMapView.getController().animateTo(tmp_geopoint, zoom, speed);
+                    onClose();
+                }
+
+            }
+        });
+
         mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
 
 
-        Map<String, String> arg = new HashMap<>();
-        arg.put("subscriber_uuid", device_uuid);
-        url_identifier = Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
-        HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier, arg);
+        url_identifier_detail = Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
+        trx_id_detail =  HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier_detail, device_uuid);
 
     }
 

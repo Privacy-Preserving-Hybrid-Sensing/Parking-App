@@ -42,22 +42,33 @@ public class SParkeeJSONObject {
     String status;
     String msg;
     String path;
+
+    public String getTrx_id() {
+        return trx_id;
+    }
+
+    public void setTrx_id(String trx_id) {
+        this.trx_id = trx_id;
+    }
+
+    String trx_id;
     JSONArray data;
 
-    public SParkeeJSONObject(String status, String path, String msg, JSONArray ja) {
+    public SParkeeJSONObject(String status, String path, String msg, JSONArray ja, String trx_id) {
         this.status = status;
         this.msg = msg;
         this.path = path;
         this.data = ja;
+        this.trx_id =trx_id;
     }
 
     public static SParkeeJSONObject parse(String json) throws JSONException {
-        Log.d("JSON", json);
         JSONObject jo = new JSONObject(json);
         String status = jo.getString("status");
         String path = jo.getString("path");
         String msg = jo.getString("msg");
+        String trx_id= jo.getString("trx_id");
         JSONArray ja = jo.getJSONArray("data");
-        return  new SParkeeJSONObject(status, path, msg, ja);
+        return  new SParkeeJSONObject(status, path, msg, ja, trx_id);
     }
 }
