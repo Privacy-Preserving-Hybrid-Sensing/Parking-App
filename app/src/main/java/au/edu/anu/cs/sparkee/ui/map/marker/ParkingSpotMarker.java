@@ -26,31 +26,31 @@ public class ParkingSpotMarker extends Marker {
         int marker = R.drawable.unconfirmed_0;
         switch (marker_status) {
             case Constants.MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED:
-                marker = R.drawable.participate_minus_1_confirmed;
+                marker = R.drawable.participate_unavailable_1;
                 break;
             case Constants.MARKER_PARTICIPATION_AVAILABLE_RECEIVED:
-                marker = R.drawable.participate_plus_1_confirmed;
+                marker = R.drawable.participate_available_1;
                 break;
             case Constants.MARKER_PARKING_UNAVAILABLE_CONFIRMED:
-                marker = R.drawable.confirmed_unavailable;
+                marker = R.drawable.default_unavailable_3;
                 break;
             case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2:
-                marker = R.drawable.unconfirmed_minus_2;
+                marker = R.drawable.default_unavailable_2;
                 break;
             case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1:
-                marker = R.drawable.unconfirmed_minus_1;
+                marker = R.drawable.default_unavailable_1;
                 break;
             case Constants.MARKER_PARKING_UNCONFIRMED:
-                marker = R.drawable.unconfirmed_0;
+                marker = R.drawable.default_unconfirmed_0;
                 break;
             case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1:
-                marker = R.drawable.unconfirmed_plus_1;
+                marker = R.drawable.default_available_1;
                 break;
             case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2:
-                marker = R.drawable.unconfirmed_plus_2;
+                marker = R.drawable.default_available_2;
                 break;
             case Constants.MARKER_PARKING_AVAILABLE_CONFIRMED:
-                marker = R.drawable.confirmed_available;
+                marker = R.drawable.default_available_3;
                 break;
         }
         return marker;

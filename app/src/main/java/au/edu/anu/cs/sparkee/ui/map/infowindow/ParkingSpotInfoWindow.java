@@ -105,7 +105,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
                 Log.d("Btn", "Available");
                 close();
                 send("available");
-                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_plus_1));
+                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_available_1));
                 mMapView.invalidate();
             }
         });
@@ -117,7 +117,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
                 Log.d("Btn", "Unavailable");
                 close();
                 send("unavailable");
-                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_minus_1));
+                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_unavailable_1));
                 mMapView.invalidate();
 
             }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -360,7 +361,10 @@ public class MapFragment extends Fragment {
             int tmp_confidence = (int) Math.round(confidence_level * 100);
             int marker_status = parkingSpot.getMarker_status();
 
-            m.setIcon( getResources().getDrawable(ParkingSpotMarker.getMarkerIcon(marker_status)) );
+            Drawable d = getResources().getDrawable(ParkingSpotMarker.getMarkerIcon(marker_status));
+
+            m.setIcon( d );
+
             tmp_status = ParkingSpotMarker.getMarkerStatusTxt(marker_status, tmp_confidence);
 
             ParkingSpotInfoWindow infoWindow = new ParkingSpotInfoWindow(
