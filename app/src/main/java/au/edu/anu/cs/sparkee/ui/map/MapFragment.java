@@ -159,7 +159,7 @@ public class MapFragment extends Fragment {
                 currentLocation = loc;
 
                 if(isInitView) {
-                    mLocationOverlay.enableMyLocation();
+//                    mLocationOverlay.enableMyLocation();
 //                  mLocationOverlay.enableFollowLocation();
                     mLocationOverlay.setOptionsMenuEnabled(true);
                     mMapView.getOverlays().add(mLocationOverlay);

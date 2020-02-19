@@ -2,13 +2,17 @@ package au.edu.anu.cs.sparkee;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,13 +43,15 @@ import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQUEST = 112;
+    private static final int REQUEST = 1240;
     private Context mContext = MainActivity.this;
     private GpsMyLocationProvider mGpsMyLocationProvider;
     private NavController navController;
     private static boolean hasPermissions(Context context, String... permissions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            int i=1;
             for (String permission : permissions) {
+                Log.d("PERM " + i, permission);
                 if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
                     return false;
                 }
@@ -105,8 +111,14 @@ public class MainActivity extends AppCompatActivity {
             editor.commit();
         }
 
-        if (Build.VERSION.SDK_INT >= 23) {
-            String[] PERMISSIONS = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET, android.Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE};
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String[] PERMISSIONS = {
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.INTERNET,
+            };
+
             if (!hasPermissions(mContext, PERMISSIONS)) {
                 ActivityCompat.requestPermissions((Activity) mContext, PERMISSIONS, REQUEST);
 
@@ -119,7 +131,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("File DB", "BELUM ADA");
                 }
 
-                setContentView(R.layout.activity_acknowledge);
+//                setContentView(R.layout.activity_acknowledge);
+                showSettingsDialog();
 
             } else {
                 setContentView(R.layout.activity_main);
@@ -160,6 +173,34 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void showSettingsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Need Permissions");
+        builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
+        builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                openSettings();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                finish();
+            }
+        });
+        builder.show();
+
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, 101);
+    }
     @Override
     protected void onResume() {
         super.onResume();

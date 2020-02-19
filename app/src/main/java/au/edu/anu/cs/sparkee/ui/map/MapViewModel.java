@@ -110,11 +110,11 @@ public class MapViewModel extends AndroidViewModel {
                 Date date = new Date();
                 String date_time = formatter.format(date);
                 if(location != null) {
-                    Log.d("Long", "" + location.getLongitude());
-                    Log.d("Lat", "" + location.getLatitude());
+//                    Log.d("Long", "" + location.getLongitude());
+//                    Log.d("Lat", "" + location.getLatitude());
                     mLocation.setValue(location);
                 }
-                Log.d("Wkt", date_time);
+//                Log.d("Wkt", date_time);
             }
         });
 
