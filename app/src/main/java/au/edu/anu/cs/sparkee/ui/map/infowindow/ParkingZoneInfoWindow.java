@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -25,12 +27,17 @@ import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZoneId;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 import au.edu.anu.cs.sparkee.model.SParkeeJSONObject;
+
+import static android.text.InputType.TYPE_NULL;
 
 
 public class ParkingZoneInfoWindow extends InfoWindow {
@@ -200,9 +207,19 @@ public class ParkingZoneInfoWindow extends InfoWindow {
         String time_pretty = p.format(Timestamp.valueOf( date_str + " " + time_str ));
 
         txtLastUpdate.setText(time_pretty);
+        txtName.setText(textNewlinePrettyFormatting(parkingZone.getName(), 15));
+        txtName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(parkingZone != null) {
+                    long speed = 1000;
+                    mMapView.getController().animateTo(parkingZone.getCenterGeopoint(), Constants.DEFAULT_ZOOM_PARKING_ZONE_MED, speed);
+                    onClose();
+                }
+            }
+        });
 
-        txtName.setText(parkingZone.getName());
-        txtDescription.setText(parkingZone.getDescription());
+        txtDescription.setText(textNewlinePrettyFormatting(parkingZone.getDescription(), 20 ));
         if(parkingZone.isAuthorized()) {
             layout_table_information.setVisibility(View.VISIBLE);
             layout_btn.setVisibility(View.GONE);
@@ -229,10 +246,8 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             @Override
             public void onClick(View view) {
                 if(parkingZone != null) {
-                    GeoPoint tmp_geopoint = new GeoPoint(Double.parseDouble(parkingZone.getCenter_latitude()), Double.parseDouble(parkingZone.getCenter_longitude()));
                     long speed = 1000;
-                    double zoom = 20.0;
-                    mMapView.getController().animateTo(tmp_geopoint, zoom, speed);
+                    mMapView.getController().animateTo(parkingZone.getCenterGeopoint(), Constants.DEFAULT_ZOOM_PARKING_ZONE_MED, speed);
                     onClose();
                 }
 
@@ -245,6 +260,30 @@ public class ParkingZoneInfoWindow extends InfoWindow {
         url_identifier_detail = Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
         trx_id_detail =  HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier_detail, device_uuid);
 
+    }
+
+    private String textNewlinePrettyFormatting(String txt, int length_per_line) {
+        StringTokenizer st = new StringTokenizer(txt);
+        int cnt_tokens = st.countTokens();
+        List<String> list_str = new ArrayList<String>();
+        String candidate = new String();
+        do {
+            String tmp = st.nextToken();
+            if( (candidate.length() + tmp.length()) > length_per_line) {
+                list_str.add(candidate);
+                candidate = tmp;
+            }
+            else {
+                candidate += " " + tmp ;
+            }
+
+        }
+        while(st.hasMoreTokens());
+
+        list_str.add(candidate);
+
+        String ret = TextUtils.join("\n", list_str);
+        return ret.trim();
     }
 
     private ParkingZoneInfoWindow.InternalHTTPBroadcaseReceiver httpReceiver;

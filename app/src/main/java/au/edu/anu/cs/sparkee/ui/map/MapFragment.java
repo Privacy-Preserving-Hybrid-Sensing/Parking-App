@@ -66,6 +66,8 @@ import au.edu.anu.cs.sparkee.ui.map.infowindow.ParkingSpotInfoWindow;
 import au.edu.anu.cs.sparkee.ui.map.infowindow.ParkingZoneInfoWindow;
 import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSpotMarker;
 import au.edu.anu.cs.sparkee.ui.map.marker.ParkingZonePolygon;
+
+import static au.edu.anu.cs.sparkee.Constants.DEFAULT_ZOOM_PARKING_SPOT;
 //import au.edu.anu.cs.sparkee.amqpReceiver.AMQPBroadcaseReceiver;
 
 public class MapFragment extends Fragment {
@@ -88,8 +90,8 @@ public class MapFragment extends Fragment {
     private String DEFAULT_LON = "149.120385";
     private String DEFAULT_LAT = "-35.275514";
 
-    private double DEFAULT_ZOOM_PARKING_ZONE = 18.0;
-    private double DEFAULT_ZOOM_PARKING_SPOT = 22.0;
+//    private double DEFAULT_ZOOM_PARKING_ZONE_FAR = 18.0;
+//    private double DEFAULT_ZOOM_PARKING_SPOT = 22.0;
 
     private String device_uuid;
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
@@ -129,7 +131,7 @@ public class MapFragment extends Fragment {
 
         IGeoPoint geoPoint =new GeoPoint(map_lat, map_lon);
         mMapView.getController().animateTo(geoPoint);
-        mMapView.getController().setZoom(DEFAULT_ZOOM_PARKING_ZONE);
+        mMapView.getController().setZoom(Constants.DEFAULT_ZOOM_PARKING_ZONE_FAR);
 
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
 
@@ -357,44 +359,9 @@ public class MapFragment extends Fragment {
             double confidence_level = parkingSpot.getConfidence_level();
             int tmp_confidence = (int) Math.round(confidence_level * 100);
             int marker_status = parkingSpot.getMarker_status();
-            switch (marker_status) {
-                case Constants.MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED:
-                    m.setIcon( getResources().getDrawable(R.drawable.participate_minus_1_confirmed));
-                    tmp_status = "Participate: Unvailable";
-                    break;
-                case Constants.MARKER_PARTICIPATION_AVAILABLE_RECEIVED:
-                    m.setIcon( getResources().getDrawable(R.drawable.participate_plus_1_confirmed));
-                    tmp_status = "Participate: Available";
-                    break;
-                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIRMED:
-                    m.setIcon( getResources().getDrawable(R.drawable.confirmed_unavailable));
-                    tmp_status = "Unavailable";
-                    break;
-                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2:
-                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_2));
-                    tmp_status = "Unavailable ("+ tmp_confidence +"%)";
-                    break;
-                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1:
-                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_minus_1));
-                    tmp_status = "Unavailable ("+ tmp_confidence +"%)";
-                    break;
-                case Constants.MARKER_PARKING_UNCONFIRMED:
-                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_0));
-                    tmp_status = "Unconfirmed";
-                    break;
-                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1:
-                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_1));
-                    tmp_status = "Available ("+ tmp_confidence +"%)";
-                    break;
-                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2:
-                    m.setIcon( getResources().getDrawable(R.drawable.unconfirmed_plus_2));
-                    tmp_status = "Available ("+ tmp_confidence +"%)";
-                    break;
-                case Constants.MARKER_PARKING_AVAILABLE_CONFIRMED:
-                    m.setIcon( getResources().getDrawable(R.drawable.confirmed_available));
-                    tmp_status = "Available";
-                    break;
-            }
+
+            m.setIcon( getResources().getDrawable(ParkingSpotMarker.getMarkerIcon(marker_status)) );
+            tmp_status = ParkingSpotMarker.getMarkerStatusTxt(marker_status, tmp_confidence);
 
             ParkingSpotInfoWindow infoWindow = new ParkingSpotInfoWindow(
                     R.layout.bubble_parking_spot_layout,
@@ -412,7 +379,7 @@ public class MapFragment extends Fragment {
                 @Override
                 public boolean onMarkerClick(Marker marker, MapView mapView) {
                     hideAllInfoWindow();
-                    mMapView.getController().animateTo(marker.getPosition(), DEFAULT_ZOOM_PARKING_SPOT, (long) 1000);
+                    mMapView.getController().animateTo(marker.getPosition(), Constants.DEFAULT_ZOOM_PARKING_SPOT, (long) 1000);
                     marker.showInfoWindow();
                     return true;
                 }
@@ -684,13 +651,13 @@ public class MapFragment extends Fragment {
             if(parkingZones[k] != null) {
                 int id = parkingZones[k].getId();
                 ParkingZonePolygon polygon = findParkingZoneByID(id);
-                ParkingZone existing_pz = polygon.getParkingZone();
+                if(polygon != null) {
 
-                boolean authorized = parkingZones[k].isAuthorized();
-                LocalDateTime new_ts_update = parkingZones[k].getTs_update();
-                ParkingSpot [] parking_spots = parkingZones[k].getParking_spots();
+                    ParkingZone existing_pz = polygon.getParkingZone();
+                    boolean authorized = parkingZones[k].isAuthorized();
+                    LocalDateTime new_ts_update = parkingZones[k].getTs_update();
+                    ParkingSpot [] parking_spots = parkingZones[k].getParking_spots();
 
-                if(existing_pz != null) {
                     existing_pz = parkingZones[k];
                     polygon.setParkingZone(existing_pz);
 
@@ -728,9 +695,8 @@ public class MapFragment extends Fragment {
             int geopoint_cnt = parkingZones[i].getGeoPoints().size();
 
             if(geopoint_cnt > 0) {
-                // check is current & previous data has changed?
-                // Polygon
-                ParkingZonePolygon tmp_polygon = new ParkingZonePolygon(mMapView, parkingZones[i]);
+
+                final ParkingZonePolygon tmp_polygon = new ParkingZonePolygon(mMapView, parkingZones[i]);
                 tmp_polygon.setPoints(parkingZones[i].getGeoPoints());
                 tmp_polygon.setTitle(parkingZones[i].getName());
                 tmp_polygon.getOutlinePaint().setColor(Color.parseColor("#990000FF"));
@@ -743,36 +709,26 @@ public class MapFragment extends Fragment {
                         this.device_uuid,
                         parkingZones[i]
                 );
-//                Log.d("PZ", "PARKING ZONE ADDED");
-//                tmp_polygon.setInfoWindow(new ParkingZoneInfoWindow(R.layout.bubble_parking_zone_layout, mMapView));
+
                 tmp_polygon.setInfoWindow(infoWindow);
                 tmp_polygon.setOnClickListener(new Polygon.OnClickListener() {
                     @Override
                     public boolean onClick(Polygon polygon, MapView mapView, GeoPoint eventPos) {
                         hideAllInfoWindow();
-                        mMapView.getController().animateTo(eventPos, DEFAULT_ZOOM_PARKING_ZONE, (long) 1000);
+                        mMapView.getController().animateTo(eventPos, DEFAULT_ZOOM_PARKING_SPOT, (long) 1000);
+                        polygon.setInfoWindowLocation(eventPos);
                         polygon.showInfoWindow();
                         return true;
                     }
                 });
 
 
-                tmp_polygon.getInfoWindow().open(tmp_polygon, tmp_polygon.getParkingZone().getCenterGeopoint(),0, 0);
+                tmp_polygon.setInfoWindowLocation(parkingZones[i].getCenterGeopoint());
+                tmp_polygon.showInfoWindow();
+//                tmp_polygon.getInfoWindow().open(tmp_polygon, tmp_polygon.getParkingZone().getCenterGeopoint(),0, 0);
 
                 folderOverlayParkingZone.add(tmp_polygon);
-//                polygons.put(parkingZones[i].getId(), tmp_polygon);
-
-                if(parkingZones[i].getParking_spots() == null)
-                    Log.d("BANYAK SPOT", "0");
-                else
-                    Log.d("BANYAK SPOT", "" + parkingZones[i].getParking_spots().length);
-
-
-//                for(int j=0; j< parkingZones[i])
             }
-//            om.add(folderOverlayParkingZone);
-            Log.d("MASUK", "FOLDER BRO");
-            Log.d("BANYAK OVERLAY", "" + folderOverlayParkingZone.getItems().size());
         }
 
         if(!mMapView.getOverlays().contains(folderOverlayParkingZone))

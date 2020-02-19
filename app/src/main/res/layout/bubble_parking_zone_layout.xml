@@ -8,21 +8,23 @@
     android:orientation="vertical">
 
 
+
     <TextView
         android:id="@+id/bubble_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="          -            "
-        android:textSize="18sp" />
+        android:text=""
+        android:textSize="20dp"
+        />
 
     <TextView
         android:id="@+id/bubble_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="        -                   "
-        android:textSize="10sp" />
+        android:text=""
+         />
 
     <TableLayout
         android:layout_width="wrap_content"

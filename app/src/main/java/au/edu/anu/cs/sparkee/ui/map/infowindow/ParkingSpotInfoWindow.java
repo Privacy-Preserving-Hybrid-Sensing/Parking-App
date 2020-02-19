@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,15 +75,21 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         Button btnUnavailable = (Button) mView.findViewById(R.id.bubble_unavailable);
         TextView txtBubbleStatus = (TextView) mView.findViewById(R.id.bubble_status);
         TextView txtLastUpdate = (TextView) mView.findViewById(R.id.bubble_last_update);
-        TextView txtName= (TextView) mView.findViewById(R.id.bubble_name);
+        TextView txtSlotName = (TextView) mView.findViewById(R.id.bubble_name);
+        TextView txtZoneName = (TextView) mView.findViewById(R.id.bubble_parking_zone_name);
+        ImageView imgBubbleParkingSpot = (ImageView) mView.findViewById(R.id.bubble_parking_spot_icon);
+
+        int iconId = ParkingSpotMarker.getMarkerIcon(parkingSpotMarker.getParkingSpot().getMarker_status());
+        imgBubbleParkingSpot.setImageDrawable( mMapView.getResources().getDrawable( iconId ));
 
         PrettyTime p = new PrettyTime();
         String date_str = ts_update.atZone(ZoneId.systemDefault()).toLocalDate().toString();
         String time_str = ts_update.atZone(ZoneId.systemDefault()).toLocalTime().toString();
         String time_pretty = p.format(Timestamp.valueOf( date_str + " " + time_str ));
-        txtName.setText( parkingSpotMarker.getParkingSpot().getName() );
-        txtBubbleStatus.setText(status);
-        txtLastUpdate.setText( time_pretty );
+        txtSlotName.setText( parkingSpotMarker.getParkingSpot().getName() );
+        txtZoneName.setText( "at " + parkingSpotMarker.getParkingSpot().getZone_name() );
+        txtBubbleStatus.setText("Status: " + status);
+        txtLastUpdate.setText( "Last change " + time_pretty );
 
         layout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

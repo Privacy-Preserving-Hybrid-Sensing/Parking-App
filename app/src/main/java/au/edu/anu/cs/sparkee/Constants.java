@@ -20,8 +20,10 @@ public class Constants {
     public static final String RABBIT_EXCHANGE_PARKING_SLOTS_TOPIC = "parking_slot.zone.*";
 
 
-    public static final int MAP_LAYER_ID_PARKING_ZONE = 1000;
-    public static final int MAP_LAYER_ID_PARKING_SPOT = 1001;
+    public static final double DEFAULT_ZOOM_PARKING_ZONE_FAR = 18.0;
+    public static final double DEFAULT_ZOOM_PARKING_ZONE_MED = 20.0;
+    public static final double DEFAULT_ZOOM_PARKING_ZONE_NEAR = 21.0;
+    public static final double DEFAULT_ZOOM_PARKING_SPOT = 22.0;
 
     public static final String DEFAULT_PARTICIPANT_TO_SERVER_ROUTING_KEY = "PARTICIPANT_TO_SERVER";
     public static final String BROADCAST_AMQP_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.AMQP";
