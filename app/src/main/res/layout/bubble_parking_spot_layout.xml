@@ -43,7 +43,7 @@ android:orientation="vertical">
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Chante to Available"
+            android:text="Change to Available"
             android:theme="@style/AppTheme.BlueButton" />
 
         <Button
@@ -52,7 +52,7 @@ android:orientation="vertical">
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:theme="@style/AppTheme.BlackButton"
-            android:text="Chante to Unavailable" />
+            android:text="Change to Unavailable" />
     </LinearLayout>
 
 
