@@ -252,6 +252,7 @@ public class MapViewModel extends AndroidViewModel {
                         tmp_parking_spot.setVoting_available( obj_parking_spot.getDouble("voting_available") );
                         tmp_parking_spot.setVoting_unavailable( obj_parking_spot.getDouble("voting_unavailable") );
 
+                        tmp_parking_spot.setName( obj_parking_spot.getString("name") );
 
                         tmp_parking_spot.setLatitude(Double.parseDouble(obj_parking_spot.getString("latitude")));
                         tmp_parking_spot.setLongitude(Double.parseDouble(obj_parking_spot.getString("longitude")));

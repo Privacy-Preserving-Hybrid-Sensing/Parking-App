@@ -15,6 +15,16 @@ public class ParkingSpot extends Location {
     private int marker_status;
     private int zone_id;
     private double confidence_level;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    private String name;
     private String zone_name;
 
     public ParkingSpot() {

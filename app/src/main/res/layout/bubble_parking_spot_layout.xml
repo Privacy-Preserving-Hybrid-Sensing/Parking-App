@@ -3,9 +3,17 @@
 android:id="@+id/bubble_parking_spot_layout"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
-android:background="@drawable/curvyedge_bubble"
+android:background="@drawable/bonuspack_bubble"
 android:padding="15px"
 android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/bubble_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TextView"
+        android:textSize="26sp" />
 
     <TextView
         android:id="@+id/bubble_status"
@@ -23,13 +31,6 @@ android:orientation="vertical">
         android:layout_weight="1"
         android:text="TextView" />
 
-    <TextView
-        android:id="@+id/bubble_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="TextView"
-        android:textSize="10sp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -42,7 +43,7 @@ android:orientation="vertical">
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Available"
+            android:text="Chante to Available"
             android:theme="@style/AppTheme.BlueButton" />
 
         <Button
@@ -51,7 +52,7 @@ android:orientation="vertical">
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:theme="@style/AppTheme.BlackButton"
-            android:text="Unavailable" />
+            android:text="Chante to Unavailable" />
     </LinearLayout>
 
 

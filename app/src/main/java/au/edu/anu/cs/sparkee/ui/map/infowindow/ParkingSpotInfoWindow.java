@@ -74,15 +74,16 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         Button btnUnavailable = (Button) mView.findViewById(R.id.bubble_unavailable);
         TextView txtBubbleStatus = (TextView) mView.findViewById(R.id.bubble_status);
         TextView txtLastUpdate = (TextView) mView.findViewById(R.id.bubble_last_update);
-        TextView txtLocation = (TextView) mView.findViewById(R.id.bubble_location);
+        TextView txtName= (TextView) mView.findViewById(R.id.bubble_name);
 
         PrettyTime p = new PrettyTime();
         String date_str = ts_update.atZone(ZoneId.systemDefault()).toLocalDate().toString();
         String time_str = ts_update.atZone(ZoneId.systemDefault()).toLocalTime().toString();
         String time_pretty = p.format(Timestamp.valueOf( date_str + " " + time_str ));
+        txtName.setText( parkingSpotMarker.getParkingSpot().getName() );
         txtBubbleStatus.setText(status);
         txtLastUpdate.setText( time_pretty );
-        txtLocation.setText(geoPoint.getLatitude() + ", " + geoPoint.getLongitude());
+
         layout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Override Marker's onClick behaviour here

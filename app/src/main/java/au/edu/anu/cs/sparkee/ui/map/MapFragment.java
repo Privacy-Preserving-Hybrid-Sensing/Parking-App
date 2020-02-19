@@ -38,6 +38,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.FolderOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.OverlayManager;
@@ -52,8 +53,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -88,7 +87,9 @@ public class MapFragment extends Fragment {
     private Context context;
     private String DEFAULT_LON = "149.120385";
     private String DEFAULT_LAT = "-35.275514";
-    private String DEFAULT_ZOOM = "18.0";
+
+    private double DEFAULT_ZOOM_PARKING_ZONE = 18.0;
+    private double DEFAULT_ZOOM_PARKING_SPOT = 22.0;
 
     private String device_uuid;
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
@@ -125,12 +126,10 @@ public class MapFragment extends Fragment {
 
         double map_lon =  Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_LON, DEFAULT_LON));
         double map_lat = Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_LAT, DEFAULT_LAT));
-//        double map_zoom = Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_ZOOM, DEFAULT_ZOOM));
-        double map_zoom = Double.parseDouble(DEFAULT_ZOOM);
 
         IGeoPoint geoPoint =new GeoPoint(map_lat, map_lon);
         mMapView.getController().animateTo(geoPoint);
-        mMapView.getController().setZoom(map_zoom);
+        mMapView.getController().setZoom(DEFAULT_ZOOM_PARKING_ZONE);
 
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
 
@@ -408,6 +407,16 @@ public class MapFragment extends Fragment {
             );
             m.setInfoWindow(infoWindow);
             m.setSnippet(m.getPosition().toDoubleString());
+
+            m.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker, MapView mapView) {
+                    hideAllInfoWindow();
+                    mMapView.getController().animateTo(marker.getPosition(), DEFAULT_ZOOM_PARKING_SPOT, (long) 1000);
+                    marker.showInfoWindow();
+                    return true;
+                }
+            });
         }
         catch (final Exception e) {
             Log.w(IMapView.LOGTAG,"Error getting tile sources: ", e);
@@ -453,23 +462,25 @@ public class MapFragment extends Fragment {
         mMapView.invalidate();
     }
 
+    public void hideAllInfoWindow() {
+        for (Overlay item :folderOverlayParkingZone.getItems()) {
+            ParkingZonePolygon tmp_polygon = (ParkingZonePolygon) item;
+            tmp_polygon.getInfoWindow().close();
+        }
+
+        for (Overlay item :folderOverlayParkingSpot.getItems()) {
+            ParkingSpotMarker tmp_parking_spot = (ParkingSpotMarker) item;
+            tmp_parking_spot.getInfoWindow().close();
+        }
+    }
 
     public void addHandleMapEvent() {
 
         MapEventsOverlay events = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-                for (Overlay item :folderOverlayParkingZone.getItems()) {
-                    ParkingZonePolygon tmp_polygon = (ParkingZonePolygon) item;
-                    tmp_polygon.getInfoWindow().close();
-                }
-
-                for (Overlay item :folderOverlayParkingSpot.getItems()) {
-                    ParkingSpotMarker tmp_parking_spot = (ParkingSpotMarker) item;
-                    tmp_parking_spot.getInfoWindow().close();
-                }
-
-                return false;
+                hideAllInfoWindow();
+                return true;
             }
 
             @Override
@@ -738,13 +749,9 @@ public class MapFragment extends Fragment {
                 tmp_polygon.setOnClickListener(new Polygon.OnClickListener() {
                     @Override
                     public boolean onClick(Polygon polygon, MapView mapView, GeoPoint eventPos) {
-                        // Hide All Polygon ParkingZoneInfoWindow
-                        for (Overlay item:folderOverlayParkingZone.getItems()) {
-                            ParkingZonePolygon p = (ParkingZonePolygon) item;
-                            p.closeInfoWindow();
-                        }
-
-                        polygon.getInfoWindow().open(polygon, eventPos,0, 0);
+                        hideAllInfoWindow();
+                        mMapView.getController().animateTo(eventPos, DEFAULT_ZOOM_PARKING_ZONE, (long) 1000);
+                        polygon.showInfoWindow();
                         return true;
                     }
                 });
