@@ -225,6 +225,9 @@ public class MapViewModel extends AndroidViewModel {
         void process_parking_zone_details(JSONArray ja) throws JSONException{
 
             ParkingZone [] update_parking_zone = mParkingZones.getValue();
+            if(update_parking_zone == null)
+                return;
+
             for(int k=0; k < ja.length() ; k++) {
 
                 JSONObject parking_data_obj = ja.getJSONObject(k);
@@ -288,8 +291,9 @@ public class MapViewModel extends AndroidViewModel {
 
         private ParkingZone findParkingZoneByID(int id) {
             ParkingZone ret = null;
-            if(mParkingZones != null) {
-                for (ParkingZone tmp: mParkingZones.getValue()) {
+            ParkingZone [] parkingZones = mParkingZones.getValue();
+            if(parkingZones != null) {
+                for (ParkingZone tmp: parkingZones) {
                     if(tmp != null && tmp.getId() == id) {
                         ret = tmp;
                         break;
