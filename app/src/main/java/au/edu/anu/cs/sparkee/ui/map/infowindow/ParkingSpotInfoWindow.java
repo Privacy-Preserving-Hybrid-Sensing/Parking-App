@@ -55,6 +55,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         this.parkingSpotMarker = parkingSpotMarker;
 
         httpReceiver = new ParkingSpotInfoWindow.InternalHTTPBroadcaseReceiver();
+        httpIntentFilter = new IntentFilter(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
     }
 
 
@@ -113,8 +114,6 @@ public class ParkingSpotInfoWindow extends InfoWindow {
                 Log.d("Btn", "Available");
                 close();
                 send("available");
-//                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_available_1));
-//                mMapView.invalidate();
             }
         });
 
@@ -125,11 +124,11 @@ public class ParkingSpotInfoWindow extends InfoWindow {
                 Log.d("Btn", "Unavailable");
                 close();
                 send("unavailable");
-//                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_unavailable_1));
-//                mMapView.invalidate();
 
             }
         });
+
+        mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
     }
 
     String url_identifier_detail = "";
@@ -153,6 +152,12 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             ((ViewGroup) mView.getParent()).removeView(mView);
             onClose();
         }
+        try {
+            mMapView.getContext().unregisterReceiver(httpReceiver);
+        }
+        catch(Exception e) {
+//            e.printStackTrace();
+        }
     }
 
     public class InternalHTTPBroadcaseReceiver extends BroadcastReceiver {
@@ -173,7 +178,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         }
 
         void onSuccess(SParkeeJSONObject jo) throws JSONException {
-            Log.d("TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
+            Log.d("SPOT TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
             if(jo.getPath().startsWith(Constants.URL_API_PARTICIPATE) && jo.getTrx_id().equalsIgnoreCase(trx_id_detail)) {
                 processParticipation(jo);
             }

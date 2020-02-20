@@ -288,10 +288,12 @@ public class MapViewModel extends AndroidViewModel {
 
         private ParkingZone findParkingZoneByID(int id) {
             ParkingZone ret = null;
-            for (ParkingZone tmp: mParkingZones.getValue()) {
-                if(tmp != null && tmp.getId() == id) {
-                    ret = tmp;
-                    break;
+            if(mParkingZones != null) {
+                for (ParkingZone tmp: mParkingZones.getValue()) {
+                    if(tmp != null && tmp.getId() == id) {
+                        ret = tmp;
+                        break;
+                    }
                 }
             }
             return ret;

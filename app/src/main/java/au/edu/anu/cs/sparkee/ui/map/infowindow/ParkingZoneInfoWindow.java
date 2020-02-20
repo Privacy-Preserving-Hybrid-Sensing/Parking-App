@@ -59,6 +59,13 @@ public class ParkingZoneInfoWindow extends InfoWindow {
 
     public void onClose() {
         super.close();
+        try {
+            mMapView.getContext().unregisterReceiver(httpReceiver);
+        }
+        catch(Exception e) {
+//            e.printStackTrace();
+        }
+
     }
 
     private String url_identifier_detail;
@@ -87,7 +94,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
 
         void onSuccess(SParkeeJSONObject jo) throws JSONException {
             Log.d("PATH", jo.getPath() + " vs " + url_identifier_detail);
-            Log.d("TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
+            Log.d("ZONE TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
             if(jo.getPath().startsWith(Constants.URL_API_ZONES_DETAIL) && jo.getTrx_id().equalsIgnoreCase(trx_id_detail)) {
                 processZoneDetail(jo);
             }

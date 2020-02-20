@@ -159,8 +159,8 @@ public class MapFragment extends Fragment {
             if(loc != null) {
                 currentLocation = loc;
 
-                if(isInitView) {
-//                    mLocationOverlay.enableMyLocation();
+                if(!initGPS) {
+                    mLocationOverlay.enableMyLocation();
 //                  mLocationOverlay.enableFollowLocation();
                     mLocationOverlay.setOptionsMenuEnabled(true);
                     mMapView.getOverlays().add(mLocationOverlay);
@@ -396,43 +396,6 @@ public class MapFragment extends Fragment {
         return m;
     }
 
-//    public void setVisibleAllMarkers(boolean visible) {
-//        OverlayManager om = mMapView.getOverlayManager();
-//
-//        Set set = markers.entrySet();
-//        Iterator iterator = set.iterator();
-////        Iterator iterator = om.iterator();
-//        while(iterator.hasNext()) {
-//            ParkingSpotMarker obj = (ParkingSpotMarker) iterator.next();
-//            if(visible)
-//                om.add(obj);
-//            else
-//                om.remove(obj);
-//        }
-//        mMapView.invalidate();
-//    }
-
-    public void setVisibleAllPolygons(boolean visible) {
-//        OverlayManager om = mMapView.getOverlayManager();
-//        Iterator iterator = om.iterator();
-//        while(iterator.hasNext()) {
-//            Object obj = iterator.next();
-//            if (obj instanceof Polygon) {
-//                ((Polygon) obj).setVisible(visible);
-//                ((Polygon) obj).setEnabled(visible);
-//            }
-//        }
-//        Set set = polygons.entrySet();
-//        Iterator iterator = set.iterator();
-//        while(iterator.hasNext()) {
-//            Map.Entry mentry = (Map.Entry)iterator.next();
-//            Polygon p = (Polygon) mentry.getValue();
-//            p.setVisible(visible);
-//            p.setEnabled(visible);
-//        }
-        mMapView.invalidate();
-    }
-
     public void hideAllInfoWindow() {
         for (Overlay item :folderOverlayParkingZone.getItems()) {
             ParkingZonePolygon tmp_polygon = (ParkingZonePolygon) item;
@@ -588,49 +551,6 @@ public class MapFragment extends Fragment {
 //    boolean parkingSlotsVisibile;
 //    boolean parkingZonesVisibile;
 
-    public void modifyParkingSlots(ParkingSpot[] parkingSpots) {
-//        overlayParkingMarkers.
-//        overlayParkingMarkers.getItems()
-        for( ParkingSpot parkingSpot : parkingSpots) {
-            int new_id = parkingSpot.getId();
-            ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parkingSpot);
-            ParkingSpotMarker existing_marker = markers.get(new_id);
-            if(existing_marker != null) {
-                // check is current & previous data has changed?
-                if(existing_marker.getParkingSpot().getMarker_status() != parkingSpot.getMarker_status()) {
-                    markers.remove(new_id);
-                    markers.put(new_id, new_marker);
-//                    overlayParkingMarkers.add(new_marker);
-//                    overlayParkingMarkers.
-                }
-            }
-            else {
-                markers.put(new_id, new_marker);
-            }
-        }
-//        OverlayManager om = mMapView.getOverlayManager();
-//        for(int i=0; i < parkingSpots.length; i++) {
-//            int new_id = parkingSpots[i].getId();
-//            int new_parking_status = parkingSpots[i].getParking_status();
-//            ParkingSpotMarker existing_marker = markers.get(new_id);
-//            if(existing_marker != null) {
-//                // check is current & previous data has changed?
-//                if(existing_marker.getParkingSpot().getMarker_status() != parkingSpots[i].getMarker_status()) {
-//                    om.remove(existing_marker);
-//                    markers.remove(new_id);
-//                    ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parkingSpots[i]);
-//                    om.add(new_marker);
-//                    markers.put(new_id, new_marker);
-//                }
-//            }
-//            else {
-//                ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parkingSpots[i]);
-//                om.add(new_marker);
-//                markers.put(new_id, new_marker);
-//            }
-//        }
-        mMapView.invalidate();
-    }
 
     public ParkingZonePolygon findParkingZoneByID(int id) {
         ParkingZonePolygon ret = null;
