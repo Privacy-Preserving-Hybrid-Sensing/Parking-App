@@ -11,7 +11,7 @@ public class ParkingSpot extends Location {
     private double voting_available;
     private double voting_unavailable;
     private int parking_status;
-    private int participation_status;
+    private boolean participation_status;
     private int marker_status;
     private int zone_id;
     private double confidence_level;
@@ -56,11 +56,11 @@ public class ParkingSpot extends Location {
         this.id = id;
     }
 
-    public int getParticipation_status() {
+    public boolean getParticipation_status() {
         return participation_status;
     }
 
-    public void setParticipation_status(int participation_status) {
+    public void setParticipation_status(boolean participation_status) {
         this.participation_status = participation_status;
     }
 

@@ -47,6 +47,12 @@ public class Constants {
     public static final int MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED = -101;
     public static final int MARKER_PARTICIPATION_AVAILABLE_RECEIVED = 101;
 
+
+    public static final int MARKER_PARKING_CATEGORY_DEFAULT = 1000;
+    public static final int MARKER_PARKING_CATEGORY_PARTICIPATION = 1001;
+    public static final int MARKER_PARKING_CATEGORY_CREDIT = 1002;
+
+
     public static final int MARKER_PARKING_UNCONFIRMED_DEFAULT = 0;
     public static final int MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT = 1;
     public static final int MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT = 2;

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -62,6 +63,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
     private ParkingSpotInfoWindow.InternalHTTPBroadcaseReceiver httpReceiver;
     private IntentFilter httpIntentFilter;
     private String trx_id_detail;
+    private boolean participate;
     public void onClose() {
         super.close();
     }
@@ -80,7 +82,8 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         TextView txtZoneName = (TextView) mView.findViewById(R.id.bubble_parking_zone_name);
         ImageView imgBubbleParkingSpot = (ImageView) mView.findViewById(R.id.bubble_parking_spot_icon);
 
-        int iconId = ParkingSpotMarker.getMarkerIcon(parkingSpotMarker.getParkingSpot().getMarker_status());
+        int participation = ( parkingSpotMarker.getParkingSpot().getParticipation_status() ? Constants.MARKER_PARKING_CATEGORY_PARTICIPATION: Constants.MARKER_PARKING_CATEGORY_DEFAULT);
+        int iconId = ParkingSpotMarker.getMarkerIcon(parkingSpotMarker.getParkingSpot().getMarker_status(), participation);
         imgBubbleParkingSpot.setImageDrawable( mMapView.getResources().getDrawable( iconId ));
 
         PrettyTime p = new PrettyTime();
@@ -112,8 +115,9 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             @Override
             public void onClick(View view) {
                 Log.d("Btn", "Available");
-                close();
+                mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
                 send("available");
+                close();
             }
         });
 
@@ -122,13 +126,13 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             @Override
             public void onClick(View view) {
                 Log.d("Btn", "Unavailable");
-                close();
+                mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
                 send("unavailable");
+                close();
 
             }
         });
 
-        mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
     }
 
     String url_identifier_detail = "";
@@ -151,12 +155,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             mIsVisible = false;
             ((ViewGroup) mView.getParent()).removeView(mView);
             onClose();
-        }
-        try {
-            mMapView.getContext().unregisterReceiver(httpReceiver);
-        }
-        catch(Exception e) {
-//            e.printStackTrace();
+
         }
     }
 
@@ -166,6 +165,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             Bundle bundle = intent.getExtras();
             String msg = bundle.getString(Constants.BROADCAST_HTTP_BODY_IDENTIFIER);
             String status = bundle.getString(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER);
+            Log.d("SPOT", msg);
             if (status.equalsIgnoreCase(Constants.BROADCAST_HTTP_STATUS_OK)) {
                 try {
                     onSuccess(SParkeeJSONObject.parse(msg));
@@ -174,6 +174,13 @@ public class ParkingSpotInfoWindow extends InfoWindow {
                 }
             } else {
                 onError(msg);
+            }
+
+            try {
+                mMapView.getContext().unregisterReceiver(httpReceiver);
+            }
+            catch(Exception e) {
+
             }
         }
 
@@ -188,6 +195,20 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             Log.d("JSON SUBSCRIBE", jo.getStatus() );
             if(jo.getStatus().equalsIgnoreCase("OK")) {
                 JSONArray ja = jo.getData();
+
+                ImageView imgBubbleParkingSpot = (ImageView) mView.findViewById(R.id.bubble_parking_spot_icon);
+                parkingSpotMarker.getParkingSpot().setParticipation_status(true);
+                Log.d("PARTICIPATE", "" + parkingSpotMarker.getParkingSpot().getParticipation_status());
+
+                int participation = (parkingSpotMarker.getParkingSpot().getParticipation_status() ? Constants.MARKER_PARKING_CATEGORY_PARTICIPATION: Constants.MARKER_PARKING_CATEGORY_PARTICIPATION);
+                int iconId = ParkingSpotMarker.getMarkerIcon(parkingSpotMarker.getParkingSpot().getMarker_status(), participation);
+                Log.d("ICON 2", "" + iconId);
+                Drawable iconDrawable = mMapView.getResources().getDrawable( iconId );
+                imgBubbleParkingSpot.setImageDrawable( iconDrawable );
+
+                parkingSpotMarker.setIcon(iconDrawable);
+                mMapView.invalidate();
+
                 Toast.makeText(getMapView().getContext(), jo.getMsg(), Toast.LENGTH_LONG).show();
             }
         }

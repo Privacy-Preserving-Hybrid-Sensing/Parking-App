@@ -47,7 +47,7 @@ public class MapViewModel extends AndroidViewModel {
     private ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay;
     private RotationGestureOverlay mRotationGestureOverlay;
     private MutableLiveData<Location> mLocation;
-    private MutableLiveData<ParkingSpot[]> mParkingSlots;
+    private MutableLiveData<ParkingSpot[]> mParkingSpots;
     private MutableLiveData<Integer> creditValue;
     private MutableLiveData<ParkingZone []> mParkingZones;
 
@@ -134,8 +134,8 @@ public class MapViewModel extends AndroidViewModel {
         creditValue= new MutableLiveData<>();
         creditValue.setValue( 0 );
 
-        mParkingSlots = new MutableLiveData<>();
-        mParkingSlots.setValue( null );
+        mParkingSpots = new MutableLiveData<>();
+        mParkingSpots.setValue( null );
 
         mParticipantCredit= new MutableLiveData<>();
         mParticipantCredit.setValue( null );
@@ -160,7 +160,7 @@ public class MapViewModel extends AndroidViewModel {
         return mLocation;
     }
     public LiveData<ParkingSpot[]> getParkingSlots() {
-        return mParkingSlots;
+        return mParkingSpots;
     }
     public LiveData<ParticipantCredit[]> getParticipantCredit() {
         return mParticipantCredit;
@@ -264,16 +264,10 @@ public class MapViewModel extends AndroidViewModel {
 
                         tmp_parking_spot.setVoting_unavailable( obj_parking_spot.getDouble("voting_unavailable") );
 
-                        Pair <Integer, Integer> participation_data= getParticipationAndMarkerValue(
-                                obj_parking_spot.getString("ts_update"),
-                                obj_parking_spot.getInt("status"),
-                                Double.parseDouble(obj_parking_spot.getString("latitude")),
-                                Double.parseDouble(obj_parking_spot.getString("longitude"))
-                        );
-                        int participation_value = participation_data.first.intValue();
-                        int marker_value = participation_data.second.intValue();
+                        int marker_value = getMarkerValue(obj_parking_spot.getInt("status"));
 
-                        tmp_parking_spot.setParticipation_status(participation_value);
+
+                        tmp_parking_spot.setParticipation_status(false);
                         tmp_parking_spot.setMarker_status(marker_value);
                         tmp_parking_spot.setParking_status( obj_parking_spot.getInt("status") );
                         tmp_parking_spot.setConfidence_level(obj_parking_spot.getDouble("confidence_level") );
@@ -399,76 +393,43 @@ public class MapViewModel extends AndroidViewModel {
                 tmp_parkingSpots[i].setZone_id(jo.getInt("zone_id"));
                 tmp_parkingSpots[i].setZone_name(jo.getString("zone_name"));
 
-                Pair <Integer, Integer> participation_data=getParticipationAndMarkerValue(
-                        jo.getString("ts_update"),
-                        jo.getInt("status"),
-                        Double.parseDouble(jo.getString("latitude")),
-                        Double.parseDouble(jo.getString("longitude"))
-                );
-                int participation_value = participation_data.first.intValue();
-                int marker_value = participation_data.second.intValue();
+                int marker_value = getMarkerValue(jo.getInt("status"));
 
-                tmp_parkingSpots[i].setParticipation_status(participation_value);
+                tmp_parkingSpots[i].setParticipation_status(false);
                 tmp_parkingSpots[i].setMarker_status(marker_value);
             }
-            mParkingSlots.setValue(tmp_parkingSpots);
+            mParkingSpots.setValue(tmp_parkingSpots);
         }
 
     }
 
 
-    Pair <Integer, Integer> getParticipationAndMarkerValue(String last_parking_update_str, int parking_status, double latitude, double longitude) {
-        ParticipantCredit [] participation = mParticipantCredit.getValue();
-        int participation_value = 0;
+    int getMarkerValue(int parking_status) {
         int marker_value = 0;
-        LocalDateTime last_participation = LocalDateTime.MIN;
-        LocalDateTime last_parking_update = LocalDateTime.parse(last_parking_update_str);
-
-        if(participation != null) {
-            for (int i = 0; i < participation.length; i++) {
-                if (participation[i].getLatitude() == latitude && participation[i].getLongitude() == longitude) {
-                    participation_value += participation[i].getAvailability_value();
-                    last_participation = participation[i].getTs_participation_update();
-                    break;
-                }
-            }
+        switch (parking_status) {
+            case -3:
+                marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT;
+                break;
+            case -2:
+                marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT;
+                break;
+            case -1:
+                marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT;
+                break;
+            case 0:
+                marker_value = Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT;
+                break;
+            case 1:
+                marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT;
+                break;
+            case 2:
+                marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT;
+                break;
+            case 3:
+                marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT;
+                break;
         }
-
-//            Log.d("LAST_PARTICIPATION", last_participation.toString());
-//            Log.d("LAST_PARKING UPDATE", last_parking_update.toString());
-//            Log.d("PARKING STATUS", "" + parking_status);
-        if(last_participation.isAfter(last_parking_update)) {
-            if(participation_value > 0)
-                marker_value = Constants.MARKER_PARTICIPATION_AVAILABLE_RECEIVED;
-            else
-                marker_value = Constants.MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED;
-        }
-        else {
-            switch (parking_status) {
-                case -3:
-                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT;
-                    break;
-                case -2:
-                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT;
-                    break;
-                case -1:
-                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT;
-                    break;
-                case 0:
-                    marker_value = Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT;
-                    break;
-                case 1:
-                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT;
-                    break;
-                case 2:
-                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT;
-                    break;
-                case 3:
-                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT;
-                    break;
-            }
-        }
-        return new Pair<>(participation_value, marker_value);
+        return marker_value;
     }
 
 }

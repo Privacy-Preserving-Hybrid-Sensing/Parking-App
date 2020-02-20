@@ -91,6 +91,8 @@ public class MapFragment extends Fragment {
     private String DEFAULT_LON = "149.120385";
     private String DEFAULT_LAT = "-35.275514";
 
+    private long DEFAULT_DELAY_ANIMATION = 100;
+
 //    private double DEFAULT_ZOOM_PARKING_ZONE_FAR = 18.0;
 //    private double DEFAULT_ZOOM_PARKING_SPOT = 22.0;
 
@@ -361,7 +363,12 @@ public class MapFragment extends Fragment {
             int tmp_confidence = (int) Math.round(confidence_level * 100);
             int marker_status = parkingSpot.getMarker_status();
 
-            Drawable d = getResources().getDrawable(ParkingSpotMarker.getMarkerIcon(marker_status));
+
+            int participation = (parkingSpot.getParticipation_status() ? Constants.MARKER_PARKING_CATEGORY_PARTICIPATION: Constants.MARKER_PARKING_CATEGORY_DEFAULT);
+
+            int iconId = ParkingSpotMarker.getMarkerIcon(marker_status, participation);
+            Drawable d = getResources().getDrawable(iconId);
+            Log.d("ICON 1", "" + iconId);
 
             m.setIcon( d );
 
@@ -383,7 +390,7 @@ public class MapFragment extends Fragment {
                 @Override
                 public boolean onMarkerClick(Marker marker, MapView mapView) {
                     hideAllInfoWindow();
-                    mMapView.getController().animateTo(marker.getPosition(), Constants.DEFAULT_ZOOM_PARKING_SPOT, (long) 1000);
+                    mMapView.getController().animateTo(marker.getPosition(), Constants.DEFAULT_ZOOM_PARKING_SPOT, (long) DEFAULT_DELAY_ANIMATION);
                     marker.showInfoWindow();
                     return true;
                 }
@@ -554,17 +561,14 @@ public class MapFragment extends Fragment {
 
     public ParkingZonePolygon findParkingZoneByID(int id) {
         ParkingZonePolygon ret = null;
-        Log.d("FIND", ""+ id);
 
         for (Overlay item: folderOverlayParkingZone.getItems()) {
             ParkingZonePolygon tmp = (ParkingZonePolygon) item;
-            Log.d("TES", "" + tmp.getParkingZone().getId());
             if(tmp.getParkingZone().getId() == id) {
                 ret = tmp;
                 break;
             }
         };
-        Log.d("KETEMU FIND", ""+ id);
         return ret;
     }
 
@@ -599,12 +603,7 @@ public class MapFragment extends Fragment {
 
 
                     }
-                    Log.d("PS IS NULL", "" + (parking_spots == null) );
-
-
                 }
-
-
             }
         }
         mMapView.getOverlays().add(folderOverlayParkingSpot);
@@ -642,7 +641,7 @@ public class MapFragment extends Fragment {
                     @Override
                     public boolean onClick(Polygon polygon, MapView mapView, GeoPoint eventPos) {
                         hideAllInfoWindow();
-                        mMapView.getController().animateTo(eventPos, DEFAULT_ZOOM_PARKING_SPOT, (long) 1000);
+                        mMapView.getController().animateTo(eventPos, DEFAULT_ZOOM_PARKING_SPOT, (long) DEFAULT_DELAY_ANIMATION);
                         polygon.setInfoWindowLocation(eventPos);
                         polygon.showInfoWindow();
                         return true;

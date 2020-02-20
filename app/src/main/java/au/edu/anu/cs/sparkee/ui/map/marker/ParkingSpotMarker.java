@@ -1,5 +1,7 @@
 package au.edu.anu.cs.sparkee.ui.map.marker;
 
+import android.util.Log;
+
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
@@ -22,37 +24,60 @@ public class ParkingSpotMarker extends Marker {
         this.parkingSpot = parkingSpot;
     }
 
-    public static int getMarkerIcon(int marker_status) {
+    public static int getMarkerIcon(int marker_status, int category) {
         int marker = R.drawable.unconfirmed_0;
-        switch (marker_status) {
-            case Constants.MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED:
-                marker = R.drawable.participate_unavailable_1;
-                break;
-            case Constants.MARKER_PARTICIPATION_AVAILABLE_RECEIVED:
-                marker = R.drawable.participate_available_1;
-                break;
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT:
-                marker = R.drawable.default_unavailable_3;
-                break;
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT:
-                marker = R.drawable.default_unavailable_2;
-                break;
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT:
-                marker = R.drawable.default_unavailable_1;
-                break;
-            case Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT:
-                marker = R.drawable.default_unconfirmed_0;
-                break;
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT:
-                marker = R.drawable.default_available_1;
-                break;
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT:
-                marker = R.drawable.default_available_2;
-                break;
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT:
-                marker = R.drawable.default_available_3;
-                break;
+        if(category == Constants.MARKER_PARKING_CATEGORY_DEFAULT) {
+            switch (marker_status) {
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT:
+                    marker = R.drawable.default_unavailable_3;
+                    break;
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT:
+                    marker = R.drawable.default_unavailable_2;
+                    break;
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT:
+                    marker = R.drawable.default_unavailable_1;
+                    break;
+                case Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT:
+                    marker = R.drawable.default_unconfirmed_0;
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT:
+                    marker = R.drawable.default_available_1;
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT:
+                    marker = R.drawable.default_available_2;
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT:
+                    marker = R.drawable.default_available_3;
+                    break;
+            }
         }
+        else if(category == Constants.MARKER_PARKING_CATEGORY_PARTICIPATION) {
+            switch (marker_status) {
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT:
+                    marker = R.drawable.participate_unavailable_3;
+                    break;
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT:
+                    marker = R.drawable.participate_unavailable_2;
+                    break;
+                case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT:
+                    marker = R.drawable.participate_unavailable_1;
+                    break;
+                case Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT:
+                    marker = R.drawable.participate_unconfirmed_0;
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT:
+                    marker = R.drawable.participate_available_1;
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT:
+                    marker = R.drawable.participate_available_2;
+                    break;
+                case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT:
+                    marker = R.drawable.participate_available_3;
+                    break;
+            }
+        }
+        Log.d("DIAKSES", "MARKER STATUS: " + marker_status + " PARTICIPATION:" + category);
+//        marker = R.drawable.participate_available_1;
         return marker;
     }
 

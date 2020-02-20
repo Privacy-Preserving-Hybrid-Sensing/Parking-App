@@ -74,6 +74,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
     String trx_id_subscribe = "";
     String trx_id_detail = "";
     String trx_id_credit = "";
+    private long DEFAULT_DELAY_ANIMATION = 100;
 
     public class InternalHTTPBroadcaseReceiver extends BroadcastReceiver {
         @Override
@@ -228,8 +229,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             @Override
             public void onClick(View view) {
                 if(parkingZone != null) {
-                    long speed = 1000;
-                    mMapView.getController().animateTo(parkingZone.getCenterGeopoint(), Constants.DEFAULT_ZOOM_PARKING_ZONE_MED, speed);
+                    mMapView.getController().animateTo(parkingZone.getCenterGeopoint(), Constants.DEFAULT_ZOOM_PARKING_ZONE_MED, DEFAULT_DELAY_ANIMATION);
                     onClose();
                 }
             }
@@ -262,8 +262,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             @Override
             public void onClick(View view) {
                 if(parkingZone != null) {
-                    long speed = 1000;
-                    mMapView.getController().animateTo(parkingZone.getCenterGeopoint(), Constants.DEFAULT_ZOOM_PARKING_ZONE_MED, speed);
+                    mMapView.getController().animateTo(parkingZone.getCenterGeopoint(), Constants.DEFAULT_ZOOM_PARKING_ZONE_MED, DEFAULT_DELAY_ANIMATION);
                     onClose();
                 }
 
