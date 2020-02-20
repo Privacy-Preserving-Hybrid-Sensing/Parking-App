@@ -683,6 +683,8 @@ public class MapFragment extends Fragment {
 
 
                 }
+
+
             }
         }
         mMapView.getOverlays().add(folderOverlayParkingSpot);
@@ -703,15 +705,16 @@ public class MapFragment extends Fragment {
                 final ParkingZonePolygon tmp_polygon = new ParkingZonePolygon(mMapView, parkingZones[i]);
                 tmp_polygon.setPoints(parkingZones[i].getGeoPoints());
                 tmp_polygon.setTitle(parkingZones[i].getName());
-                tmp_polygon.getOutlinePaint().setColor(Color.parseColor("#990000FF"));
+
+//                tmp_polygon.getOutlinePaint().setColor(Color.parseColor("#990000FF"));
                 tmp_polygon.getOutlinePaint().setStrokeWidth(2);
-                tmp_polygon.getFillPaint().setColor(Color.parseColor("#330000FF"));
+//                tmp_polygon.getFillPaint().setColor(Color.parseColor("#330000FF"));
 
                 ParkingZoneInfoWindow infoWindow = new ParkingZoneInfoWindow(
                         R.layout.bubble_parking_zone_layout,
                         mMapView,
                         this.device_uuid,
-                        parkingZones[i]
+                        tmp_polygon
                 );
 
                 tmp_polygon.setInfoWindow(infoWindow);

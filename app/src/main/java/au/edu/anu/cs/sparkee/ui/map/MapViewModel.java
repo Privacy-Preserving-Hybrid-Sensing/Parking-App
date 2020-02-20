@@ -440,25 +440,25 @@ public class MapViewModel extends AndroidViewModel {
         else {
             switch (parking_status) {
                 case -3:
-                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIRMED;
+                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT;
                     break;
                 case -2:
-                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2;
+                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT;
                     break;
                 case -1:
-                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1;
+                    marker_value = Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT;
                     break;
                 case 0:
-                    marker_value = Constants.MARKER_PARKING_UNCONFIRMED;
+                    marker_value = Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT;
                     break;
                 case 1:
-                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1;
+                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT;
                     break;
                 case 2:
-                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2;
+                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT;
                     break;
                 case 3:
-                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIRMED;
+                    marker_value = Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT;
                     break;
             }
         }

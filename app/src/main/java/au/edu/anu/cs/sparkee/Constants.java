@@ -9,7 +9,7 @@ public class Constants {
     public static final String URL_API_ZONES_INFO_ALL = "/api/zones/info/all";
     public static final String URL_API_ZONES_DETAIL = "/api/zones/detail";
     public static final String URL_API_ZONES_SUBSCRIBE = "/api/zones/subscribe";
-    public static final String URL_API_PROFILE_CREDIT = "/api/profile/credit";
+    public static final String URL_API_PROFILE_CREDIT = "/api/profile/creditbalance";
     public static final String URL_API_PARTICIPATE= "/api/participate";
 
     public static final String RABBIT_HOST = "ec2-3-133-91-181.us-east-2.compute.amazonaws.com";
@@ -47,13 +47,13 @@ public class Constants {
     public static final int MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED = -101;
     public static final int MARKER_PARTICIPATION_AVAILABLE_RECEIVED = 101;
 
-    public static final int MARKER_PARKING_UNCONFIRMED = 0;
-    public static final int MARKER_PARKING_AVAILABLE_CONFIDENT_1 = 1;
-    public static final int MARKER_PARKING_AVAILABLE_CONFIDENT_2 = 2;
-    public static final int MARKER_PARKING_AVAILABLE_CONFIRMED = 3;
+    public static final int MARKER_PARKING_UNCONFIRMED_DEFAULT = 0;
+    public static final int MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT = 1;
+    public static final int MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT = 2;
+    public static final int MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT = 3;
 
-    public static final int MARKER_PARKING_UNAVAILABLE_CONFIDENT_1 = -1;
-    public static final int MARKER_PARKING_UNAVAILABLE_CONFIDENT_2 = -2;
-    public static final int MARKER_PARKING_UNAVAILABLE_CONFIRMED = -3;
+    public static final int MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT = -1;
+    public static final int MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT = -2;
+    public static final int MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT = -3;
 
 }

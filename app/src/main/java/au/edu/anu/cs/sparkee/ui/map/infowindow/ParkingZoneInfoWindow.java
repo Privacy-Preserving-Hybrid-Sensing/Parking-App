@@ -4,22 +4,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
-import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
@@ -36,20 +37,21 @@ import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 import au.edu.anu.cs.sparkee.model.SParkeeJSONObject;
-
-import static android.text.InputType.TYPE_NULL;
+import au.edu.anu.cs.sparkee.ui.map.marker.ParkingZonePolygon;
 
 
 public class ParkingZoneInfoWindow extends InfoWindow {
 
     private String device_uuid;
+    private ParkingZonePolygon polygon;
     private ParkingZone parkingZone;
 
-    public ParkingZoneInfoWindow(int layoutResId, MapView mapView, String device_uuid, ParkingZone parkingZone) {
+    public ParkingZoneInfoWindow(int layoutResId, MapView mapView, String device_uuid, ParkingZonePolygon polygon) {
         super(layoutResId, mapView);
         Log.d("RESID", "" + layoutResId);
         this.device_uuid = device_uuid;
-        this.parkingZone = parkingZone;
+        this.polygon = polygon;
+        this.parkingZone = polygon.getParkingZone();
 
         httpReceiver = new ParkingZoneInfoWindow.InternalHTTPBroadcaseReceiver();
         httpIntentFilter = new IntentFilter(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
@@ -141,17 +143,17 @@ public class ParkingZoneInfoWindow extends InfoWindow {
                 JSONObject item = parkingSpots.getJSONObject(i);
                 total++;
                 switch (item.getInt("status")) {
-                    case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1:
-                    case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2:
-                    case Constants.MARKER_PARKING_UNCONFIRMED:
-                    case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1:
-                    case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2:
+                    case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT:
+                    case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT:
+                    case Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT:
+                    case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT:
+                    case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT:
                         undefined++;
                         break;
-                    case Constants.MARKER_PARKING_AVAILABLE_CONFIRMED:
+                    case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT:
                         available++;
                         break;
-                    case Constants.MARKER_PARKING_UNAVAILABLE_CONFIRMED:
+                    case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT:
                         unavailable++;
                         break;
                 }
@@ -174,6 +176,13 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             txtParkingSpotAvailable.setText("" + available);
             txtParkingSpotUnavailable.setText("" + unavailable);
             txtParkingSpotUndefined.setText("" + undefined);
+
+            int polygon_color = ParkingZonePolygon.getPolygonColor(total, available);
+            int colorColor = ContextCompat.getColor(mView.getContext(), polygon_color);
+//            polygon.setFillColor(polygon_color);
+//            polygon.getOutlinePaint().setColor(polygon_color);
+//            polygon.getOutlinePaint().setStrokeWidth(2);
+            polygon.getFillPaint().setColor( colorColor );
 
         }
 

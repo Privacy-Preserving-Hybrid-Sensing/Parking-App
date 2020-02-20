@@ -31,25 +31,25 @@ public class ParkingSpotMarker extends Marker {
             case Constants.MARKER_PARTICIPATION_AVAILABLE_RECEIVED:
                 marker = R.drawable.participate_available_1;
                 break;
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIRMED:
+            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT:
                 marker = R.drawable.default_unavailable_3;
                 break;
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2:
+            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT:
                 marker = R.drawable.default_unavailable_2;
                 break;
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1:
+            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT:
                 marker = R.drawable.default_unavailable_1;
                 break;
-            case Constants.MARKER_PARKING_UNCONFIRMED:
+            case Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT:
                 marker = R.drawable.default_unconfirmed_0;
                 break;
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1:
+            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT:
                 marker = R.drawable.default_available_1;
                 break;
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2:
+            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT:
                 marker = R.drawable.default_available_2;
                 break;
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIRMED:
+            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT:
                 marker = R.drawable.default_available_3;
                 break;
         }
@@ -65,22 +65,22 @@ public class ParkingSpotMarker extends Marker {
             case Constants.MARKER_PARTICIPATION_AVAILABLE_RECEIVED:
                 tmp_status = "Participate: Available";
                 break;
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIRMED:
+            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT:
                 tmp_status = "Unavailable";
                 break;
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2:
-            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1:
+            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_2_DEFAULT:
+            case Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_1_DEFAULT:
                 tmp_status = "Unavailable ("+ tmp_confidence +"%)";
                 tmp_status = "Unavailable ("+ tmp_confidence +"%)";
                 break;
-            case Constants.MARKER_PARKING_UNCONFIRMED:
+            case Constants.MARKER_PARKING_UNCONFIRMED_DEFAULT:
                 tmp_status = "Unconfirmed";
                 break;
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1:
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2:
+            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_1_DEFAULT:
+            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_2_DEFAULT:
                 tmp_status = "Available ("+ tmp_confidence +"%)";
                 break;
-            case Constants.MARKER_PARKING_AVAILABLE_CONFIRMED:
+            case Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT:
                 tmp_status = "Available";
                 break;
         }

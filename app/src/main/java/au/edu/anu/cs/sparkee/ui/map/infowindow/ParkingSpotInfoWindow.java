@@ -85,7 +85,15 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         PrettyTime p = new PrettyTime();
         String date_str = ts_update.atZone(ZoneId.systemDefault()).toLocalDate().toString();
         String time_str = ts_update.atZone(ZoneId.systemDefault()).toLocalTime().toString();
-        String time_pretty = p.format(Timestamp.valueOf( date_str + " " + time_str ));
+        String time_pretty = "-";
+        try {
+            time_pretty = p.format(Timestamp.valueOf( date_str + " " + time_str ));
+        }
+        catch(IllegalArgumentException iae) {
+            iae.printStackTrace();
+            Log.d("ERR", "Time Problem");
+        }
+
         txtSlotName.setText( parkingSpotMarker.getParkingSpot().getName() );
         txtZoneName.setText( "at " + parkingSpotMarker.getParkingSpot().getZone_name() );
         txtBubbleStatus.setText("Status: " + status);
@@ -105,8 +113,8 @@ public class ParkingSpotInfoWindow extends InfoWindow {
                 Log.d("Btn", "Available");
                 close();
                 send("available");
-                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_available_1));
-                mMapView.invalidate();
+//                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_available_1));
+//                mMapView.invalidate();
             }
         });
 
@@ -117,8 +125,8 @@ public class ParkingSpotInfoWindow extends InfoWindow {
                 Log.d("Btn", "Unavailable");
                 close();
                 send("unavailable");
-                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_unavailable_1));
-                mMapView.invalidate();
+//                parkingSpotMarker.setIcon(mMapView.getResources().getDrawable(R.drawable.participate_unavailable_1));
+//                mMapView.invalidate();
 
             }
         });
