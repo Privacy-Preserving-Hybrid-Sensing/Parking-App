@@ -209,7 +209,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
                 parkingSpotMarker.setIcon(iconDrawable);
                 mMapView.invalidate();
 
-                Toast.makeText(getMapView().getContext(), jo.getMsg(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(getMapView().getContext(), jo.getMsg(), Toast.LENGTH_LONG).show();
             }
         }
         void onError(String msg) {

@@ -239,7 +239,7 @@ public class MapViewModel extends AndroidViewModel {
 
                 JSONArray parking_spots = parking_data_obj.getJSONArray("parking_spots");
 //                Log.d("VS VS", existing_pz.getTs_update().toString() + " vs " + ts_update.toString() + " STATUS: " + existing_pz.getTs_update().isBefore(ts_update));
-                if(existing_pz  != null && parking_spots.length() > 0) { // && existing_pz.getTs_update().isBefore(ts_update) ) {
+                if(existing_pz  != null && parking_spots.length() > 0 && existing_pz.getParking_spots() == null ) {
                     existing_pz.setAuthorized(authorized);
                     existing_pz.setTs_update(ts_update);
 
@@ -271,6 +271,7 @@ public class MapViewModel extends AndroidViewModel {
                         tmp_parking_spot.setMarker_status(marker_value);
                         tmp_parking_spot.setParking_status( obj_parking_spot.getInt("status") );
                         tmp_parking_spot.setConfidence_level(obj_parking_spot.getDouble("confidence_level") );
+
                         new_parking_spots[j] = tmp_parking_spot;
 
                     }

@@ -74,7 +74,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
     String trx_id_subscribe = "";
     String trx_id_detail = "";
     String trx_id_credit = "";
-    private long DEFAULT_DELAY_ANIMATION = 100;
+    private long DEFAULT_DELAY_ANIMATION = 500;
 
     public class InternalHTTPBroadcaseReceiver extends BroadcastReceiver {
         @Override
@@ -272,9 +272,10 @@ public class ParkingZoneInfoWindow extends InfoWindow {
         mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
 
 
-        url_identifier_detail = Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
-        trx_id_detail =  HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier_detail, device_uuid);
-
+        if(parkingZone.getParking_spots() == null ) {
+            url_identifier_detail = Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
+            trx_id_detail = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier_detail, device_uuid);
+        }
     }
 
     private String textNewlinePrettyFormatting(String txt, int length_per_line) {

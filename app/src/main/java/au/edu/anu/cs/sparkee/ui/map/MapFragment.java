@@ -85,13 +85,13 @@ public class MapFragment extends Fragment {
     private MyLocationNewOverlay mLocationOverlay;
 
     protected static final int DEFAULT_INACTIVITY_DELAY_IN_MILLISECS = 200;
-    protected static final double MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE = 19;
+    protected static final double MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE = 19.9;
 
     private Context context;
     private String DEFAULT_LON = "149.120385";
     private String DEFAULT_LAT = "-35.275514";
 
-    private long DEFAULT_DELAY_ANIMATION = 100;
+    private long DEFAULT_DELAY_ANIMATION = 500;
 
 //    private double DEFAULT_ZOOM_PARKING_ZONE_FAR = 18.0;
 //    private double DEFAULT_ZOOM_PARKING_SPOT = 22.0;
@@ -236,22 +236,13 @@ public class MapFragment extends Fragment {
         addHandleMapEvent();
         addOverlayRotation();
 
-//        getParkingZones();
-
         markers = new HashMap<>();
         polygons = new HashMap<>();
     }
 
     private boolean initGPS;
-//    private boolean initAMQP;
     private boolean initHTTP;
 
-//    private void evaluateInitView() {
-//        if(! ( initGPS || initHTTP)) { // && initAMQP
-//            isInitView = false;
-//            Toast.makeText(context, "Initializing ...", Toast.LENGTH_LONG).show();
-//        }
-//    }
 
     private int creditValue;
 //    public void getParkingZones() {
