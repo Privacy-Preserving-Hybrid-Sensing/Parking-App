@@ -13,13 +13,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.rabbitmq.client.AlreadyClosedException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -27,16 +25,13 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZoneId;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
 import java.sql.Timestamp;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
 import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
-import au.edu.anu.cs.sparkee.model.SParkeeJSONObject;
+import au.edu.anu.cs.sparkee.model.SParkeeJSONArrayData;
 import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSpotMarker;
 
 public class ParkingSpotInfoWindow extends InfoWindow {
@@ -168,7 +163,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             Log.d("SPOT", msg);
             if (status.equalsIgnoreCase(Constants.BROADCAST_HTTP_STATUS_OK)) {
                 try {
-                    onSuccess(SParkeeJSONObject.parse(msg));
+                    onSuccess(SParkeeJSONArrayData.parse(msg));
                 } catch (JSONException je) {
                     je.printStackTrace();
                 }
@@ -184,14 +179,14 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             }
         }
 
-        void onSuccess(SParkeeJSONObject jo) throws JSONException {
+        void onSuccess(SParkeeJSONArrayData jo) throws JSONException {
             Log.d("SPOT TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
             if(jo.getPath().startsWith(Constants.URL_API_PARTICIPATE) && jo.getTrx_id().equalsIgnoreCase(trx_id_detail)) {
                 processParticipation(jo);
             }
         }
 
-        void processParticipation(SParkeeJSONObject jo) throws  JSONException {
+        void processParticipation(SParkeeJSONArrayData jo) throws  JSONException {
             Log.d("JSON SUBSCRIBE", jo.getStatus() );
             if(jo.getStatus().equalsIgnoreCase("OK")) {
                 JSONArray ja = jo.getData();

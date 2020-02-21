@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -36,7 +35,7 @@ import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
-import au.edu.anu.cs.sparkee.model.SParkeeJSONObject;
+import au.edu.anu.cs.sparkee.model.SParkeeJSONArrayData;
 import au.edu.anu.cs.sparkee.ui.map.marker.ParkingZonePolygon;
 
 
@@ -68,7 +67,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
 
     }
 
-    private String url_identifier_detail;
+    private String url_identifier_subscribe;
     private String url_identifier_credit;
 
     String trx_id_subscribe = "";
@@ -84,7 +83,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             String status = bundle.getString(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER);
             if (status.equalsIgnoreCase(Constants.BROADCAST_HTTP_STATUS_OK)) {
                 try {
-                    onSuccess(SParkeeJSONObject.parse(msg));
+                    onSuccess(SParkeeJSONArrayData.parse(msg));
                 } catch (JSONException je) {
                     je.printStackTrace();
                 }
@@ -93,8 +92,8 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             }
         }
 
-        void onSuccess(SParkeeJSONObject jo) throws JSONException {
-            Log.d("PATH", jo.getPath() + " vs " + url_identifier_detail);
+        void onSuccess(SParkeeJSONArrayData jo) throws JSONException {
+            Log.d("PATH", jo.getPath() + " vs " + url_identifier_subscribe);
             Log.d("ZONE TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
             if(jo.getPath().startsWith(Constants.URL_API_ZONES_DETAIL) && jo.getTrx_id().equalsIgnoreCase(trx_id_detail)) {
                 processZoneDetail(jo);
@@ -105,17 +104,13 @@ public class ParkingZoneInfoWindow extends InfoWindow {
 
         }
 
-        void processZoneSubscribe(SParkeeJSONObject jo) throws  JSONException {
+        void processZoneSubscribe(SParkeeJSONArrayData jo) throws  JSONException {
             Log.d("JSON SUBSCRIBE", jo.getStatus() );
             if(jo.getStatus().equalsIgnoreCase("OK")) {
                 JSONArray ja = jo.getData();
                 JSONObject obj_zone = ja.getJSONObject(0);
                 Log.d("OBJ ZONE", obj_zone.toString());
                 parkingZone.setAuthorized(true);
-
-                url_identifier_detail = Constants.BASE_URL + Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
-                trx_id_detail  = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(url_identifier_detail, device_uuid);
-                Log.d("trx_id_detail", trx_id_detail);
 
 
                 url_identifier_credit = Constants.BASE_URL + Constants.URL_API_PROFILE_CREDIT;
@@ -128,7 +123,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
             }
         }
 
-        void processZoneDetail(SParkeeJSONObject jo) throws  JSONException{
+        void processZoneDetail(SParkeeJSONArrayData jo) throws  JSONException{
 
             Log.d("DEB", "PPPPPPPPPPPPPPPPPPPP");
             if (mView==null) {
@@ -247,10 +242,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
                 @Override
                 public void onClick(View view) {
                     Log.d("Btn", "Use Credit");
-
-                    url_identifier_detail = Constants.URL_API_ZONES_SUBSCRIBE+ "/" + parkingZone.getId();
-                    trx_id_subscribe = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier_detail, device_uuid);
-
+                    requestZoneSubscribe();
                     onClose();
                 }
             });
@@ -261,6 +253,10 @@ public class ParkingZoneInfoWindow extends InfoWindow {
         bubble_parking_zone_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
+                requestZoneDetail();
+
                 if(parkingZone != null) {
                     mMapView.getController().animateTo(parkingZone.getCenterGeopoint(), Constants.DEFAULT_ZOOM_PARKING_ZONE_MED, DEFAULT_DELAY_ANIMATION);
                     onClose();
@@ -273,11 +269,19 @@ public class ParkingZoneInfoWindow extends InfoWindow {
 
 
         if(parkingZone.getParking_spots() == null ) {
-            url_identifier_detail = Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
-            trx_id_detail = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier_detail, device_uuid);
+            requestZoneDetail();
         }
     }
 
+    private void requestZoneDetail() {
+        url_identifier_subscribe = Constants.BASE_URL + Constants.URL_API_ZONES_DETAIL + "/" + parkingZone.getId();
+        trx_id_detail  = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(url_identifier_subscribe, device_uuid);
+        Log.d("trx_id_detail", trx_id_detail);
+    }
+    private void requestZoneSubscribe() {
+        url_identifier_subscribe = Constants.URL_API_ZONES_SUBSCRIBE+ "/" + parkingZone.getId();
+        trx_id_subscribe = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(Constants.BASE_URL + url_identifier_subscribe, device_uuid);
+    }
     private String textNewlinePrettyFormatting(String txt, int length_per_line) {
         StringTokenizer st = new StringTokenizer(txt);
         int cnt_tokens = st.countTokens();

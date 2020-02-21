@@ -1,12 +1,10 @@
 package au.edu.anu.cs.sparkee.model;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SParkeeJSONObject {
+public class SParkeeJSONArrayData {
     public String getStatus() {
         return status;
     }
@@ -54,7 +52,7 @@ public class SParkeeJSONObject {
     String trx_id;
     JSONArray data;
 
-    public SParkeeJSONObject(String status, String path, String msg, JSONArray ja, String trx_id) {
+    public SParkeeJSONArrayData(String status, String path, String msg, JSONArray ja, String trx_id) {
         this.status = status;
         this.msg = msg;
         this.path = path;
@@ -62,13 +60,13 @@ public class SParkeeJSONObject {
         this.trx_id =trx_id;
     }
 
-    public static SParkeeJSONObject parse(String json) throws JSONException {
+    public static SParkeeJSONArrayData parse(String json) throws JSONException {
         JSONObject jo = new JSONObject(json);
         String status = jo.getString("status");
         String path = jo.getString("path");
         String msg = jo.getString("msg");
         String trx_id= jo.getString("trx_id");
         JSONArray ja = jo.getJSONArray("data");
-        return  new SParkeeJSONObject(status, path, msg, ja, trx_id);
+        return  new SParkeeJSONArrayData(status, path, msg, ja, trx_id);
     }
 }

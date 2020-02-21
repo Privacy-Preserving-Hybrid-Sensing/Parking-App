@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -38,7 +37,7 @@ import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
 import au.edu.anu.cs.sparkee.model.ParkingSpot;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 import au.edu.anu.cs.sparkee.model.ParticipantCredit;
-import au.edu.anu.cs.sparkee.model.SParkeeJSONObject;
+import au.edu.anu.cs.sparkee.model.SParkeeJSONArrayData;
 
 public class MapViewModel extends AndroidViewModel {
 
@@ -187,7 +186,7 @@ public class MapViewModel extends AndroidViewModel {
             if(status.equalsIgnoreCase(Constants.BROADCAST_HTTP_STATUS_OK)) {
                 try {
                     Log.d("MSG", msg);
-                    onSuccess(SParkeeJSONObject.parse(msg));
+                    onSuccess(SParkeeJSONArrayData.parse(msg));
                 } catch (JSONException je) {
                     je.printStackTrace();
                 }
@@ -197,7 +196,7 @@ public class MapViewModel extends AndroidViewModel {
             }
         }
 
-        void onSuccess(SParkeeJSONObject jo) throws JSONException{
+        void onSuccess(SParkeeJSONArrayData jo) throws JSONException{
             JSONArray data = jo.getData();
             if(jo.getPath().equalsIgnoreCase(Constants.URL_API_ZONES_INFO_ALL)) {
                 process_parking_zones(data);
@@ -217,6 +216,7 @@ public class MapViewModel extends AndroidViewModel {
         }
 
         void process_profile_credit(JSONArray ja) throws  JSONException {
+            Log.d("CREDIT?", "OKE");
             JSONObject jo = ja.getJSONObject(0);
             int credit_value = jo.getInt("credit_value");
             creditValue.setValue(credit_value);

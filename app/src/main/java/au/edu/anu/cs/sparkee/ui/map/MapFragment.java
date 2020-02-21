@@ -93,9 +93,6 @@ public class MapFragment extends Fragment {
 
     private long DEFAULT_DELAY_ANIMATION = 500;
 
-//    private double DEFAULT_ZOOM_PARKING_ZONE_FAR = 18.0;
-//    private double DEFAULT_ZOOM_PARKING_SPOT = 22.0;
-
     private String device_uuid;
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
 
@@ -105,10 +102,24 @@ public class MapFragment extends Fragment {
         return mMapView;
     }
 
+    private boolean initGPS;
+    private boolean initHTTP;
+
+
+    private int creditValue;
+    IntentFilter intentFilter;
+
+    private HashMap<Integer, ParkingSpotMarker> markers;
+
+    private SharedPreferences sharedPref;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_map, null);
+        context = this.getActivity();
+        sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+        device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
+
         mMapView = v.findViewById(R.id.mapview);
         mMapView.setTilesScaledToDpi(true);
         mMapView.setMultiTouchControls(true);
@@ -122,12 +133,7 @@ public class MapFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
-        this.context = this.getActivity();
-        final DisplayMetrics dm = context.getResources().getDisplayMetrics();
-
-        SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
-        device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
-
+//        final DisplayMetrics dm = context.getResources().getDisplayMetrics();
 
         double map_lon =  Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_LON, DEFAULT_LON));
         double map_lat = Double.parseDouble(sharedPref.getString(Constants.CURRENT_LOCATION_LAT, DEFAULT_LAT));
@@ -147,8 +153,6 @@ public class MapFragment extends Fragment {
             @Override
             public void onChanged(@Nullable Boolean stat) {
                 initHTTP = stat;
-//                evaluateInitView();
-
                 if(stat == Boolean.FALSE)
                     Toast.makeText(context, "Connecting to server (retrying)...", Toast.LENGTH_SHORT).show();
             }
@@ -168,25 +172,10 @@ public class MapFragment extends Fragment {
                     mMapView.getOverlays().add(mLocationOverlay);
                 }
                 initGPS = true;
-//                evaluateInitView();
             }
             }
         });
 
-        // TODO:
-        // 1. Get Parking Zones
-//        mapViewModel.getParkingSlots().observe( getViewLifecycleOwner(), new Observer<ParkingSpot[]>() {
-//
-//            @Override
-//            public void onChanged(@Nullable ParkingSpot[] parkingSlots) {
-//                if(parkingSlots != null) {
-//                    Log.d("BANYAK PARKING SLOTS", "" + parkingSlots.length);
-//                    modifyParkingSlots(parkingSlots);
-//                }
-//            }
-//        });
-//
-//
         mapViewModel.getParkingZones().observe( getViewLifecycleOwner(), new Observer<ParkingZone[]>() {
 
             @Override
@@ -220,7 +209,6 @@ public class MapFragment extends Fragment {
         mapViewModel.startViewModel();
 
         btCenterMap = view.findViewById(R.id.ic_center_map);
-
         btCenterMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -237,48 +225,8 @@ public class MapFragment extends Fragment {
         addOverlayRotation();
 
         markers = new HashMap<>();
-        polygons = new HashMap<>();
+
     }
-
-    private boolean initGPS;
-    private boolean initHTTP;
-
-
-    private int creditValue;
-//    public void getParkingZones() {
-//        mapViewModel.getParkingZones();
-//    }
-//    public void sendCurrentPosition() {
-//        try {
-//            JSONObject jo = new JSONObject();
-//            jo.put("action", "participant_location");
-//            jo.put("device_uuid", device_uuid);
-//            jo.put("device_type", Constants.DEVICE_TYPE);
-//            jo.put("msg", "Contributor Location Changed");
-//            jo.put("lon", currentLocation.getLongitude());
-//            jo.put("lat", currentLocation.getLatitude());
-//            amqpConnectionHelper.send(jo);
-//        }
-//        catch (AlreadyClosedException ace) {
-//            ace.printStackTrace();
-//        }
-//        catch (SocketException se) {
-//            se.printStackTrace();
-//        }
-//        catch (NullPointerException npe) {
-//            npe.printStackTrace();
-//        }
-//        catch(UnsupportedEncodingException uee) {
-//            uee.printStackTrace();
-//        }
-//        catch (IOException ioe) {
-//            ioe.printStackTrace();
-//        }
-//        catch (JSONException je) {
-//            je.printStackTrace();
-//        }
-//    }
-
 
     public void addOverlayRotation(){
 
@@ -327,16 +275,12 @@ public class MapFragment extends Fragment {
 
     }
 
-    IntentFilter intentFilter;
-
     @Override
     public void onPause() {
         super.onPause();
         mapViewModel.stopViewModel();
     }
 
-    private HashMap<Integer, ParkingSpotMarker> markers;
-    private HashMap<Integer, Polygon> polygons;
 
     public ParkingSpotMarker setParkingSpotAsMarker(MapView view, ParkingSpot parkingSpot) {
         ParkingSpotMarker m = new ParkingSpotMarker(view, parkingSpot);
@@ -431,12 +375,9 @@ public class MapFragment extends Fragment {
             @Override
             public boolean onScroll(ScrollEvent event) {
                 IGeoPoint map_center = event.getSource().getMapCenter();
-                SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 double lon = map_center.getLongitude();
                 double lat = map_center.getLatitude();
-//                Log.d("CENTER LON", "" + lon);
-//                Log.d("CENTER LAT", "" + lat);
                 editor.putString(Constants.CURRENT_LOCATION_LON, "" + lon);
                 editor.putString(Constants.CURRENT_LOCATION_LAT, "" + lat);
                 editor.commit();
@@ -447,27 +388,18 @@ public class MapFragment extends Fragment {
 
             @Override
             public boolean onZoom(ZoomEvent event) {
-//                double zoom_level = event.getZoomLevel();
-//                SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
-//                SharedPreferences.Editor editor = sharedPref.edit();
-//                editor.putString(Constants.CURRENT_LOCATION_ZOOM, "" + zoom_level);
-//                editor.commit();
                 return true;
             }
         }, DEFAULT_INACTIVITY_DELAY_IN_MILLISECS));
 
         mMapView.addMapListener(new MapListener() {
-
             @Override
             public boolean onScroll(ScrollEvent event) {
                 return true;
             }
 
-
-
             @Override
             public boolean onZoom(ZoomEvent event) {
-//                Log.d("ZOOM TO", "" + event.getZoomLevel());
                 double zoom_level = event.getZoomLevel();
 
                 if(zoom_level > MIN_ZOOM_LEVEL_TO_SHOW_BUBBLE) {
@@ -572,20 +504,14 @@ public class MapFragment extends Fragment {
                 ParkingZonePolygon polygon = findParkingZoneByID(id);
                 if(polygon != null) {
 
-                    ParkingZone existing_pz = polygon.getParkingZone();
-                    boolean authorized = parkingZones[k].isAuthorized();
-                    LocalDateTime new_ts_update = parkingZones[k].getTs_update();
                     ParkingSpot [] parking_spots = parkingZones[k].getParking_spots();
-
-                    existing_pz = parkingZones[k];
+                    ParkingZone existing_pz = parkingZones[k];
                     polygon.setParkingZone(existing_pz);
-
 
                     if(parking_spots != null) {
                         for(int i=0; i < parking_spots.length; i++) {
                             int new_id = parking_spots[i].getId();
                             int new_parking_status = parking_spots[i].getParking_status();
-                            ParkingSpotMarker existing_marker = markers.get(new_id);
 
                             ParkingSpotMarker new_marker = setParkingSpotAsMarker(mMapView, parking_spots[i]);
                             folderOverlayParkingSpot.add(new_marker);
@@ -615,10 +541,7 @@ public class MapFragment extends Fragment {
                 final ParkingZonePolygon tmp_polygon = new ParkingZonePolygon(mMapView, parkingZones[i]);
                 tmp_polygon.setPoints(parkingZones[i].getGeoPoints());
                 tmp_polygon.setTitle(parkingZones[i].getName());
-
-//                tmp_polygon.getOutlinePaint().setColor(Color.parseColor("#990000FF"));
                 tmp_polygon.getOutlinePaint().setStrokeWidth(2);
-//                tmp_polygon.getFillPaint().setColor(Color.parseColor("#330000FF"));
 
                 ParkingZoneInfoWindow infoWindow = new ParkingZoneInfoWindow(
                         R.layout.bubble_parking_zone_layout,
@@ -654,87 +577,87 @@ public class MapFragment extends Fragment {
     }
 
     public void addLocalDatastore() {
-        if (datastore == null)
-            datastore = new OSMBookmarkDatastore(this);
+//        if (datastore == null)
+//            datastore = new OSMBookmarkDatastore(this);
     }
 
-    private void showDialog(GeoPoint p) {
-        if (addBookmark!=null)
-            addBookmark.dismiss();
-
-        //TODO prompt for user input
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-
-        View view = View.inflate(getContext(), R.layout.bookmark_add_dialog, null);
-        builder.setView(view);
-        final TextView lat = view.findViewById(R.id.bookmark_lat);
-        lat.setText(p.getLatitude() + "");
-        final TextView lon = view.findViewById(R.id.bookmark_lon);
-        lon.setText(p.getLongitude() + "");
-
-        Log.d("DialogLong", "" + p.getLongitude());
-        Log.d("DialogLat", "" + p.getLatitude());
-        view.findViewById(R.id.bookmark_cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addBookmark.dismiss();
-            }
-        });
-
-        view.findViewById(R.id.bookmark_ok).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            boolean valid = true;
-            double latD = 0;
-            double lonD = 0;
-
-            //basic validate input
-            try {
-                latD = Double.parseDouble(lat.getText().toString());
-                lonD = Double.parseDouble(lon.getText().toString());
-            } catch (Exception ex) {
-                valid = false;
-            }
-
-            if (!mMapView.getTileSystem().isValidLatitude(latD))
-                valid = false;
-            if (!mMapView.getTileSystem().isValidLongitude(lonD))
-                valid = false;
-
-            if (valid) {
-                ParkingSpot newParkingSpot = new ParkingSpot();
-
-                ParkingSpotMarker m = new ParkingSpotMarker(mMapView, newParkingSpot);
-                m.setId(UUID.randomUUID().toString());
-                m.setTitle(UUID.randomUUID().toString());
-                m.setSubDescription(UUID.randomUUID().toString());
-                m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_0));
-
-                GeoPoint geoPoint = new GeoPoint(latD, lonD);
-                m.setPosition(geoPoint);
-                String tmp_status = "Unconfirmed (confidence 60%)";
-                ParkingSpotInfoWindow infoWindow = new ParkingSpotInfoWindow(
-                    R.layout.bubble_parking_spot_layout,
-                    mMapView,
-                    geoPoint,
-                    device_uuid,
-                    tmp_status,
-                    LocalDateTime.now(),
-                    m
-                );
-
-                m.setInfoWindow(infoWindow);
-                m.setSnippet(m.getPosition().toDoubleString());
-                datastore.addBookmark(m);
-                mMapView.getOverlayManager().add(m);
-                mMapView.invalidate();
-                addNewData(geoPoint);
-            }
-            addBookmark.dismiss();
-            }
-        });
-        addBookmark = builder.show();
-    }
+//    private void showDialog(GeoPoint p) {
+//        if (addBookmark!=null)
+//            addBookmark.dismiss();
+//
+//        //TODO prompt for user input
+//        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+//
+//        View view = View.inflate(getContext(), R.layout.bookmark_add_dialog, null);
+//        builder.setView(view);
+//        final TextView lat = view.findViewById(R.id.bookmark_lat);
+//        lat.setText(p.getLatitude() + "");
+//        final TextView lon = view.findViewById(R.id.bookmark_lon);
+//        lon.setText(p.getLongitude() + "");
+//
+//        Log.d("DialogLong", "" + p.getLongitude());
+//        Log.d("DialogLat", "" + p.getLatitude());
+//        view.findViewById(R.id.bookmark_cancel).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                addBookmark.dismiss();
+//            }
+//        });
+//
+//        view.findViewById(R.id.bookmark_ok).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//            boolean valid = true;
+//            double latD = 0;
+//            double lonD = 0;
+//
+//            //basic validate input
+//            try {
+//                latD = Double.parseDouble(lat.getText().toString());
+//                lonD = Double.parseDouble(lon.getText().toString());
+//            } catch (Exception ex) {
+//                valid = false;
+//            }
+//
+//            if (!mMapView.getTileSystem().isValidLatitude(latD))
+//                valid = false;
+//            if (!mMapView.getTileSystem().isValidLongitude(lonD))
+//                valid = false;
+//
+//            if (valid) {
+//                ParkingSpot newParkingSpot = new ParkingSpot();
+//
+//                ParkingSpotMarker m = new ParkingSpotMarker(mMapView, newParkingSpot);
+//                m.setId(UUID.randomUUID().toString());
+//                m.setTitle(UUID.randomUUID().toString());
+//                m.setSubDescription(UUID.randomUUID().toString());
+//                m.setIcon(getResources().getDrawable(R.drawable.unconfirmed_0));
+//
+//                GeoPoint geoPoint = new GeoPoint(latD, lonD);
+//                m.setPosition(geoPoint);
+//                String tmp_status = "Unconfirmed (confidence 60%)";
+//                ParkingSpotInfoWindow infoWindow = new ParkingSpotInfoWindow(
+//                    R.layout.bubble_parking_spot_layout,
+//                    mMapView,
+//                    geoPoint,
+//                    device_uuid,
+//                    tmp_status,
+//                    LocalDateTime.now(),
+//                    m
+//                );
+//
+//                m.setInfoWindow(infoWindow);
+//                m.setSnippet(m.getPosition().toDoubleString());
+//                datastore.addBookmark(m);
+//                mMapView.getOverlayManager().add(m);
+//                mMapView.invalidate();
+//                addNewData(geoPoint);
+//            }
+//            addBookmark.dismiss();
+//            }
+//        });
+//        addBookmark = builder.show();
+//    }
 
 
 }

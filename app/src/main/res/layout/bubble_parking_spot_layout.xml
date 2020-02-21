@@ -74,7 +74,7 @@ android:orientation="vertical">
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Change to Available"
-            android:theme="@style/AppTheme.BlueButton" />
+            android:theme="@style/AppTheme.GreenRipple" />
 
         <Button
             android:id="@+id/bubble_unavailable"
@@ -82,7 +82,7 @@ android:orientation="vertical">
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Change to Unavailable"
-            android:theme="@style/AppTheme.BlackButton" />
+            android:theme="@style/AppTheme.RedButton" />
 
     </LinearLayout>
 
