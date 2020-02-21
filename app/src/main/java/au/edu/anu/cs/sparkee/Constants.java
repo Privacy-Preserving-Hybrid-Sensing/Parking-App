@@ -27,11 +27,11 @@ public class Constants {
 
     public static final String DEFAULT_PARTICIPANT_TO_SERVER_ROUTING_KEY = "PARTICIPANT_TO_SERVER";
     public static final String BROADCAST_AMQP_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.AMQP";
-    public static final String BROADCAST_HTTP_RESPONSE_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.HTTP.response";
+    public static final String BROADCAST_DATA_HELPER_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.HTTP.response";
     public static final String BROADCAST_HTTP_BODY_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.HTTP.body";
-    public static final String BROADCAST_HTTP_STATUS_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.HTTP.status";
-    public static final String BROADCAST_HTTP_STATUS_OK = "au.edu.anu.cs.sparkee.broadcast.HTTP.status.OK";
-    public static final String BROADCAST_HTTP_STATUS_ERR = "au.edu.anu.cs.sparkee.broadcast.HTTP.status.ERR";
+    public static final String BROADCAST_DATA_STATUS_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.HTTP.status";
+    public static final String BROADCAST_STATUS_OK = "au.edu.anu.cs.sparkee.broadcast.HTTP.status.OK";
+    public static final String BROADCAST_STATUS_ERR = "au.edu.anu.cs.sparkee.broadcast.HTTP.status.ERR";
 
     public static final String CURRENT_LOCATION_LON = "au.edu.anu.cs.sparkee.current.location.lon";
     public static final String CURRENT_LOCATION_LAT = "au.edu.anu.cs.sparkee.current.location.lat";

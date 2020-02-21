@@ -149,7 +149,7 @@ public class MapViewModel extends AndroidViewModel {
         amqpIntentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
 
         httpReceiver = new InternalHTTPBroadcaseReceiver();
-        httpIntentFilter = new IntentFilter(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
+        httpIntentFilter = new IntentFilter(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
     }
 
     public LiveData<Integer> getCreditValue() {
@@ -182,8 +182,8 @@ public class MapViewModel extends AndroidViewModel {
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             String msg = bundle.getString(Constants.BROADCAST_HTTP_BODY_IDENTIFIER);
-            String status = bundle.getString(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER);
-            if(status.equalsIgnoreCase(Constants.BROADCAST_HTTP_STATUS_OK)) {
+            String status = bundle.getString(Constants.BROADCAST_DATA_STATUS_IDENTIFIER);
+            if(status.equalsIgnoreCase(Constants.BROADCAST_STATUS_OK)) {
                 try {
                     Log.d("MSG", msg);
                     onSuccess(SParkeeJSONArrayData.parse(msg));

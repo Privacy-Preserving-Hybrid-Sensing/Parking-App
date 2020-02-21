@@ -51,7 +51,7 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         this.parkingSpotMarker = parkingSpotMarker;
 
         httpReceiver = new ParkingSpotInfoWindow.InternalHTTPBroadcaseReceiver();
-        httpIntentFilter = new IntentFilter(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
+        httpIntentFilter = new IntentFilter(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
     }
 
 
@@ -159,9 +159,9 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             String msg = bundle.getString(Constants.BROADCAST_HTTP_BODY_IDENTIFIER);
-            String status = bundle.getString(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER);
+            String status = bundle.getString(Constants.BROADCAST_DATA_STATUS_IDENTIFIER);
             Log.d("SPOT", msg);
-            if (status.equalsIgnoreCase(Constants.BROADCAST_HTTP_STATUS_OK)) {
+            if (status.equalsIgnoreCase(Constants.BROADCAST_STATUS_OK)) {
                 try {
                     onSuccess(SParkeeJSONArrayData.parse(msg));
                 } catch (JSONException je) {

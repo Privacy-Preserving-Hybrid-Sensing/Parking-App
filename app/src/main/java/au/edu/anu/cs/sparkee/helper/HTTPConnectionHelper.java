@@ -5,17 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,8 +38,8 @@ public class HTTPConnectionHelper extends IntentService {
         @Override
         public void onResponse(String msg) {
             Intent intent = new Intent();
-            intent.setAction(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
-            intent.putExtra(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER, Constants.BROADCAST_HTTP_STATUS_OK);
+            intent.setAction(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
+            intent.putExtra(Constants.BROADCAST_DATA_STATUS_IDENTIFIER, Constants.BROADCAST_STATUS_OK);
             intent.putExtra(Constants.BROADCAST_HTTP_BODY_IDENTIFIER, msg);
             Log.d("RESP", msg);
             context.sendBroadcast(intent);
@@ -56,8 +51,8 @@ public class HTTPConnectionHelper extends IntentService {
         public void onErrorResponse(VolleyError error) {
             Log.d("EROR", error.toString());
             Intent intent = new Intent();
-            intent.setAction(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
-            intent.putExtra(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER, Constants.BROADCAST_HTTP_STATUS_ERR);
+            intent.setAction(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
+            intent.putExtra(Constants.BROADCAST_DATA_STATUS_IDENTIFIER, Constants.BROADCAST_STATUS_ERR);
             intent.putExtra(Constants.BROADCAST_HTTP_BODY_IDENTIFIER, error.toString());
             context.sendBroadcast(intent);
         }

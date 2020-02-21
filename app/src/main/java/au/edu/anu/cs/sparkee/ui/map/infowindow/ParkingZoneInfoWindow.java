@@ -53,7 +53,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
         this.parkingZone = polygon.getParkingZone();
 
         httpReceiver = new ParkingZoneInfoWindow.InternalHTTPBroadcaseReceiver();
-        httpIntentFilter = new IntentFilter(Constants.BROADCAST_HTTP_RESPONSE_IDENTIFIER);
+        httpIntentFilter = new IntentFilter(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
     }
 
     public void onClose() {
@@ -80,8 +80,8 @@ public class ParkingZoneInfoWindow extends InfoWindow {
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             String msg = bundle.getString(Constants.BROADCAST_HTTP_BODY_IDENTIFIER);
-            String status = bundle.getString(Constants.BROADCAST_HTTP_STATUS_IDENTIFIER);
-            if (status.equalsIgnoreCase(Constants.BROADCAST_HTTP_STATUS_OK)) {
+            String status = bundle.getString(Constants.BROADCAST_DATA_STATUS_IDENTIFIER);
+            if (status.equalsIgnoreCase(Constants.BROADCAST_STATUS_OK)) {
                 try {
                     onSuccess(SParkeeJSONArrayData.parse(msg));
                 } catch (JSONException je) {

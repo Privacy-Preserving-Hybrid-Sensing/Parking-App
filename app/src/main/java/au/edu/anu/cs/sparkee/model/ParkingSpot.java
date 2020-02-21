@@ -1,10 +1,11 @@
 package au.edu.anu.cs.sparkee.model;
 
 import android.location.Location;
+import android.os.Parcelable;
 
 import org.threeten.bp.LocalDateTime;
 
-public class ParkingSpot extends Location {
+public class ParkingSpot extends Location  {
     private int id;
     private LocalDateTime ts_register;
     private LocalDateTime ts_update;
