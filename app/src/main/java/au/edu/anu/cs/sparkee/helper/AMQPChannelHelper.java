@@ -42,7 +42,7 @@ public class AMQPChannelHelper extends IntentService {
             channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, specificSubscriberUUIDTopic);
 
 
-            boolean autoAck = false;
+            boolean autoAck = true;
             channel.basicConsume(queueName, autoAck, "",
                     new DefaultConsumer(channel) {
                         @Override

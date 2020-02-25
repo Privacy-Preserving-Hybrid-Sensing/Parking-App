@@ -1,6 +1,5 @@
 package au.edu.anu.cs.sparkee;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -12,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -21,6 +21,12 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jakewharton.threetenabp.AndroidThreeTen;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,10 +42,12 @@ import org.osmdroid.tileprovider.modules.SqlTileWriter;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import au.edu.anu.cs.sparkee.helper.AMQPChannelHelper;
-import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
+import au.edu.anu.cs.sparkee.helper.DataHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -77,22 +85,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-//        unregisterReceiver(amqpReceiver);
     }
 
-//    AMQPBroadcaseReceiver amqpReceiver;
-    IntentFilter intentFilter;
-
-//    public void launchBroadcaseReceiver() {
-//        amqpReceiver = new AMQPBroadcaseReceiver();
-//        intentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
-//    }
 
     public void launchSParkeeMessagingService() {
-        Intent amqpService = new Intent(this, AMQPChannelHelper.class);
-        Intent httpService = new Intent(this, HTTPConnectionHelper.class);
-        startService(amqpService);
-        startService(httpService);
+//        Intent dataService = new Intent(this, DataHelper.class);
+//        startService(dataService);
     }
 
     @Override
@@ -125,13 +123,12 @@ public class MainActivity extends AppCompatActivity {
                 String pathname = Configuration.getInstance().getOsmdroidTileCache().getAbsolutePath() + File.separator + SqlTileWriter.DATABASE_FILENAME;
                 Log.d("Lokasi", pathname);
                 File dbFile = new File(pathname);
-                if (dbFile.exists()) {
-                    Log.d("File DB", "ADA");
-                } else {
-                    Log.d("File DB", "BELUM ADA");
-                }
+//                if (dbFile.exists()) {
+//                    Log.d("File DB", "ADA");
+//                } else {
+//                    Log.d("File DB", "BELUM ADA");
+//                }
 
-//                setContentView(R.layout.activity_acknowledge);
                 showSettingsDialog();
 
             } else {
@@ -156,15 +153,8 @@ public class MainActivity extends AppCompatActivity {
                 navController = Navigation.findNavController(this, R.id.nav_host_fragment);
                 NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
-//                navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
-//                    @Override
-//                    public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
-//                        Toast.makeText(MainActivity.this, "Change To " + destination.getLabel(), Toast.LENGTH_SHORT).show();
-//                    }
-//                });
                 NavigationUI.setupWithNavController(navView, navController);
                 launchSParkeeMessagingService();
-//                launchBroadcaseReceiver();
             }
         } else {
             //do here
@@ -204,7 +194,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        registerReceiver(amqpReceiver, intentFilter);
 
     }
 
@@ -218,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        unregisterReceiver(amqpReceiver);
     }
 
     @Override

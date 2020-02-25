@@ -1,4 +1,4 @@
-package au.edu.anu.cs.sparkee.ui.map.marker;
+package au.edu.anu.cs.sparkee.ui.map.overlay.marker;
 
 import android.util.Log;
 
@@ -76,7 +76,7 @@ public class ParkingSpotMarker extends Marker {
                     break;
             }
         }
-        Log.d("DIAKSES", "MARKER STATUS: " + marker_status + " PARTICIPATION:" + category);
+//        Log.d("DIAKSES", "MARKER STATUS: " + marker_status + " PARTICIPATION:" + category);
 //        marker = R.drawable.participate_available_1;
         return marker;
     }

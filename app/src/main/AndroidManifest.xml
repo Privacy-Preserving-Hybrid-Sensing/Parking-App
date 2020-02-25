@@ -31,10 +31,6 @@
             android:name=".helper.AMQPChannelHelper"
             android:exported="false"/>
 
-        <service
-            android:name=".helper.HTTPConnectionHelper"
-            android:exported="false"/>
-
     </application>
 
 

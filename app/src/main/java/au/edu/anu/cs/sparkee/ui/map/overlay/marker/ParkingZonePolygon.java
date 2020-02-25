@@ -1,4 +1,4 @@
-package au.edu.anu.cs.sparkee.ui.map.marker;
+package au.edu.anu.cs.sparkee.ui.map.overlay.marker;
 
 
 import android.graphics.Color;
@@ -32,7 +32,7 @@ public class ParkingZonePolygon extends Polygon {
 
     public static int getPolygonColor(int parking_spots_cnt, int parking_spots_available) {
         int marker = R.color.white;
-        if(parking_spots_cnt == 0)
+        if(parking_spots_cnt <= 0)
             return marker;
         int parking_spots_unavailable_undefined = parking_spots_cnt - parking_spots_available;
         double occupation =  (parking_spots_unavailable_undefined / (double) parking_spots_cnt) * 100;

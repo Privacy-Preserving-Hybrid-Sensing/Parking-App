@@ -1,40 +1,75 @@
 package au.edu.anu.cs.sparkee.model;
 
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.overlay.Overlay;
-import org.osmdroid.views.overlay.Polygon;
 import org.threeten.bp.LocalDateTime;
 
 import java.util.List;
 
 public class ParkingZone {
     private int id;
+    private boolean subscribed;
     private String name;
+    private String subscription_token;
     private String description;
     private String center_longitude;
     private String center_latitude;
-    private int credit_charge;
-
-    private boolean authorized;
-    private List<GeoPoint> geoPoints;
+    private int credit_required;
+    private int spot_total;
+    private int spot_available;
+    private int spot_unavailable;
+    private int spot_undefined;
     private LocalDateTime ts_update;
 
-    private ParkingSpot[] parking_spots;
 
-    public ParkingSpot[] getParking_spots() {
-        return parking_spots;
+    public String getSubscription_token() {
+        return subscription_token;
     }
 
-    public void setParking_spots(ParkingSpot[] parking_spots) {
-        this.parking_spots = parking_spots;
+    public void setSubscription_token(String subscription_token) {
+        this.subscription_token = subscription_token;
     }
 
-    public boolean isAuthorized() {
-        return authorized;
+    private List<GeoPoint> geoPoints;
+
+    public int getSpot_total() {
+        return spot_total;
     }
 
-    public void setAuthorized(boolean authorized) {
-        this.authorized = authorized;
+    public void setSpot_total(int spot_total) {
+        this.spot_total = spot_total;
+    }
+
+    public int getSpot_available() {
+        return spot_available;
+    }
+
+    public void setSpot_available(int spot_available) {
+        this.spot_available = spot_available;
+    }
+
+    public int getSpot_unavailable() {
+        return spot_unavailable;
+    }
+
+    public void setSpot_unavailable(int spot_unavailable) {
+        this.spot_unavailable = spot_unavailable;
+    }
+
+    public int getSpot_undefined() {
+        return spot_undefined;
+    }
+
+    public void setSpot_undefined(int spot_undefined) {
+        this.spot_undefined = spot_undefined;
+    }
+
+
+    public boolean isSubscribed() {
+        return subscribed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        this.subscribed = subscribed;
     }
 
 
@@ -82,12 +117,12 @@ public class ParkingZone {
         this.center_latitude = center_latitude;
     }
 
-    public int getCredit_charge() {
-        return credit_charge;
+    public int getCredit_required() {
+        return credit_required;
     }
 
-    public void setCredit_charge(int credit_charge) {
-        this.credit_charge = credit_charge;
+    public void setCredit_required(int credit_required) {
+        this.credit_required = credit_required;
     }
 
     public List<GeoPoint> getGeoPoints() {

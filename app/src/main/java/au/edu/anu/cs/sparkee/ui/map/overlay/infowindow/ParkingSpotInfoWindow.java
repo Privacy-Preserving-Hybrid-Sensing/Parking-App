@@ -1,10 +1,8 @@
-package au.edu.anu.cs.sparkee.ui.map.infowindow;
+package au.edu.anu.cs.sparkee.ui.map.overlay.infowindow;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,10 +12,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.rabbitmq.client.AlreadyClosedException;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -30,9 +24,8 @@ import java.sql.Timestamp;
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
-import au.edu.anu.cs.sparkee.helper.HTTPConnectionHelper;
-import au.edu.anu.cs.sparkee.model.SParkeeJSONArrayData;
-import au.edu.anu.cs.sparkee.ui.map.marker.ParkingSpotMarker;
+import au.edu.anu.cs.sparkee.ui.map.MapViewModel;
+import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingSpotMarker;
 
 public class ParkingSpotInfoWindow extends InfoWindow {
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
@@ -41,22 +34,24 @@ public class ParkingSpotInfoWindow extends InfoWindow {
     private String status;
     private LocalDateTime ts_update;
     private ParkingSpotMarker parkingSpotMarker;
+    private MapViewModel mapViewModel;
 
-    public ParkingSpotInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update, ParkingSpotMarker parkingSpotMarker) {
+    public ParkingSpotInfoWindow(int layoutResId, MapView mapView, GeoPoint geoPoint, String device_uuid, String status, LocalDateTime ts_update, ParkingSpotMarker parkingSpotMarker, MapViewModel mapViewModel) {
         super(layoutResId, mapView);
         this.geoPoint = geoPoint;
         this.device_uuid = device_uuid;
         this.status = status;
         this.ts_update = ts_update;
         this.parkingSpotMarker = parkingSpotMarker;
+        this.mapViewModel = mapViewModel;
 
-        httpReceiver = new ParkingSpotInfoWindow.InternalHTTPBroadcaseReceiver();
-        httpIntentFilter = new IntentFilter(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
+//        httpReceiver = new ParkingSpotInfoWindow.InternalHTTPBroadcaseReceiver();
+//        httpIntentFilter = new IntentFilter(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
     }
 
 
-    private ParkingSpotInfoWindow.InternalHTTPBroadcaseReceiver httpReceiver;
-    private IntentFilter httpIntentFilter;
+//    private ParkingSpotInfoWindow.InternalHTTPBroadcaseReceiver httpReceiver;
+//    private IntentFilter httpIntentFilter;
     private String trx_id_detail;
     private boolean participate;
     public void onClose() {
@@ -77,8 +72,9 @@ public class ParkingSpotInfoWindow extends InfoWindow {
         TextView txtZoneName = (TextView) mView.findViewById(R.id.bubble_parking_zone_name);
         ImageView imgBubbleParkingSpot = (ImageView) mView.findViewById(R.id.bubble_parking_spot_icon);
 
-        int participation = ( parkingSpotMarker.getParkingSpot().getParticipation_status() ? Constants.MARKER_PARKING_CATEGORY_PARTICIPATION: Constants.MARKER_PARKING_CATEGORY_DEFAULT);
-        int iconId = ParkingSpotMarker.getMarkerIcon(parkingSpotMarker.getParkingSpot().getMarker_status(), participation);
+//        int participation = ( parkingSpotMarker.getParkingSpot().getParticipation_status() ? Constants.MARKER_PARKING_CATEGORY_PARTICIPATION: Constants.MARKER_PARKING_CATEGORY_DEFAULT);
+        int participation = Constants.MARKER_PARKING_CATEGORY_DEFAULT;
+        int iconId = ParkingSpotMarker.getMarkerIcon(parkingSpotMarker.getParkingSpot().getParking_status(), participation);
         imgBubbleParkingSpot.setImageDrawable( mMapView.getResources().getDrawable( iconId ));
 
         PrettyTime p = new PrettyTime();
@@ -110,8 +106,10 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             @Override
             public void onClick(View view) {
                 Log.d("Btn", "Available");
-                mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
-                send("available");
+                mapViewModel.sendRequestParticipation(parkingSpotMarker.getParkingSpot().getZone_id(), parkingSpotMarker.getParkingSpot().getId(), "available");
+
+//                mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
+//                send("available");
                 close();
             }
         });
@@ -121,8 +119,9 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             @Override
             public void onClick(View view) {
                 Log.d("Btn", "Unavailable");
-                mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
-                send("unavailable");
+                mapViewModel.sendRequestParticipation(parkingSpotMarker.getParkingSpot().getZone_id(), parkingSpotMarker.getParkingSpot().getId(), "unavailable");
+//                mMapView.getContext().registerReceiver(httpReceiver, httpIntentFilter);
+//                send("unavailable");
                 close();
 
             }
@@ -130,20 +129,6 @@ public class ParkingSpotInfoWindow extends InfoWindow {
 
     }
 
-    String url_identifier_detail = "";
-    public void send(String participation) {
-        try {
-            url_identifier_detail = Constants.BASE_URL + Constants.URL_API_PARTICIPATE + "/" + participation + "/" + parkingSpotMarker.getParkingSpot().getId();
-            trx_id_detail  = HTTPConnectionHelper.getInstance(mMapView.getContext()).sendPost(url_identifier_detail, device_uuid);
-            Log.d("trx_id_detail", trx_id_detail);
-        }
-        catch (AlreadyClosedException ace) {
-            ace.printStackTrace();
-        }
-        catch (NullPointerException npe) {
-            npe.printStackTrace();
-        }
-    }
 
     public void close() {
         if (mIsVisible) {
@@ -161,52 +146,46 @@ public class ParkingSpotInfoWindow extends InfoWindow {
             String msg = bundle.getString(Constants.BROADCAST_HTTP_BODY_IDENTIFIER);
             String status = bundle.getString(Constants.BROADCAST_DATA_STATUS_IDENTIFIER);
             Log.d("SPOT", msg);
-            if (status.equalsIgnoreCase(Constants.BROADCAST_STATUS_OK)) {
-                try {
-                    onSuccess(SParkeeJSONArrayData.parse(msg));
-                } catch (JSONException je) {
-                    je.printStackTrace();
-                }
-            } else {
-                onError(msg);
-            }
+//            if (status.equalsIgnoreCase(Constants.BROADCAST_STATUS_OK)) {
+//                try {
+//                    onSuccess(SParkeeJSONArrayData.parse(msg));
+//                } catch (JSONException je) {
+//                    je.printStackTrace();
+//                }
+//            } else {
+//                onError(msg);
+//            }
 
-            try {
-                mMapView.getContext().unregisterReceiver(httpReceiver);
-            }
-            catch(Exception e) {
-
-            }
         }
 
-        void onSuccess(SParkeeJSONArrayData jo) throws JSONException {
-            Log.d("SPOT TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
-            if(jo.getPath().startsWith(Constants.URL_API_PARTICIPATE) && jo.getTrx_id().equalsIgnoreCase(trx_id_detail)) {
-                processParticipation(jo);
-            }
-        }
-
-        void processParticipation(SParkeeJSONArrayData jo) throws  JSONException {
-            Log.d("JSON SUBSCRIBE", jo.getStatus() );
-            if(jo.getStatus().equalsIgnoreCase("OK")) {
-                JSONArray ja = jo.getData();
-
-                ImageView imgBubbleParkingSpot = (ImageView) mView.findViewById(R.id.bubble_parking_spot_icon);
-                parkingSpotMarker.getParkingSpot().setParticipation_status(true);
-                Log.d("PARTICIPATE", "" + parkingSpotMarker.getParkingSpot().getParticipation_status());
-
-                int participation = (parkingSpotMarker.getParkingSpot().getParticipation_status() ? Constants.MARKER_PARKING_CATEGORY_PARTICIPATION: Constants.MARKER_PARKING_CATEGORY_PARTICIPATION);
-                int iconId = ParkingSpotMarker.getMarkerIcon(parkingSpotMarker.getParkingSpot().getMarker_status(), participation);
-                Log.d("ICON 2", "" + iconId);
-                Drawable iconDrawable = mMapView.getResources().getDrawable( iconId );
-                imgBubbleParkingSpot.setImageDrawable( iconDrawable );
-
-                parkingSpotMarker.setIcon(iconDrawable);
-                mMapView.invalidate();
-
-//                Toast.makeText(getMapView().getContext(), jo.getMsg(), Toast.LENGTH_LONG).show();
-            }
-        }
+//        void onSuccess(SParkeeJSONArrayData jo) throws JSONException {
+//            Log.d("SPOT TRX ID", jo.getTrx_id() + " vs " + trx_id_detail);
+//            if(jo.getPath().startsWith(Constants.URL_API_PARTICIPATE) && jo.getTrx_id().equalsIgnoreCase(trx_id_detail)) {
+//                processParticipation(jo);
+//            }
+//        }
+//
+//        void processParticipation(SParkeeJSONArrayData jo) throws  JSONException {
+//            Log.d("JSON SUBSCRIBE", jo.getStatus() );
+//            if(jo.getStatus().equalsIgnoreCase("OK")) {
+//                JSONArray ja = jo.getData();
+//
+//                ImageView imgBubbleParkingSpot = (ImageView) mView.findViewById(R.id.bubble_parking_spot_icon);
+//                parkingSpotMarker.getParkingSpot().setParticipation_status(true);
+//                Log.d("PARTICIPATE", "" + parkingSpotMarker.getParkingSpot().getParticipation_status());
+//
+//                int participation = (parkingSpotMarker.getParkingSpot().getParticipation_status() ? Constants.MARKER_PARKING_CATEGORY_PARTICIPATION: Constants.MARKER_PARKING_CATEGORY_PARTICIPATION);
+//                int iconId = ParkingSpotMarker.getMarkerIcon(parkingSpotMarker.getParkingSpot().getMarker_status(), participation);
+//                Log.d("ICON 2", "" + iconId);
+//                Drawable iconDrawable = mMapView.getResources().getDrawable( iconId );
+//                imgBubbleParkingSpot.setImageDrawable( iconDrawable );
+//
+//                parkingSpotMarker.setIcon(iconDrawable);
+//                mMapView.invalidate();
+//
+////                Toast.makeText(getMapView().getContext(), jo.getMsg(), Toast.LENGTH_LONG).show();
+//            }
+//        }
         void onError(String msg) {
             Log.d("ERROR", msg);
         }

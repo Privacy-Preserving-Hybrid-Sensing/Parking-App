@@ -1,21 +1,32 @@
 package au.edu.anu.cs.sparkee.model;
 
 import android.location.Location;
-import android.os.Parcelable;
 
+import org.osmdroid.util.GeoPoint;
 import org.threeten.bp.LocalDateTime;
 
 public class ParkingSpot extends Location  {
     private int id;
+    private String name;
     private LocalDateTime ts_register;
     private LocalDateTime ts_update;
-    private double voting_available;
-    private double voting_unavailable;
-    private int parking_status;
-    private boolean participation_status;
-    private int marker_status;
-    private int zone_id;
+    private String registrar_uuid;
+    private int vote_available;
+    private int vote_unavailable;
     private double confidence_level;
+    private int parking_status;
+    private int zone_id;
+
+    public String getZone_name() {
+        return zone_name;
+    }
+
+    public void setZone_name(String zone_name) {
+        this.zone_name = zone_name;
+    }
+
+    private String zone_name;
+
 
     public String getName() {
         return name;
@@ -25,8 +36,6 @@ public class ParkingSpot extends Location  {
         this.name = name;
     }
 
-    private String name;
-    private String zone_name;
 
     public ParkingSpot() {
         super("");
@@ -41,14 +50,6 @@ public class ParkingSpot extends Location  {
         this.confidence_level = confidence_level;
     }
 
-    public int getMarker_status() {
-        return marker_status;
-    }
-
-    public void setMarker_status(int marker_status) {
-        this.marker_status = marker_status;
-    }
-
     public int getId() {
         return id;
     }
@@ -56,15 +57,6 @@ public class ParkingSpot extends Location  {
     public void setId(int id) {
         this.id = id;
     }
-
-    public boolean getParticipation_status() {
-        return participation_status;
-    }
-
-    public void setParticipation_status(boolean participation_status) {
-        this.participation_status = participation_status;
-    }
-
 
     public int getZone_id() {
         return zone_id;
@@ -74,12 +66,12 @@ public class ParkingSpot extends Location  {
         this.zone_id = zone_id;
     }
 
-    public String getZone_name() {
-        return zone_name;
+    public String getRegistrar_uuid() {
+        return registrar_uuid;
     }
 
-    public void setZone_name(String zone_name) {
-        this.zone_name = zone_name;
+    public void setRegistrar_uuid(String registrar_uuid) {
+        this.registrar_uuid = registrar_uuid;
     }
 
     public int getParking_status() {
@@ -109,20 +101,28 @@ public class ParkingSpot extends Location  {
         this.ts_update = LocalDateTime.parse(ts_update);
     }
 
-    public double getVoting_available() {
-        return voting_available;
+    public void setTs_update(LocalDateTime ts_update) {
+        this.ts_update = ts_update;
     }
 
-    public void setVoting_available(double voting_available) {
-        this.voting_available = voting_available;
+    public int getVote_available() {
+        return vote_available;
     }
 
-    public double getVoting_unavailable() {
-        return voting_unavailable;
+    public GeoPoint getGeoPoint() {
+        return new GeoPoint(getLatitude(), getLongitude());
     }
 
-    public void setVoting_unavailable(double voting_unavailable) {
-        this.voting_unavailable = voting_unavailable;
+    public void setVote_available(int vote_available) {
+        this.vote_available = vote_available;
+    }
+
+    public int getVote_unavailable() {
+        return vote_unavailable;
+    }
+
+    public void setVote_unavailable(int vote_unavailable) {
+        this.vote_unavailable = vote_unavailable;
     }
 
 }

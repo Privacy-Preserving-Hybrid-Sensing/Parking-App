@@ -2,15 +2,19 @@ package au.edu.anu.cs.sparkee;
 
 public class Constants {
 
-//    public static final String BASE_URL = "http://192.168.0.218:8000";
-    public static final String BASE_URL = "http://10.234.0.5:8000";
+    public static final String BASE_URL = "http://192.168.0.218:8000";
+//    public static final String BASE_URL = "http://10.234.0.5:8000";
 //    public static final String BASE_URL = "http://ec2-3-133-91-181.us-east-2.compute.amazonaws.com:8000";
 
-    public static final String URL_API_ZONES_INFO_ALL = "/api/zones/info/all";
-    public static final String URL_API_ZONES_DETAIL = "/api/zones/detail";
-    public static final String URL_API_ZONES_SUBSCRIBE = "/api/zones/subscribe";
+    public static final String URL_API_ZONES_ALL = "/api/zones/all";
+    public static final String URL_API_ZONES_ID = "/api/zones/%d";
+    public static final String URL_API_ZONES_SPOTS_ALL = "/api/zones/%d/spots/all";
+    public static final String URL_API_ZONES_SUBSCRIBE = "/api/zones/%d/subscribe";
     public static final String URL_API_PROFILE_CREDIT = "/api/profile/creditbalance";
-    public static final String URL_API_PARTICIPATE= "/api/participate";
+    public static final String URL_API_PARTICIPATE = "/api/participate/%d/%d/%s";
+    public static final String URL_API_PROFILE_PARTICIPATION_LATEST = "/api/profile/participations/latest";
+    public static final String URL_API_PROFILE_PARTICIPATION_DAYS_AGO = "/api/profile/participations/%d";
+
 
     public static final String RABBIT_HOST = "ec2-3-133-91-181.us-east-2.compute.amazonaws.com";
     public static final String RABBIT_USER = "mobile";
