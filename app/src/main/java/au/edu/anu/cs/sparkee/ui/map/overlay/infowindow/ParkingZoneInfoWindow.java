@@ -32,6 +32,10 @@ public class ParkingZoneInfoWindow extends InfoWindow {
     private ParkingZone parkingZone;
     private MapViewModel mapViewModel;
 
+    public void setParkingZone(ParkingZone parkingZone) {
+        this.parkingZone = parkingZone;
+    }
+
     public ParkingZoneInfoWindow(int layoutResId, MapView mapView, String device_uuid, ParkingZonePolygon polygon, MapViewModel mapViewModel) {
         super(layoutResId, mapView);
         Log.d("RESID", "" + layoutResId);
@@ -57,7 +61,6 @@ public class ParkingZoneInfoWindow extends InfoWindow {
 
         Log.d("MVIEW", mView.toString());
         mIsVisible = true;
-        mapViewModel.sendRequestZone(parkingZone.getId());
         updateInfoWindow();
     }
 
@@ -136,6 +139,8 @@ public class ParkingZoneInfoWindow extends InfoWindow {
     }
 
     private void requestZoneDetail(int zone_id) {
+//        mapViewModel.sendRequestZone(parkingZone.getId());
+
         mapViewModel.sendRequestZoneSpotsAll(zone_id);
         String subscription_token = parkingZone.getSubscription_token();
         mapViewModel.subscribeAsyncChannel(subscription_token);

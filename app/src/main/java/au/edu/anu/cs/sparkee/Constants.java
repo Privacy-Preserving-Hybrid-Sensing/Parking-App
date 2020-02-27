@@ -13,7 +13,7 @@ public class Constants {
     public static final String URL_API_PROFILE_CREDIT = "/api/profile/creditbalance";
     public static final String URL_API_PARTICIPATE = "/api/participate/%d/%d/%s";
     public static final String URL_API_PROFILE_PARTICIPATION_LATEST = "/api/profile/participations/latest";
-    public static final String URL_API_PROFILE_PARTICIPATION_DAYS_AGO = "/api/profile/participations/%d";
+    public static final String URL_API_PROFILE_PARTICIPATION_NUM_LAST = "/api/profile/participations/%d";
 
 
     public static final String RABBIT_HOST = "ec2-3-133-91-181.us-east-2.compute.amazonaws.com";

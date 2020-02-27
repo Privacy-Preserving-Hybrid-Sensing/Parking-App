@@ -143,7 +143,7 @@ public class MapViewModel extends AndroidViewModel {
     public void sendRequestProfileParticipationsDaysAgo(int days_ago) {
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
-        fmt.format(Constants.URL_API_PROFILE_PARTICIPATION_DAYS_AGO, days_ago);
+        fmt.format(Constants.URL_API_PROFILE_PARTICIPATION_NUM_LAST, days_ago);
         DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
     }
 
@@ -213,8 +213,6 @@ public class MapViewModel extends AndroidViewModel {
         httpReceiver = new InternalHTTPBroadcaseReceiver();
         httpIntentFilter = new IntentFilter(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
 
-
-
     }
 
     public LiveData<Integer> getCreditBalance() {
@@ -258,21 +256,18 @@ public class MapViewModel extends AndroidViewModel {
     void onSuccess(String msg) throws JSONException{
         JSONObject obj = new JSONObject(msg);
         String path = obj.getString("path");
-        if(path.equalsIgnoreCase(Constants.URL_API_PROFILE_CREDIT)) {
+        if(path.matches("/api/profile/creditbalance")) {
             JSONObject jo = obj.getJSONObject("data");
             process_profile_credit(jo);
         }
-
         else if(path.matches("/api/zones/all")) {
             JSONArray ja = obj.getJSONArray("data");
             process_zones_all(ja);
         }
-
-        else if(path.matches("/api/zones/\\d")) {
+        else if(path.matches("/api/zones/\\d+")) {
             JSONObject  ja = obj.getJSONObject("data");
             process_update_zone(ja);
         }
-
         else if(path.matches("/api/zones/\\d+/subscribe")) {
             JSONObject jo = obj.getJSONObject("data");
             process_zones_subscribe(jo);
@@ -337,7 +332,6 @@ public class MapViewModel extends AndroidViewModel {
 
 
     void process_participate(JSONObject jo) throws  JSONException {
-        Log.d("SUBS", " PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
         int participation_id = jo.getInt("id");
         Participation participation = hashmap_participation.get(participation_id);
         if(participation == null) {

@@ -5,13 +5,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -21,12 +19,6 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jakewharton.threetenabp.AndroidThreeTen;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,12 +34,8 @@ import org.osmdroid.tileprovider.modules.SqlTileWriter;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.TimeoutException;
 
-import au.edu.anu.cs.sparkee.helper.AMQPChannelHelper;
-import au.edu.anu.cs.sparkee.helper.DataHelper;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
@@ -147,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
                 AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                         R.id.navigation_map,
-                        R.id.navigation_activity,
+                        R.id.navigation_participation,
                         R.id.navigation_profile
                 ).build();
 

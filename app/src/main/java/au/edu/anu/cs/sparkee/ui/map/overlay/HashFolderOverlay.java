@@ -6,6 +6,7 @@ import org.osmdroid.views.overlay.Overlay;
 import java.util.HashMap;
 
 import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingSpotMarker;
+import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingZonePolygon;
 
 public class HashFolderOverlay extends FolderOverlay {
 

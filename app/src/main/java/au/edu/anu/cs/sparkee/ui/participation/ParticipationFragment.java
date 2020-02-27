@@ -1,7 +1,7 @@
 package au.edu.anu.cs.sparkee.ui.participation;
 
 import android.os.Bundle;
-import android.provider.Telephony;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +16,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.threeten.bp.LocalDateTime;
-
 import java.util.ArrayList;
+import java.util.List;
 
 import au.edu.anu.cs.sparkee.R;
-import au.edu.anu.cs.sparkee.model.ActivityModel;
 import au.edu.anu.cs.sparkee.model.Participation;
 import au.edu.anu.cs.sparkee.ui.participation.adapter.ParticipationAdapter;
 import butterknife.BindView;
@@ -30,27 +28,66 @@ public class ParticipationFragment extends Fragment {
 
     private ParticipationViewModel participationViewModel;
 
+    boolean isLoading = false;
+
+    int numExistingItems;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        participationViewModel =
-                ViewModelProviders.of(this).get(ParticipationViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_activity, container, false);
+        participationViewModel = ViewModelProviders.of(this).get(ParticipationViewModel.class);
+
+        View root = inflater.inflate(R.layout.fragment_participation, container, false);
         mRecyclerView = root.findViewById(R.id.recycle_activity);
-        participationViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        setUp();
+        initScrollListener();
+
+        participationViewModel.getParticipation().observe(getViewLifecycleOwner(), new Observer<List<Participation>>() {
             @Override
-            public void onChanged(@Nullable String s) {
-//                textView.setText(s);
+            public void onChanged(@Nullable List<Participation> part) {
+                populateData(part);
             }
         });
 
-        setUp();
-        populateData();
+        participationViewModel.sendRequestParticipationsNumLast(numItems);
 
         return root;
     }
     LinearLayoutManager mLayoutManager;
     @BindView(R.id.recycle_activity)
     RecyclerView mRecyclerView;
+
+    int lastVisibleItemPosition;
+    private void initScrollListener() {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (!isLoading) {
+
+                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == numExistingItems - 1) {
+                        lastVisibleItemPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
+                        //bottom of list!
+                        loadMore();
+                        isLoading = true;
+                    }
+                }
+            }
+        });
+    }
+
+    int numItems;
+    final int moreItems = 10;
+    private void loadMore() {
+        participationViewModel.sendRequestParticipationsNumLast(numItems + moreItems);
+        numItems += moreItems;
+    }
 
     ParticipationAdapter mParticipationAdapter;
 
@@ -63,91 +100,22 @@ public class ParticipationFragment extends Fragment {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
         ArrayList<Participation> list = new ArrayList<>();
         mParticipationAdapter = new ParticipationAdapter(list);
+        numItems = 10;
     }
 
-    public void populateData() {
-        ArrayList<Participation> mActivities = new ArrayList<Participation>();
+    public void populateData(List<Participation> part) {
+        if(part != null) {
+            mParticipationAdapter.addItems(part);
+            mRecyclerView.setAdapter(mParticipationAdapter);
+            numExistingItems = part.size();
+            mRecyclerView.scrollToPosition(lastVisibleItemPosition);
+        }
+        isLoading = false;
+    }
 
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-//        mActivities.add(new ActivityModel(
-//                "https://androidwave.com/wp-content/uploads/2020/01/androidwave-logo.png",
-//                "123",
-//                "Computer Science",
-//                "+2",
-//                LocalDateTime.parse("2020-01-01T02:02:02")
-//        ));
-
-        mParticipationAdapter.addItems(mActivities);
-        mRecyclerView.setAdapter(mParticipationAdapter);
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        participationViewModel.stopViewModel();
     }
 }

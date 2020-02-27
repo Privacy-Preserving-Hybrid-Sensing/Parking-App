@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
-import au.edu.anu.cs.sparkee.model.ActivityModel;
 import au.edu.anu.cs.sparkee.model.Participation;
 import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingSpotMarker;
 import butterknife.BindView;
@@ -43,6 +42,7 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     public void onBindViewHolder(BaseViewHolder holder, int position) {
         holder.onBind(position);
     }
+
     @Override
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
@@ -53,7 +53,7 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             default:
                 return new EmptyViewHolder(
                         LayoutInflater.from(parent.getContext())
-                                .inflate(R.layout.list_empty_activity, parent, false));
+                                .inflate(R.layout.list_empty_participation, parent, false));
         }
     }
     @Override
@@ -73,7 +73,7 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         }
     }
     public void addItems(List<Participation> sportList) {
-        mActivityList.addAll(sportList);
+        mActivityList .addAll(sportList);
         notifyDataSetChanged();
     }
     public interface Callback {
