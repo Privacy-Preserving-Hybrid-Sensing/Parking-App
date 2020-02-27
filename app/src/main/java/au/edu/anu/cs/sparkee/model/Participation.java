@@ -8,10 +8,34 @@ public class Participation  {
     private int id;
     private LocalDateTime ts_update;
     private int zone_id;
+    private String zone_name;
+
+    public String getZone_name() {
+        return zone_name;
+    }
+
+    public void setZone_name(String zone_name) {
+        this.zone_name = zone_name;
+    }
+
+    public String getSpot_name() {
+        return spot_name;
+    }
+
+    public void setSpot_name(String spot_name) {
+        this.spot_name = spot_name;
+    }
+
+    private String spot_name;
+
     private int spot_id;
     private int participation_value;
     private boolean incentive_processed;
     private int incentive_value;
+
+    public void setSpot_id(int spot_id) {
+        this.spot_id = spot_id;
+    }
 
     public int getId() {
         return id;
@@ -35,15 +59,13 @@ public class Participation  {
 
     public void setZone_id(int zone_id) {
         this.zone_id = zone_id;
+
     }
 
     public int getSpot_id() {
         return spot_id;
     }
 
-    public void setSpot_id(int spot_id) {
-        this.spot_id = spot_id;
-    }
 
     public int getParticipation_value() {
         return participation_value;

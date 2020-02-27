@@ -48,6 +48,7 @@ import java.util.concurrent.TimeoutException;
 
 import au.edu.anu.cs.sparkee.helper.AMQPChannelHelper;
 import au.edu.anu.cs.sparkee.helper.DataHelper;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -97,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AndroidThreeTen.init(this);
+        ButterKnife.bind(this);
 
         SharedPreferences sharedPref =  getApplicationContext().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
 

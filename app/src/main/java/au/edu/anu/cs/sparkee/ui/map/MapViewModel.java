@@ -345,7 +345,9 @@ public class MapViewModel extends AndroidViewModel {
         }
         participation.setTs_update(jo.getString("ts_update"));
         participation.setZone_id(jo.getInt("zone_id"));
+        participation.setZone_name(jo.getString("zone_name"));
         participation.setSpot_id(jo.getInt("spot_id"));
+        participation.setSpot_name(jo.getString("spot_name"));
         participation.setParticipation_value(jo.getInt("participation_value"));
         participation.setIncentive_processed(jo.getBoolean("incentive_processed"));
         participation.setIncentive_value(jo.getInt("incentive_value"));

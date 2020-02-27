@@ -57,7 +57,7 @@ public class ParkingZoneInfoWindow extends InfoWindow {
 
         Log.d("MVIEW", mView.toString());
         mIsVisible = true;
-
+        mapViewModel.sendRequestZone(parkingZone.getId());
         updateInfoWindow();
     }
 
