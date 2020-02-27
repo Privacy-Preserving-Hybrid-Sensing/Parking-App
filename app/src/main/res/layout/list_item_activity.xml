@@ -9,10 +9,26 @@
     android:padding="12dp">
 
     <ImageView
-        android:id="@+id/img_activity"
-        android:layout_width="60dp"
+        android:id="@+id/img_previous"
+        android:layout_width="45dp"
         android:layout_height="60dp"
-        android:background="#16000000" />
+         />
+
+    <ImageView
+        android:id="@+id/img_right"
+        android:layout_width="15dp"
+        android:layout_height="20dp"
+        android:src="@drawable/icon_right"
+         />
+
+    <ImageView
+        android:id="@+id/img_participation"
+        android:layout_width="45dp"
+        android:layout_height="60dp"
+        />
+
+
+
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -20,11 +36,16 @@
         android:layout_marginLeft="10dp"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/layout_info_kiri"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
 
             <TextView
                 android:id="@+id/txt_spot_id"
@@ -37,38 +58,49 @@
                 android:textSize="18dp" />
 
             <TextView
+                android:id="@+id/txt_zone_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Canberra Center, Woolworth"
+                android:textColor="#727272"
+                android:textSize="12dp" />
+
+            <TextView
+                android:id="@+id/txt_ts_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="2 days ago at 13:22:00"
+                android:textColor="#212121"
+                android:textSize="8dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_info_kanan"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:orientation="vertical">
+
+            <TextView
                 android:id="@+id/txt_credit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="+1"
                 android:textColor="#212121"
-                android:layout_marginLeft="10dp"
-                android:paddingRight="10dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:textSize="18dp" />
 
-        </RelativeLayout>
-        <TextView
-            android:id="@+id/txt_zone_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="Canberra Center, Woolworth"
-            android:textColor="#727272"
-            android:textSize="12dp" />
+            <ImageView
+                android:id="@+id/img_participation_status"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                />
 
-        <TextView
-            android:id="@+id/txt_ts_update"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="2 days ago at 13:22:00"
-            android:textColor="#212121"
-            android:textSize="8dp" />
-
+        </LinearLayout>
     </LinearLayout>
-
 
 </LinearLayout>
 

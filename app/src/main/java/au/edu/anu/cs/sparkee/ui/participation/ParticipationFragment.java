@@ -71,17 +71,19 @@ public class ParticipationFragment extends Fragment {
 
                 if (!isLoading) {
 
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == numExistingItems - 1) {
+                    if (linearLayoutManager != null && lastCompletelyVisibleItemPosition != linearLayoutManager.findLastCompletelyVisibleItemPosition() &&  linearLayoutManager.findLastCompletelyVisibleItemPosition() == numExistingItems - 1) {
                         lastVisibleItemPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
                         //bottom of list!
                         loadMore();
                         isLoading = true;
+                        lastCompletelyVisibleItemPosition = linearLayoutManager.findLastCompletelyVisibleItemPosition();
                     }
                 }
             }
         });
     }
 
+    int lastCompletelyVisibleItemPosition;
     int numItems;
     final int moreItems = 10;
     private void loadMore() {
@@ -106,6 +108,7 @@ public class ParticipationFragment extends Fragment {
     public void populateData(List<Participation> part) {
         if(part != null) {
             mParticipationAdapter.addItems(part);
+
             mRecyclerView.setAdapter(mParticipationAdapter);
             numExistingItems = part.size();
             mRecyclerView.scrollToPosition(lastVisibleItemPosition);

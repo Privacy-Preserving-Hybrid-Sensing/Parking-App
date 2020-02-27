@@ -58,6 +58,7 @@ import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingSpotMarker;
 import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingZonePolygon;
 
 import static au.edu.anu.cs.sparkee.Constants.DEFAULT_ZOOM_PARKING_SPOT;
+import static au.edu.anu.cs.sparkee.Constants.DEFAULT_ZOOM_PARKING_ZONE_NEAR;
 
 public class MapFragment extends Fragment {
 
@@ -77,7 +78,7 @@ public class MapFragment extends Fragment {
     private String DEFAULT_LON = "149.120385";
     private String DEFAULT_LAT = "-35.275514";
 
-    private long DEFAULT_DELAY_ANIMATION = 300;
+    private long DEFAULT_DELAY_ANIMATION = 200;
 
     private String device_uuid;
     final AMQPConnectionHelper amqpConnectionHelper = AMQPConnectionHelper.getInstance();
@@ -418,11 +419,15 @@ public class MapFragment extends Fragment {
                         }
                         else {
                             hideAllInfoWindow();
-                            mMapView.getController().animateTo(eventPos, DEFAULT_ZOOM_PARKING_SPOT, (long) DEFAULT_DELAY_ANIMATION);
+                            mMapView.getController().animateTo(eventPos, DEFAULT_ZOOM_PARKING_ZONE_NEAR, (long) DEFAULT_DELAY_ANIMATION);
                             polygon.setInfoWindowLocation(eventPos);
                             polygon.showInfoWindow();
                             mapViewModel.sendRequestZone(parkingZone.getId());
                         }
+
+                        mapViewModel.sendRequestZoneSpotsAll(parkingZone.getId());
+                        String subscription_token = parkingZone.getSubscription_token();
+                        mapViewModel.subscribeAsyncChannel(subscription_token);
 
                         return true;
                     }

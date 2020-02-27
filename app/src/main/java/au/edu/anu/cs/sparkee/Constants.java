@@ -27,6 +27,7 @@ public class Constants {
     public static final double DEFAULT_ZOOM_PARKING_ZONE_FAR = 18.0;
     public static final double DEFAULT_ZOOM_PARKING_ZONE_MED = 20.0;
     public static final double DEFAULT_ZOOM_PARKING_ZONE_NEAR = 21.0;
+
     public static final double DEFAULT_ZOOM_PARKING_SPOT = 22.0;
 
     public static final String DEFAULT_PARTICIPANT_TO_SERVER_ROUTING_KEY = "PARTICIPANT_TO_SERVER";
@@ -43,10 +44,6 @@ public class Constants {
 
     public static final String SHARED_PREFERENCE_FILE_SPARKEE = "au.edu.anu.cs.sparkee.shared_preference";
     public static final String SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID = "au.edu.anu.cs.sparkee.shared_preference.host.uuid";
-    public static final String DEVICE_TYPE = "android";
-
-    public static final int MARKER_PARTICIPATION_UNAVAILABLE_SENT = -100;
-    public static final int MARKER_PARTICIPATION_AVAILABLE_SENT = 100;
 
     public static final int MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED = -101;
     public static final int MARKER_PARTICIPATION_AVAILABLE_RECEIVED = 101;
@@ -54,7 +51,6 @@ public class Constants {
 
     public static final int MARKER_PARKING_CATEGORY_DEFAULT = 1000;
     public static final int MARKER_PARKING_CATEGORY_PARTICIPATION = 1001;
-    public static final int MARKER_PARKING_CATEGORY_CREDIT = 1002;
 
 
     public static final int MARKER_PARKING_UNCONFIRMED_DEFAULT = 0;

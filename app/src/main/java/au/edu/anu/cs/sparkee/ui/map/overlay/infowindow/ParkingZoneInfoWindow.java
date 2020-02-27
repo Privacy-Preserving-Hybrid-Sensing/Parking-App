@@ -139,7 +139,6 @@ public class ParkingZoneInfoWindow extends InfoWindow {
     }
 
     private void requestZoneDetail(int zone_id) {
-//        mapViewModel.sendRequestZone(parkingZone.getId());
 
         mapViewModel.sendRequestZoneSpotsAll(zone_id);
         String subscription_token = parkingZone.getSubscription_token();

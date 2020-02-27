@@ -94,6 +94,7 @@ public class ParticipationViewModel extends AndroidViewModel {
             item.setZone_name(jo.getString("zone_name"));
             item.setSpot_id(jo.getInt("spot_id"));
             item.setSpot_name(jo.getString("spot_name"));
+            item.setPrevious_value(jo.getInt("previous_value"));
             item.setParticipation_value(jo.getInt("participation_value"));
             item.setIncentive_processed(jo.getBoolean("incentive_processed"));
             item.setIncentive_value(jo.getInt("incentive_value"));

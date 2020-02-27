@@ -72,16 +72,20 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             return 1;
         }
     }
-    public void addItems(List<Participation> sportList) {
-        mActivityList .addAll(sportList);
+    public void addItems(List<Participation> participationList) {
+        for(int i = mActivityList.size(); i < participationList.size(); i++) {
+            mActivityList.add(i, participationList.get(i));
+        }
         notifyDataSetChanged();
     }
     public interface Callback {
         void onEmptyViewRetryClick();
     }
     public class ViewHolder extends BaseViewHolder {
-        @BindView(R.id.img_activity)
-        ImageView imgActivity;
+        @BindView(R.id.img_previous)
+        ImageView imgPrevious;
+        @BindView(R.id.img_participation)
+        ImageView imgParticipation;
         @BindView(R.id.txt_spot_id)
         TextView txtSpotId;
         @BindView(R.id.txt_credit)
@@ -98,7 +102,8 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             this.itemView = itemView;
         }
         protected void clear() {
-            imgActivity.setImageDrawable(null);
+            imgPrevious.setImageDrawable(null);
+            imgParticipation.setImageDrawable(null);
             txtSpotId.setText("");
             txtCredit.setText("");
             txtZoneName.setText("");
@@ -110,22 +115,25 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             final Participation mActivity = mActivityList.get(position);
 
 
-            if (mActivity.getParticipation_value() != 0) {
-                int participation = Constants.MARKER_PARKING_CATEGORY_PARTICIPATION;
-                int marker_status = mActivity.getParticipation_value() > 0 ? MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT : MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT;
-                int iconId = ParkingSpotMarker.getMarkerIcon(marker_status, participation);
+            int iconPrevious = ParkingSpotMarker.getMarkerIcon(mActivity.getPrevious_value(), Constants.MARKER_PARKING_CATEGORY_DEFAULT);
+            Drawable dPrevious = itemView.getResources().getDrawable(iconPrevious);
+            Glide.with(itemView.getContext())
+                    .load(dPrevious)
+                    .into(imgPrevious);
 
-                Drawable d = itemView.getResources().getDrawable(iconId);
+            int marker_status = mActivity.getParticipation_value() > 0 ? MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT : MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT;
+            int iconParticipation = ParkingSpotMarker.getMarkerIcon(marker_status, Constants.MARKER_PARKING_CATEGORY_DEFAULT);
+            Drawable dParticipation = itemView.getResources().getDrawable(iconParticipation);
+            Glide.with(itemView.getContext())
+                    .load(dParticipation)
+                    .into(imgParticipation);
 
-                Glide.with(itemView.getContext())
-                        .load(d)
-                        .into(imgActivity);
-            }
             if (mActivity.getSpot_name()  != null) {
                 txtSpotId.setText(mActivity.getSpot_name());
             }
 
-            String incentive = mActivity.getIncentive_value() == 0 ? "-" : "" + mActivity.getIncentive_value();
+            int val = mActivity.getIncentive_value();
+            String incentive = val == 0 ? "( 0 )" : "( +" + val + " )";
             txtCredit.setText( incentive );
 
             if (mActivity.getZone_name() != null) {
@@ -161,9 +169,15 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     public class EmptyViewHolder extends BaseViewHolder {
         @BindView(R.id.txt_message)
         TextView txtMessage;
+
         EmptyViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+
+        public void onBind(int position) {
+            super.onBind(position);
+            txtMessage.setText("No Participation");
         }
         @Override
         protected void clear() {

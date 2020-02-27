@@ -29,6 +29,16 @@ public class Participation  {
     private String spot_name;
 
     private int spot_id;
+
+    public int getPrevious_value() {
+        return previous_value;
+    }
+
+    public void setPrevious_value(int previous_value) {
+        this.previous_value = previous_value;
+    }
+
+    private int previous_value;
     private int participation_value;
     private boolean incentive_processed;
     private int incentive_value;
