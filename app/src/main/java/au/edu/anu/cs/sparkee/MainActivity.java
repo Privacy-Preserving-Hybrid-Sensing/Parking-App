@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                         R.id.navigation_map,
                         R.id.navigation_participation,
-                        R.id.navigation_profile
+                        R.id.navigation_summary
                 ).build();
 
 
@@ -204,9 +204,9 @@ public class MainActivity extends AppCompatActivity {
         String label = (String) navController.getCurrentDestination().getLabel();
         switch (item.getItemId()) {
             // action with ID action_refresh was selected
-            case R.id.configure:
-                Toast.makeText(this, "Menu at " + label , Toast.LENGTH_SHORT).show();
-                break;
+//            case R.id.configure:
+//                Toast.makeText(this, "Menu at " + label , Toast.LENGTH_SHORT).show();
+//                break;
             default:
                 break;
         }

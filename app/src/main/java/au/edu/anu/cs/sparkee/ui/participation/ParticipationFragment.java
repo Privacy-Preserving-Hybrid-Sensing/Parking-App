@@ -1,10 +1,12 @@
 package au.edu.anu.cs.sparkee.ui.participation;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -31,10 +33,12 @@ public class ParticipationFragment extends Fragment {
     boolean isLoading = false;
 
     int numExistingItems;
+    Context context;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         participationViewModel = ViewModelProviders.of(this).get(ParticipationViewModel.class);
 
+        context = this.getActivity();
         View root = inflater.inflate(R.layout.fragment_participation, container, false);
         mRecyclerView = root.findViewById(R.id.recycle_activity);
         setUp();
@@ -43,12 +47,12 @@ public class ParticipationFragment extends Fragment {
         participationViewModel.getParticipation().observe(getViewLifecycleOwner(), new Observer<List<Participation>>() {
             @Override
             public void onChanged(@Nullable List<Participation> part) {
+                Log.d("SIZE", "" + part.size());
                 populateData(part);
             }
         });
 
         participationViewModel.sendRequestParticipationsNumLast(numItems);
-
         return root;
     }
     LinearLayoutManager mLayoutManager;
@@ -106,10 +110,10 @@ public class ParticipationFragment extends Fragment {
     }
 
     public void populateData(List<Participation> part) {
-        if(part != null) {
-            mParticipationAdapter.addItems(part);
-
-            mRecyclerView.setAdapter(mParticipationAdapter);
+        mParticipationAdapter.addItems(part);
+        mRecyclerView.setAdapter(mParticipationAdapter);
+        Log.d("POP", "POPOPO");
+        if(part.size() > 0) {
             numExistingItems = part.size();
             mRecyclerView.scrollToPosition(lastVisibleItemPosition);
         }

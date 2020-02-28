@@ -10,7 +10,7 @@ public class Constants {
     public static final String URL_API_ZONES_ID = "/api/zones/%d";
     public static final String URL_API_ZONES_SPOTS_ALL = "/api/zones/%d/spots/all";
     public static final String URL_API_ZONES_SUBSCRIBE = "/api/zones/%d/subscribe";
-    public static final String URL_API_PROFILE_CREDIT = "/api/profile/creditbalance";
+    public static final String URL_API_PROFILE_SUMMARY = "/api/profile/summary";
     public static final String URL_API_PARTICIPATE = "/api/participate/%d/%d/%s";
     public static final String URL_API_PROFILE_PARTICIPATION_LATEST = "/api/profile/participations/latest";
     public static final String URL_API_PROFILE_PARTICIPATION_NUM_LAST = "/api/profile/participations/%d";

@@ -31,9 +31,9 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     public static final int VIEW_TYPE_EMPTY = 0;
     public static final int VIEW_TYPE_NORMAL = 1;
     private Callback mCallback;
-    private List<Participation> mActivityList;
+    private List<Participation> mParticipationList;
     public ParticipationAdapter(List<Participation> activityList) {
-        mActivityList = activityList;
+        mParticipationList = activityList;
     }
     public void setCallback(Callback callback) {
         mCallback = callback;
@@ -52,13 +52,12 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             case VIEW_TYPE_EMPTY:
             default:
                 return new EmptyViewHolder(
-                        LayoutInflater.from(parent.getContext())
-                                .inflate(R.layout.list_empty_participation, parent, false));
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.list_empty_participation, parent, false));
         }
     }
     @Override
     public int getItemViewType(int position) {
-        if (mActivityList != null && mActivityList.size() > 0) {
+        if (mParticipationList != null && mParticipationList.size() > 0) {
             return VIEW_TYPE_NORMAL;
         } else {
             return VIEW_TYPE_EMPTY;
@@ -66,15 +65,15 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     }
     @Override
     public int getItemCount() {
-        if (mActivityList != null && mActivityList.size() > 0) {
-            return mActivityList.size();
+        if (mParticipationList != null && mParticipationList.size() > 0) {
+            return mParticipationList.size();
         } else {
             return 1;
         }
     }
     public void addItems(List<Participation> participationList) {
-        for(int i = mActivityList.size(); i < participationList.size(); i++) {
-            mActivityList.add(i, participationList.get(i));
+        for(int i = mParticipationList.size(); i < participationList.size(); i++) {
+            mParticipationList.add(i, participationList.get(i));
         }
         notifyDataSetChanged();
     }
@@ -112,7 +111,7 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
         public void onBind(int position) {
             super.onBind(position);
-            final Participation mActivity = mActivityList.get(position);
+            final Participation mActivity = mParticipationList.get(position);
 
 
             int iconPrevious = ParkingSpotMarker.getMarkerIcon(mActivity.getPrevious_value(), Constants.MARKER_PARKING_CATEGORY_DEFAULT);

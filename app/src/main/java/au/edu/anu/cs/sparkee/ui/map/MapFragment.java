@@ -1,6 +1,5 @@
 package au.edu.anu.cs.sparkee.ui.map;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -18,6 +17,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -30,11 +30,9 @@ import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Overlay;
-import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
@@ -57,7 +55,6 @@ import au.edu.anu.cs.sparkee.ui.map.overlay.infowindow.ParkingZoneInfoWindow;
 import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingSpotMarker;
 import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingZonePolygon;
 
-import static au.edu.anu.cs.sparkee.Constants.DEFAULT_ZOOM_PARKING_SPOT;
 import static au.edu.anu.cs.sparkee.Constants.DEFAULT_ZOOM_PARKING_ZONE_NEAR;
 
 public class MapFragment extends Fragment {
@@ -125,12 +122,12 @@ public class MapFragment extends Fragment {
         folderOverlayParkingSpot = new HashFolderOverlay();
 
 
-        mapViewModel.getServerConnectionEstablished().observe( getViewLifecycleOwner(), new Observer<Boolean>() {
+        mapViewModel.getServerConnectionEstablished().observe( getViewLifecycleOwner(), new Observer<Pair<Boolean, String>>() {
             @Override
-            public void onChanged(@Nullable Boolean stat) {
-                initHTTP = stat;
-                if(stat == Boolean.FALSE)
-                    Toast.makeText(context, "Connecting to server (retrying)...", Toast.LENGTH_SHORT).show();
+            public void onChanged(@Nullable Pair<Boolean, String> stat) {
+                initHTTP = stat.first;
+                if(stat.first == Boolean.FALSE && ! stat.second.equalsIgnoreCase(""))
+                    Toast.makeText(context, stat.second, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -190,10 +187,10 @@ public class MapFragment extends Fragment {
             @Override
             public void onChanged(@Nullable Integer val) {
                 TextView ic_credit = (TextView) getView().findViewById(R.id.ic_credit);
-                if(initHTTP)
+//                if(initHTTP)
                     ic_credit.setText(val.toString());
-                else
-                    ic_credit.setText("-");
+//                else
+//                    ic_credit.setText("-");
 
             }
         });
@@ -244,7 +241,7 @@ public class MapFragment extends Fragment {
         addHandleMapEvent();
         addOverlayRotation();
 
-        mapViewModel.sendRequestProfileCreditValue();
+        mapViewModel.sendRequestProfileSummary();
         mapViewModel.sendRequestZonesAll();
 
     }

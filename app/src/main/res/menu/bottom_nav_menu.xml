@@ -8,12 +8,12 @@
 
     <item
         android:id="@+id/navigation_participation"
-        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:icon="@drawable/ic_list_black"
         android:title="@string/title_participation" />
 
     <item
-        android:id="@+id/navigation_profile"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/title_profile" />
+        android:id="@+id/navigation_summary"
+        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:title="@string/title_summary" />
 
 </menu>

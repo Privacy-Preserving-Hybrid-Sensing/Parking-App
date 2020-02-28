@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.Pair;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -55,7 +56,7 @@ public class MapViewModel extends AndroidViewModel {
 
     private MutableLiveData<HashMap<Integer,Participation>> mParticipations;
 
-    private MutableLiveData<Boolean> serverConnectionEstablished;
+    private MutableLiveData<Pair<Boolean, String>> serverConnectionEstablished;
 
 
     final Context context;
@@ -122,9 +123,9 @@ public class MapViewModel extends AndroidViewModel {
 
     }
 
-    public void sendRequestProfileCreditValue() {
-        // Get Profile Credit Value
-        String url = Constants.BASE_URL + Constants.URL_API_PROFILE_CREDIT;
+    public void sendRequestProfileSummary() {
+        // Get Profile Summary (credit value included)
+        String url = Constants.BASE_URL + Constants.URL_API_PROFILE_SUMMARY;
         DataHelper.getInstance(context).sendGet(url, device_uuid);
     }
 
@@ -205,7 +206,8 @@ public class MapViewModel extends AndroidViewModel {
         mParticipations.setValue( hashmap_participation );
 
         serverConnectionEstablished = new MutableLiveData<>();
-        serverConnectionEstablished.setValue( Boolean.TRUE );
+        Pair<Boolean, String> pair = new Pair<Boolean, String>(false, "");
+        serverConnectionEstablished.setValue( pair );
 
         amqpReceiver = new InternalAMQPBroadcaseReceiver();
         amqpIntentFilter = new IntentFilter(Constants.BROADCAST_AMQP_IDENTIFIER);
@@ -239,7 +241,7 @@ public class MapViewModel extends AndroidViewModel {
     public LiveData<HashMap<Integer, ParkingZone>> getParkingZones() {
         return mParkingZones;
     }
-    public LiveData<Boolean> getServerConnectionEstablished() {
+    public LiveData<Pair<Boolean, String>> getServerConnectionEstablished() {
         return serverConnectionEstablished;
     }
 
@@ -256,9 +258,9 @@ public class MapViewModel extends AndroidViewModel {
     void onSuccess(String msg) throws JSONException{
         JSONObject obj = new JSONObject(msg);
         String path = obj.getString("path");
-        if(path.matches("/api/profile/creditbalance")) {
+        if(path.matches("/api/profile/summary")) {
             JSONObject jo = obj.getJSONObject("data");
-            process_profile_credit(jo);
+            process_profile_summary(jo);
         }
         else if(path.matches("/api/zones/all")) {
             JSONArray ja = obj.getJSONArray("data");
@@ -271,7 +273,7 @@ public class MapViewModel extends AndroidViewModel {
         else if(path.matches("/api/zones/\\d+/subscribe")) {
             JSONObject jo = obj.getJSONObject("data");
             process_zones_subscribe(jo);
-            sendRequestProfileCreditValue();
+            sendRequestProfileSummary();
             sendRequestZonesAll();
         }
         else if(path.matches("/api/zones/\\d+/spots/all")) {
@@ -297,7 +299,7 @@ public class MapViewModel extends AndroidViewModel {
             Log.d("ELSE", msg);
         }
 
-        serverConnectionEstablished.setValue(Boolean.TRUE);
+        serverConnectionEstablished.setValue(new Pair<Boolean, String>(true, "" ));
     }
 
 
@@ -324,9 +326,10 @@ public class MapViewModel extends AndroidViewModel {
     }
 
 
-    void process_profile_credit(JSONObject jo) throws  JSONException {
+    void process_profile_summary(JSONObject jo) throws  JSONException {
 
         int credit_balance = jo.getInt("balance");
+        Log.d("PROFIL", "" + credit_balance);
         creditBalance.setValue(credit_balance);
     }
 
@@ -479,21 +482,20 @@ public class MapViewModel extends AndroidViewModel {
                     if(jo.getString("status").equalsIgnoreCase("OK"))
                         onSuccess(msg);
                     else    // jo.getString("status").equalsIgnoreCase("ERR")
-                        onError(msg);
+                        onError(jo.getString("msg"));
 
                 } catch (JSONException je) {
                     je.printStackTrace();
                 }
             }
             else {
-                onError(msg);
+                onError("Conneting to Server failed ...");
             }
         }
 
 
         void onError(String msg) {
-            Log.d("ERROR", msg);
-            serverConnectionEstablished.setValue(Boolean.FALSE);
+            serverConnectionEstablished.setValue(new Pair<Boolean, String>(false, msg ));
         }
     }
 
@@ -509,14 +511,15 @@ public class MapViewModel extends AndroidViewModel {
                 if(jo.getString("status").equalsIgnoreCase("OK"))
                     onSuccess(msg);
                 else
-                    onError(msg);
+                    onError(jo.getString("msg"));
             } catch (JSONException je) {
                 je.printStackTrace();
             }
         }
+
+
         void onError(String msg) {
-            Log.d("ERROR", msg);
-            serverConnectionEstablished.setValue(Boolean.FALSE);
+            serverConnectionEstablished.setValue(new Pair<Boolean, String>(false, msg ));
         }
 
     }
