@@ -1,17 +1,8 @@
 package au.edu.anu.cs.sparkee.ui.map.overlay.marker;
 
-
-import android.graphics.Color;
-import android.graphics.ColorSpace;
-import android.util.Log;
-
-import androidx.annotation.ColorInt;
-
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polygon;
 
-import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 
@@ -36,8 +27,6 @@ public class ParkingZonePolygon extends Polygon {
             return marker;
         int parking_spots_unavailable_undefined = parking_spots_cnt - parking_spots_available;
         double occupation =  (parking_spots_unavailable_undefined / (double) parking_spots_cnt) * 100;
-        Log.d("OCCUPATION", "" + parking_spots_unavailable_undefined + " / " + parking_spots_cnt );
-        Log.d("OCCUPATION2", "" + occupation );
         if(occupation > 90) {
             marker = R.color.light_red;
         }
@@ -52,6 +41,4 @@ public class ParkingZonePolygon extends Polygon {
         }
         return marker;
     }
-
-
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.StrictMode;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -157,7 +158,10 @@ public class DataHelper extends IntentService {
             if(mapSubscriptionToken.get(subscribe_token) == null) {
                 mapSubscriptionToken.put(subscribe_token, subscribe_token);
                 Log.d("SUBS", subscribe_token);
-                amqp_incoming_channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, subscribe_token);
+                if(amqp_incoming_channel != null)
+                    amqp_incoming_channel.queueBind(queueName, Constants.RABBIT_EXCHANGE_INCOMING_NAME, subscribe_token);
+                else
+                    Toast.makeText(context, "Subsctiption Failed", Toast.LENGTH_LONG);
             }
         }
         catch(IOException ioe) {

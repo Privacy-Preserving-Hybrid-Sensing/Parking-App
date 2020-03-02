@@ -113,11 +113,11 @@ public class MainActivity extends AppCompatActivity {
                 String pathname = Configuration.getInstance().getOsmdroidTileCache().getAbsolutePath() + File.separator + SqlTileWriter.DATABASE_FILENAME;
                 Log.d("Lokasi", pathname);
                 File dbFile = new File(pathname);
-//                if (dbFile.exists()) {
-//                    Log.d("File DB", "ADA");
-//                } else {
-//                    Log.d("File DB", "BELUM ADA");
-//                }
+                if (dbFile.exists()) {
+                    Log.d("File DB", "ADA");
+                } else {
+                    Log.d("File DB", "BELUM ADA");
+                }
 
                 showSettingsDialog();
 
