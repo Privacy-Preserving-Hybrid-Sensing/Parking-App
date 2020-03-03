@@ -6,10 +6,10 @@ public class Constants {
     public static final int HISTORY_TYPE_SUBSCRIPTION = 2001;
     public static final int HISTORY_TYPE_PARTICIPATION = 2002;
 
-    public static final String BASE_URL = "http://192.168.0.218:8000";
+//    public static final String BASE_URL = "http://192.168.0.218:8000";
 //    public static final String BASE_URL = "http://10.234.0.5:8000";
 //    public static final String BASE_URL = "http://ec2-3-133-91-181.us-east-2.compute.amazonaws.com:8000";
-//    public static final String BASE_URL = "http://10.8.1.250:8000";
+    public static final String BASE_URL = "http://10.8.1.250:8000";
 
 
     public static final String URL_API_ZONES_ALL = "/api/zones/all";
@@ -21,8 +21,8 @@ public class Constants {
     public static final String URL_API_PROFILE_HISTORY_NUM_LAST = "/api/profile/history/%d";
 
 
-    public static final String RABBIT_HOST = "ec2-3-133-91-181.us-east-2.compute.amazonaws.com";
-//    public static final String RABBIT_HOST = "10.8.1.250";
+//    public static final String RABBIT_HOST = "ec2-3-133-91-181.us-east-2.compute.amazonaws.com";
+    public static final String RABBIT_HOST = "10.8.1.250";
     public static final String RABBIT_USER = "mobile";
     public static final String RABBIT_PASS = "ieGh4thi";
     public static final String RABBIT_EXCHANGE_OUTGOING_NAME = "amq.topic";
