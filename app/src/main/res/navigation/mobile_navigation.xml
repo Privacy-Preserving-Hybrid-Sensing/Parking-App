@@ -12,10 +12,10 @@
         tools:layout="@layout/fragment_map" />
 
     <fragment
-        android:id="@+id/navigation_participation"
-        android:name="au.edu.anu.cs.sparkee.ui.participation.ParticipationFragment"
-        android:label="@string/title_participation"
-        tools:layout="@layout/fragment_participation" />
+        android:id="@+id/navigation_history"
+        android:name="au.edu.anu.cs.sparkee.ui.history.HistoryFragment"
+        android:label="@string/title_history"
+        tools:layout="@layout/fragment_history" />
 
     <fragment
         android:id="@+id/navigation_summary"

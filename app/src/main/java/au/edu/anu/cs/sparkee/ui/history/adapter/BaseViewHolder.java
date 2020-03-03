@@ -1,4 +1,4 @@
-package au.edu.anu.cs.sparkee.ui.participation.adapter;
+package au.edu.anu.cs.sparkee.ui.history.adapter;
 
 import android.view.View;
 import androidx.recyclerview.widget.RecyclerView;

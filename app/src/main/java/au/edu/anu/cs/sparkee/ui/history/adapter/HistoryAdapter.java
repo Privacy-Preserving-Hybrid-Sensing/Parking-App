@@ -1,4 +1,4 @@
-package au.edu.anu.cs.sparkee.ui.participation.adapter;
+package au.edu.anu.cs.sparkee.ui.history.adapter;
 
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
+import au.edu.anu.cs.sparkee.model.History;
 import au.edu.anu.cs.sparkee.model.Participation;
+import au.edu.anu.cs.sparkee.model.Subscription;
 import au.edu.anu.cs.sparkee.ui.map.overlay.marker.ParkingSpotMarker;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,18 +28,21 @@ import java.util.List;
 import static au.edu.anu.cs.sparkee.Constants.MARKER_PARKING_AVAILABLE_CONFIDENT_3_DEFAULT;
 import static au.edu.anu.cs.sparkee.Constants.MARKER_PARKING_UNAVAILABLE_CONFIDENT_3_DEFAULT;
 
-public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
+public class HistoryAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     private static final String TAG = "ParticipationAdapter";
     public static final int VIEW_TYPE_EMPTY = 0;
     public static final int VIEW_TYPE_NORMAL = 1;
     private Callback mCallback;
-    private List<Participation> mParticipationList;
-    public ParticipationAdapter(List<Participation> activityList) {
-        mParticipationList = activityList;
+    private List<History> mHistoryList;
+
+    public HistoryAdapter(List<History> historyList) {
+        mHistoryList = historyList;
     }
+
     public void setCallback(Callback callback) {
         mCallback = callback;
     }
+
     @Override
     public void onBindViewHolder(BaseViewHolder holder, int position) {
         holder.onBind(position);
@@ -45,42 +50,89 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     @Override
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
         switch (viewType) {
-            case VIEW_TYPE_NORMAL:
-                return new ViewHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_activity, parent, false));
-            case VIEW_TYPE_EMPTY:
+            case Constants.HISTORY_TYPE_PARTICIPATION:
+                return new ParticipationViewHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_participation, parent, false));
+            case Constants.HISTORY_TYPE_SUBSCRIPTION:
+                return new SubscriptionViewHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_subscription, parent, false));
+            case Constants.HISTORY_TYPE_EMPTY:
             default:
-                return new EmptyViewHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.list_empty_participation, parent, false));
+                return new EmptyViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.list_empty_participation, parent, false));
         }
     }
     @Override
     public int getItemViewType(int position) {
-        if (mParticipationList != null && mParticipationList.size() > 0) {
-            return VIEW_TYPE_NORMAL;
+        if (mHistoryList != null && mHistoryList.size() > 0) {
+            if(mHistoryList.get(position) instanceof Participation)
+                return Constants.HISTORY_TYPE_PARTICIPATION;
+            else
+                return Constants.HISTORY_TYPE_SUBSCRIPTION;
         } else {
-            return VIEW_TYPE_EMPTY;
+            return Constants.HISTORY_TYPE_EMPTY;
         }
     }
     @Override
     public int getItemCount() {
-        if (mParticipationList != null && mParticipationList.size() > 0) {
-            return mParticipationList.size();
+        if (mHistoryList != null && mHistoryList.size() > 0) {
+            return mHistoryList.size();
         } else {
             return 1;
         }
     }
-    public void addItems(List<Participation> participationList) {
-        for(int i = mParticipationList.size(); i < participationList.size(); i++) {
-            mParticipationList.add(i, participationList.get(i));
+    public void addItems(List<History> participationList) {
+        for(int i = mHistoryList.size(); i < participationList.size(); i++) {
+            mHistoryList.add(i, participationList.get(i));
         }
         notifyDataSetChanged();
     }
     public interface Callback {
         void onEmptyViewRetryClick();
     }
-    public class ViewHolder extends BaseViewHolder {
+
+
+    public class SubscriptionViewHolder extends BaseViewHolder {
+        @BindView(R.id.txt_zone_name)
+        TextView txtZoneName;
+
+        @BindView(R.id.txt_charged)
+        TextView txtCharged;
+
+        @BindView(R.id.txt_balance)
+        TextView txtBalance;
+
+        View itemView;
+        public SubscriptionViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+            this.itemView = itemView;
+        }
+        protected void clear() {
+            txtZoneName.setText("");
+            txtCharged.setText("");
+            txtBalance.setText("");
+        }
+
+        public void onBind(int position) {
+            super.onBind(position);
+            final Subscription mActivity = (Subscription) mHistoryList.get(position);
+
+
+            if (mActivity.getZone_name() != null) {
+                txtZoneName.setText(mActivity.getZone_name());
+            }
+
+            if(mActivity.getCharged() != 0)
+                txtCharged.setText("-" + mActivity.getCharged());
+
+            txtBalance.setText("(" + mActivity.getBalance() + ")");
+
+        }
+    }
+
+    public class ParticipationViewHolder extends BaseViewHolder {
         @BindView(R.id.img_previous)
         ImageView imgPrevious;
         @BindView(R.id.img_participation)
@@ -94,8 +146,11 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         @BindView(R.id.txt_ts_update)
         TextView txtTsUpdate;
 
+        @BindView(R.id.txt_balance)
+        TextView txtBalance;
+
         View itemView;
-        public ViewHolder(View itemView) {
+        public ParticipationViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             this.itemView = itemView;
@@ -107,11 +162,12 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             txtCredit.setText("");
             txtZoneName.setText("");
             txtTsUpdate.setText("");
+            txtBalance.setText("");
         }
 
         public void onBind(int position) {
             super.onBind(position);
-            final Participation mActivity = mParticipationList.get(position);
+            final Participation mActivity = (Participation) mHistoryList.get(position);
 
 
             int iconPrevious = ParkingSpotMarker.getMarkerIcon(mActivity.getPrevious_value(), Constants.MARKER_PARKING_CATEGORY_DEFAULT);
@@ -132,7 +188,7 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             }
 
             int val = mActivity.getIncentive_value();
-            String incentive = val == 0 ? "( 0 )" : "( +" + val + " )";
+            String incentive = val == 0 ? "0" : "+" + val;
             txtCredit.setText( incentive );
 
             if (mActivity.getZone_name() != null) {
@@ -155,12 +211,7 @@ public class ParticipationAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                 txtTsUpdate.setText(time_pretty);
             }
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.d("CLICK", "HORE");
-                }
-            });
+            txtBalance.setText("(" + mActivity.getBalance() + ")");
 
         }
     }

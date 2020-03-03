@@ -136,15 +136,10 @@ public class MapViewModel extends AndroidViewModel {
         DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
     }
 
-    public void sendRequestProfileParticipationsLatest() {
-        String url = Constants.BASE_URL + Constants.URL_API_PROFILE_PARTICIPATION_LATEST;
-        DataHelper.getInstance(context).sendGet(url, device_uuid);
-    }
-
-    public void sendRequestProfileParticipationsDaysAgo(int days_ago) {
+    public void sendRequestProfileHistory(int num_last) {
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
-        fmt.format(Constants.URL_API_PROFILE_PARTICIPATION_NUM_LAST, days_ago);
+        fmt.format(Constants.URL_API_PROFILE_HISTORY_NUM_LAST, num_last);
         DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
     }
 
@@ -279,12 +274,12 @@ public class MapViewModel extends AndroidViewModel {
         else if(path.matches("/api/zones/\\d+/spots/all")) {
             JSONArray ja = obj.getJSONArray("data");
             process_zones_spots_all(ja);
-            sendRequestProfileParticipationsLatest();
+            sendRequestProfileHistory(10);
         }
 
-        else if(path.equalsIgnoreCase("/api/profile/participations/latest") || path.matches("/api/profile/participations/\\d+")) {
+        else if(path.equalsIgnoreCase("/api/profile/history/latest") || path.matches("/api/profile/history/\\d+")) {
             JSONArray ja = obj.getJSONArray("data");
-            process_participations(ja);
+            process_history(ja);
         }
 
         else if(path.matches("/api/participate/\\d+/\\d+/available") || path.matches("/api/participate/\\d+/\\d+/unavailable")) {
@@ -359,21 +354,24 @@ public class MapViewModel extends AndroidViewModel {
     }
 
 
-    void process_participations(JSONArray ja) throws  JSONException {
+    void process_history(JSONArray ja) throws  JSONException {
         hashmap_participation = new HashMap<Integer,Participation>();
         for(int i=0; i < ja.length(); i++) {
             JSONObject jo = ja.getJSONObject(i);
-            Participation tmp_participation = new Participation();
+            String type = jo.getString("type");
+            if(type.equalsIgnoreCase("participation")) {
+                Participation tmp_participation = new Participation();
+                tmp_participation.setId(jo.getInt("id_participation"));
+                tmp_participation.setTs_update(jo.getString("ts_update"));
+                tmp_participation.setZone_id(jo.getInt("zone_id"));
+                tmp_participation.setSpot_id(jo.getInt("spot_id"));
+                tmp_participation.setParticipation_value(jo.getInt("participation_value"));
+                tmp_participation.setIncentive_processed(jo.getBoolean("incentive_processed"));
+                tmp_participation.setIncentive_value(jo.getInt("incentive_value"));
+                tmp_participation.setBalance(jo.getInt("balance"));
 
-            tmp_participation.setId(jo.getInt("id"));
-            tmp_participation.setTs_update(jo.getString("ts_update"));
-            tmp_participation.setZone_id(jo.getInt("zone_id"));
-            tmp_participation.setSpot_id(jo.getInt("spot_id"));
-            tmp_participation.setParticipation_value(jo.getInt("participation_value"));
-            tmp_participation.setIncentive_processed(jo.getBoolean("incentive_processed"));
-            tmp_participation.setIncentive_value(jo.getInt("incentive_value"));
-
-            hashmap_participation.put(tmp_participation.getId(), tmp_participation);
+                hashmap_participation.put(tmp_participation.getId(), tmp_participation);
+            }
         }
         mParticipations.setValue(hashmap_participation);
     }

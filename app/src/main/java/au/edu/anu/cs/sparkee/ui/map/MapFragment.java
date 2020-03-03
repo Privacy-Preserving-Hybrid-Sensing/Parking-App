@@ -47,7 +47,6 @@ import java.util.Map;
 import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.R;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
-import au.edu.anu.cs.sparkee.helper.OSMHelper;
 import au.edu.anu.cs.sparkee.model.ParkingSpot;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 import au.edu.anu.cs.sparkee.model.Participation;
@@ -194,11 +193,8 @@ public class MapFragment extends Fragment {
         mapViewModel.getCreditBalance().observe( getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer val) {
-                TextView ic_credit = (TextView) getView().findViewById(R.id.ic_credit);
-                if(initHTTP)
-                    ic_credit.setText(val.toString());
-                else
-                    ic_credit.setText(" - ");
+                TextView ic_credit = (TextView) getView().findViewById(R.id.ic_balance);
+                ic_credit.setText(val.toString());
             }
         });
 
@@ -237,6 +233,7 @@ public class MapFragment extends Fragment {
             public void onClick(View v) {
                 Log.i("CENTER MAP", "centerMap clicked ");
                 if (currentLocation != null) {
+
                     GeoPoint myPosition = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
                     mMapView.getController().animateTo(myPosition);
                 }
@@ -248,7 +245,6 @@ public class MapFragment extends Fragment {
 
         mapViewModel.sendRequestProfileSummary();
         mapViewModel.sendRequestZonesAll();
-
     }
 
     private void redrawParkingSpot(ParkingSpot freshParkingSpot) {
@@ -438,7 +434,7 @@ public class MapFragment extends Fragment {
 
                 folderOverlayParkingZone.add(parkingZone.getId(), tmp_polygon);
             }
-            else {
+            else if(tmp_polygon != null && geopoint_cnt > 0) {
                 int polygon_color = ParkingZonePolygon.getPolygonColor(parkingZone.getSpot_total(), parkingZone.getSpot_available());
                 int colorColor = ContextCompat.getColor(getContext(), polygon_color);
                 tmp_polygon.getFillPaint().setColor( colorColor );

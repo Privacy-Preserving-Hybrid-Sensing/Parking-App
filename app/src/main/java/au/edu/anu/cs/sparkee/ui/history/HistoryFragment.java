@@ -1,4 +1,4 @@
-package au.edu.anu.cs.sparkee.ui.participation;
+package au.edu.anu.cs.sparkee.ui.history;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -22,13 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.edu.anu.cs.sparkee.R;
-import au.edu.anu.cs.sparkee.model.Participation;
-import au.edu.anu.cs.sparkee.ui.participation.adapter.ParticipationAdapter;
+import au.edu.anu.cs.sparkee.model.History;
+import au.edu.anu.cs.sparkee.ui.history.adapter.HistoryAdapter;
 import butterknife.BindView;
 
-public class ParticipationFragment extends Fragment {
+public class HistoryFragment extends Fragment {
 
-    private ParticipationViewModel participationViewModel;
+    private HistoryViewModel historyViewModel;
 
     boolean isLoading = false;
 
@@ -36,23 +35,23 @@ public class ParticipationFragment extends Fragment {
     Context context;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        participationViewModel = ViewModelProviders.of(this).get(ParticipationViewModel.class);
+        historyViewModel = ViewModelProviders.of(this).get(HistoryViewModel.class);
 
         context = this.getActivity();
-        View root = inflater.inflate(R.layout.fragment_participation, container, false);
+        View root = inflater.inflate(R.layout.fragment_history, container, false);
         mRecyclerView = root.findViewById(R.id.recycle_activity);
         setUp();
         initScrollListener();
 
-        participationViewModel.getParticipation().observe(getViewLifecycleOwner(), new Observer<List<Participation>>() {
+        historyViewModel.getHistory().observe(getViewLifecycleOwner(), new Observer<List<History>>() {
             @Override
-            public void onChanged(@Nullable List<Participation> part) {
+            public void onChanged(@Nullable List<History> part) {
                 Log.d("SIZE", "" + part.size());
                 populateData(part);
             }
         });
 
-        participationViewModel.sendRequestParticipationsNumLast(numItems);
+        historyViewModel.sendRequestHistoryNumLast(numItems);
         return root;
     }
     LinearLayoutManager mLayoutManager;
@@ -91,27 +90,27 @@ public class ParticipationFragment extends Fragment {
     int numItems;
     final int moreItems = 10;
     private void loadMore() {
-        participationViewModel.sendRequestParticipationsNumLast(numItems + moreItems);
+        historyViewModel.sendRequestHistoryNumLast(numItems + moreItems);
         numItems += moreItems;
     }
 
-    ParticipationAdapter mParticipationAdapter;
+    HistoryAdapter mHistoryAdapter;
 
     public void setUp() {
         mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setOrientation(RecyclerView.VERTICAL);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
-        ArrayList<Participation> list = new ArrayList<>();
-        mParticipationAdapter = new ParticipationAdapter(list);
+//        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        ArrayList<History> list = new ArrayList<>();
+        mHistoryAdapter = new HistoryAdapter(list);
         numItems = 10;
     }
 
-    public void populateData(List<Participation> part) {
-        mParticipationAdapter.addItems(part);
-        mRecyclerView.setAdapter(mParticipationAdapter);
+    public void populateData(List<History> part) {
+        mHistoryAdapter.addItems(part);
+        mRecyclerView.setAdapter(mHistoryAdapter);
         Log.d("POP", "POPOPO");
         if(part.size() > 0) {
             numExistingItems = part.size();
@@ -123,6 +122,6 @@ public class ParticipationFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        participationViewModel.stopViewModel();
+        historyViewModel.stopViewModel();
     }
 }

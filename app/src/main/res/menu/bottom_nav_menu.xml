@@ -7,9 +7,9 @@
         android:title="@string/title_map" />
 
     <item
-        android:id="@+id/navigation_participation"
+        android:id="@+id/navigation_history"
         android:icon="@drawable/ic_list_black"
-        android:title="@string/title_participation" />
+        android:title="@string/title_history" />
 
     <item
         android:id="@+id/navigation_summary"

@@ -4,11 +4,27 @@ import android.location.Location;
 
 import org.threeten.bp.LocalDateTime;
 
-public class Participation  {
+import au.edu.anu.cs.sparkee.Constants;
+
+public class Participation extends History {
     private int id;
     private LocalDateTime ts_update;
     private int zone_id;
     private String zone_name;
+
+    private int balance;
+
+    public int getBalance() {
+        return balance;
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
+    }
+
+    public Participation() {
+        super(Constants.HISTORY_TYPE_PARTICIPATION);
+    }
 
     public String getZone_name() {
         return zone_name;

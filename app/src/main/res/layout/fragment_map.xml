@@ -41,10 +41,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Credit: "
+            android:text="Balance: "
             android:textStyle="bold" />
         <TextView
-            android:id="@+id/ic_credit"
+            android:id="@+id/ic_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
