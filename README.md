@@ -1,6 +1,6 @@
 # Introduction
 
-![Android Smart Parking Design](https://gitlab.anu.edu.au/u1063268/smart-parking-app/blob/master/docs/android.png "Android Smart Parking Architecture")
+![Android Smart Parking Design](https://gitlab.anu.edu.au/u1063268/smart-parking-app/raw/master/docs/android.png "Android Smart Parking Architecture")
 
 SmartParking is an incentivize CrowdSourced information sharing platform for Parking Spot availability. SmartParking App provides mobile based user interface (Android). For web based App, please visit [Smart Parking App](https://gitlab.anu.edu.au/u1063268/smart-parking-backend) project.
 
