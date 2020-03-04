@@ -470,6 +470,12 @@ public class MapFragment extends Fragment {
         mapViewModel.stopViewModel();
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        mapViewModel.startViewModel();
+    }
+
     public void hideAllInfoWindow() {
 
         for (Overlay item :folderOverlayParkingZone.getItems()) {

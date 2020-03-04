@@ -84,7 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme2);
         super.onCreate(savedInstanceState);
+
         AndroidThreeTen.init(this);
         ButterKnife.bind(this);
 
