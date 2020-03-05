@@ -76,7 +76,7 @@ public class HistoryViewModel extends AndroidViewModel {
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
         fmt.format(Constants.URL_API_PROFILE_HISTORY_NUM_LAST, num_last_history);
-        DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
+        DataHelper.getInstance(context).sendGet(fmt.toString(), device_uuid);
     }
 
     public LiveData<List<History>> getHistory() {
@@ -156,7 +156,7 @@ public class HistoryViewModel extends AndroidViewModel {
 
         void onError(Context ctx, String msg) {
             Log.d("ERROR", msg);
-            Toast.makeText(ctx, msg, Toast.LENGTH_LONG );
+            Toast.makeText(ctx, msg, Toast.LENGTH_LONG ).show();
         }
     }
 

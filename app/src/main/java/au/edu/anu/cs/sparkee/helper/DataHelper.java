@@ -3,6 +3,7 @@ package au.edu.anu.cs.sparkee.helper;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Toast;
@@ -24,9 +25,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -38,10 +37,18 @@ public class DataHelper extends IntentService {
     //    private static Channel amqp_incoming_channel;
     private static DataHelper singleton;
     private Context context;
-
+    String http_host_port;
+    String amqp_host;
+    int amqp_port;
     public DataHelper(String name, Context ctx) {
         super(name);
         context = ctx;
+
+        SharedPreferences sharedPref =  ctx.getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+        http_host_port = sharedPref.getString(Constants.HTTP_IP_PORT_IDENTIFIER, Constants.HTTP_IP_PORT);
+        amqp_host = sharedPref.getString(Constants.RABBIT_HOST_IDENTIFIER, Constants.RABBIT_HOST);
+        amqp_port = sharedPref.getInt(Constants.RABBIT_PORT_IDENTIFIER, Constants.RABBIT_PORT);
+
         initAMQPConnection();
         initHTTPListener();
         mapSubscriptionToken = new HashMap<String,String>();
@@ -58,7 +65,7 @@ public class DataHelper extends IntentService {
 
     public boolean sendGet(String url, final String device_uuid) {
         String trx_id = UUID.randomUUID().toString();
-        return sendGet(url, device_uuid, trx_id);
+        return sendGet("http://" + http_host_port +  url, device_uuid, trx_id);
     }
 
     public boolean sendGet(String url, final String device_uuid, final String trx_id) {
@@ -112,7 +119,8 @@ public class DataHelper extends IntentService {
 
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost(Constants.RABBIT_HOST);
+            factory.setHost(amqp_host);
+            factory.setPort(amqp_port);
             factory.setUsername(Constants.RABBIT_USER);
             factory.setPassword(Constants.RABBIT_PASS);
             factory.setAutomaticRecoveryEnabled(true);

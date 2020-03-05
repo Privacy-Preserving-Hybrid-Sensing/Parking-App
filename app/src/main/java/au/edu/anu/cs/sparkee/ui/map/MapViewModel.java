@@ -93,7 +93,7 @@ public class MapViewModel extends AndroidViewModel {
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
         fmt.format(Constants.URL_API_ZONES_SUBSCRIBE, zone_id);
-        DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
+        DataHelper.getInstance(context).sendGet(fmt.toString(), device_uuid);
 
     }
 
@@ -101,14 +101,14 @@ public class MapViewModel extends AndroidViewModel {
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
         fmt.format(Constants.URL_API_ZONES_ID, zone_id);
-        DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
+        DataHelper.getInstance(context).sendGet(fmt.toString(), device_uuid);
     }
 
     public void sendRequestZoneSpotsAll(int zone_id) {
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
         fmt.format(Constants.URL_API_ZONES_SPOTS_ALL, zone_id);
-        DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
+        DataHelper.getInstance(context).sendGet(fmt.toString(), device_uuid);
     }
 
     public void subscribeAsyncChannel(String subscribe_token) {
@@ -118,14 +118,14 @@ public class MapViewModel extends AndroidViewModel {
 
     public void sendRequestZonesAll() {
         // Get Info All Zone
-        String url = Constants.BASE_URL + Constants.URL_API_ZONES_ALL;
+        String url = Constants.URL_API_ZONES_ALL;
         DataHelper.getInstance(context).sendGet(url, device_uuid);
 
     }
 
     public void sendRequestProfileSummary() {
         // Get Profile Summary (credit value included)
-        String url = Constants.BASE_URL + Constants.URL_API_PROFILE_SUMMARY;
+        String url = Constants.URL_API_PROFILE_SUMMARY;
         DataHelper.getInstance(context).sendGet(url, device_uuid);
     }
 
@@ -133,14 +133,14 @@ public class MapViewModel extends AndroidViewModel {
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
         fmt.format(Constants.URL_API_PARTICIPATE, zone_id, spot_id, status);
-        DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
+        DataHelper.getInstance(context).sendGet(fmt.toString(), device_uuid);
     }
 
     public void sendRequestProfileHistory(int num_last) {
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
         fmt.format(Constants.URL_API_PROFILE_HISTORY_NUM_LAST, num_last);
-        DataHelper.getInstance(context).sendGet(Constants.BASE_URL + fmt.toString(), device_uuid);
+        DataHelper.getInstance(context).sendGet(fmt.toString(), device_uuid);
     }
 
     private void initData() {

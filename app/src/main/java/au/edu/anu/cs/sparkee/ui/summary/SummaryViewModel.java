@@ -51,7 +51,7 @@ public class SummaryViewModel extends AndroidViewModel {
 
     public void sendRequestProfileSummary() {
         // Get Profile Summary (credit value included)
-        String url = Constants.BASE_URL + Constants.URL_API_PROFILE_SUMMARY;
+        String url = Constants.URL_API_PROFILE_SUMMARY;
         DataHelper.getInstance(context).sendGet(url, device_uuid);
     }
 
@@ -128,7 +128,7 @@ public class SummaryViewModel extends AndroidViewModel {
 
         void onError(Context ctx, String msg) {
             Log.d("ERROR", msg);
-            Toast.makeText(ctx, msg, Toast.LENGTH_LONG );
+            Toast.makeText(ctx, msg, Toast.LENGTH_LONG ).show();
         }
     }
 }

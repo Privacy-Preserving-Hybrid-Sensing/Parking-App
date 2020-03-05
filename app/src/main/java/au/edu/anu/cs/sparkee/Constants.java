@@ -6,11 +6,8 @@ public class Constants {
     public static final int HISTORY_TYPE_SUBSCRIPTION = 2001;
     public static final int HISTORY_TYPE_PARTICIPATION = 2002;
 
-//    public static final String BASE_URL = "http://192.168.0.218:8000";
-//    public static final String BASE_URL = "http://10.234.0.5:8000";
-//    public static final String BASE_URL = "http://ec2-3-133-91-181.us-east-2.compute.amazonaws.com:8000";
-    public static final String BASE_URL = "http://10.8.1.250:8000";
-
+    public static final String HTTP_IP_PORT = "192.168.0.73:8000";
+    public static final String HTTP_IP_PORT_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.HTTP.IP_PORT";
 
     public static final String URL_API_ZONES_ALL = "/api/zones/all";
     public static final String URL_API_ZONES_ID = "/api/zones/%d";
@@ -21,8 +18,10 @@ public class Constants {
     public static final String URL_API_PROFILE_HISTORY_NUM_LAST = "/api/profile/history/%d";
 
 
-//    public static final String RABBIT_HOST = "ec2-3-133-91-181.us-east-2.compute.amazonaws.com";
-    public static final String RABBIT_HOST = "10.8.1.250";
+    public static final String RABBIT_HOST = "192.168.0.73";
+    public static final String RABBIT_HOST_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.AMQP.HOST";
+    public static final String RABBIT_PORT_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.AMQP.PORT";
+    public static final int  RABBIT_PORT = 5672;
     public static final String RABBIT_USER = "mobile";
     public static final String RABBIT_PASS = "ieGh4thi";
     public static final String RABBIT_EXCHANGE_OUTGOING_NAME = "amq.topic";
