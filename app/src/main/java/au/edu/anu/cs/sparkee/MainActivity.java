@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPref =  getApplicationContext().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
 
         String device_uuid = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID, "");
-
         if(device_uuid.equalsIgnoreCase("")) {
             SharedPreferences.Editor editor = sharedPref.edit();
             String newUUID = UUID.randomUUID().toString();

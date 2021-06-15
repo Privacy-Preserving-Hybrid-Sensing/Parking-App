@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,9 @@ import androidx.core.util.Pair;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,18 +31,24 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.IMyLocationConsumer;
 import org.osmdroid.views.overlay.mylocation.IMyLocationProvider;
 
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import au.edu.anu.cs.sparkee.Constants;
+import au.edu.anu.cs.sparkee.ZKClient;
 import au.edu.anu.cs.sparkee.helper.DataHelper;
 import au.edu.anu.cs.sparkee.model.ParkingSpot;
 import au.edu.anu.cs.sparkee.model.ParkingZone;
 import au.edu.anu.cs.sparkee.model.Participation;
+
+import static au.edu.anu.cs.sparkee.Constants.ZK_MESSAGE_WAIT_BEFORE_SENDING_ANOTHER_PARTICIPATION_DATA;
 
 public class MapViewModel extends AndroidViewModel {
 
@@ -51,12 +61,23 @@ public class MapViewModel extends AndroidViewModel {
     private MutableLiveData<ParkingSpot> mChangedParkingSpot;
     private MutableLiveData<ParkingZone> mChangedParkingZone;
 
+
     private MutableLiveData<Integer> creditBalance;
+    private MutableLiveData<String> zkBalance;
+
     private MutableLiveData<HashMap<Integer,ParkingZone>> mParkingZones;
 
     private MutableLiveData<HashMap<Integer,Participation>> mParticipations;
 
     private MutableLiveData<Pair<Boolean, String>> serverConnectionEstablished;
+
+    // [ZK]
+    private ZKClient zkClient= new ZKClient();
+    private SharedPreferences sharedPref =  getApplication().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
+    private Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private boolean can_submit_data = true;
+    private MutableLiveData<Boolean> zkHasRegistered;
+    private MutableLiveData<String> zkToastMessage;
 
 
     final Context context;
@@ -87,6 +108,98 @@ public class MapViewModel extends AndroidViewModel {
         initData();
         startGPS();
         startListeners();
+    }
+
+    public void zk_initCredentialOrMakeNewIfNotExist() {
+        String zk_s = sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_S, "");
+        if(zk_s.equalsIgnoreCase("")) {
+            Log.d("[GG] ZK_SYSTEM_SETUP", "Trying to create new credential");
+            zk_initSystemSetup();
+        }
+        else {
+            Log.d("[GG] ZK_SYSTEM_SETUP", "Credential exist, loading from shared preference");
+            // when we already have S in our shared preference, that means we only need to load it in our zkClient.
+            zkClient.setS(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_S, ""));
+            zkClient.setS_(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_S_, ""));
+            zkClient.setQ(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_Q, ""));
+            zkClient.setB(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_B, ""));
+            zkClient.setSignQ(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_SIGN_Q, ""));
+            zkClient.setCommitment_s(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_S, ""));
+            zkClient.setCommitment_q(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_Q, ""));
+            zkClient.setCommitment_b(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_B, ""));
+            zkClient.setCommitment_random_s(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_RANDOM_S, ""));
+            zkClient.setZs(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_ZS, ""));
+            zkClient.setMask_q(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_MASK_Q, ""));
+            zkHasRegistered.setValue(true);
+        }
+    }
+
+    private void zk_registerCredential() {
+        // make registration process, command client to create credentials ans then send those credentials to server
+        HashMap<String, String> regis_data = zkClient.create_registration_data();
+        JSONObject json_obj = new JSONObject(regis_data);
+        Log.d("[GG] ZK_REGISTER", "Trying to register with following data: " + json_obj);
+        DataHelper.getInstance(context).sendPost(Constants.URL_API_ZK_REGISTER, device_uuid,
+                json_obj);
+    }
+
+    private void zk_initSystemSetup() {
+        // get crypto info from server and set the common value to the zkClient.
+        DataHelper.getInstance(context).sendGet(Constants.URL_API_ZK_GET_CRYPTO_INFO, device_uuid);
+    }
+
+    private void zk_claimRewardVerifyCredential() {
+        HashMap<String, String> claim_verify_credential_data = zkClient.create_credit_claim_data();
+        JSONObject json_obj = new JSONObject(claim_verify_credential_data);
+        Log.d("[GG] ZK_CLAIM_step_1", "Trying to claim_verify_credential with following data: " + json_obj);
+        DataHelper.getInstance(context).sendPost(Constants.URL_API_ZK_CLAIM_VERIFY_CREDENTIAL, device_uuid,
+                json_obj);
+    }
+
+    private void zk_claimRewardVerifyQ() {
+        HashMap<String, String> claim_verify_q_data = zkClient.get_q_and_mask_q();
+        JSONObject json_obj = new JSONObject(claim_verify_q_data);
+        Log.d("[GG] ZK_CLAIM_step_2", "Trying to claim_verify_q with following data: " + json_obj);
+        DataHelper.getInstance(context).sendPost(Constants.URL_API_ZK_CLAIM_VERIFY_Q, device_uuid,
+                json_obj);
+    }
+
+    private void zk_claimReward() {
+        HashMap<String, String> new_q_data = zkClient.compute_new_q();
+        JSONObject json_obj = new JSONObject(new_q_data);
+        Log.d("[GG] ZK_CLAIM_step_3", "Trying to claim_reward and submit data with following new_q_data: " + json_obj);
+        DataHelper.getInstance(context).sendPost(Constants.URL_API_ZK_CLAIM_REWARD, device_uuid,
+                json_obj);
+    }
+
+    private void zk_acceptReward(HashMap<String, String> reward_data) {
+        Log.d("[GG] ZK_CLAIM_step_4", "Reward claimed successfully :" + reward_data);
+        zkClient.accept_reward(reward_data);
+        // edit Data after getting new reward
+        zk_update_shared_preference_to_latest_zk_data();
+        zkBalance.setValue(zkClient.getReadableBalance());
+        can_submit_data = true;
+    }
+
+    private void zk_update_shared_preference_to_latest_zk_data() {
+        // save credentials and its supportive data to shared preference.
+        SharedPreferences.Editor editor = sharedPref.edit();
+        // credentials
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_S, zkClient.getS());
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_S_, zkClient.getS_());
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_Q, zkClient.getQ());
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_B, zkClient.getB());
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_SIGN_Q, zkClient.getSignQ());
+        // credential commitments
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_S, zkClient.getCommitment_s());
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_Q, zkClient.getCommitment_q());
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_B, zkClient.getCommitment_b());
+        // nzkpCm[s]
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_RANDOM_S, zkClient.getCommitment_random_s());
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_ZS, zkClient.getZs());
+        // credit claim mask_q
+        editor.putString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_MASK_Q, zkClient.getMask_q());
+        editor.commit();
     }
 
     public void sendRequestZoneSubscribe(int zone_id) {
@@ -130,10 +243,28 @@ public class MapViewModel extends AndroidViewModel {
     }
 
     public void sendRequestParticipation(int zone_id, int spot_id, String status) {
+        if (!can_submit_data) {
+            zkToastMessage.setValue(Constants.ZK_MESSAGE_WAIT_BEFORE_SENDING_ANOTHER_PARTICIPATION_DATA);
+            return;
+        }
+        // [GG new] ticker flag buat menentukan client sudah bisa send data lagi atau ngga.
+        can_submit_data = false;
+
         StringBuilder sbuf = new StringBuilder();
         Formatter fmt = new Formatter(sbuf);
         fmt.format(Constants.URL_API_PARTICIPATE, zone_id, spot_id, status);
-        DataHelper.getInstance(context).sendGet(fmt.toString(), device_uuid);
+
+        String j = Integer.toString(zone_id) + "--" + Integer.toString(spot_id);
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String t = formatter.format(Calendar.getInstance().getTime());
+        Boolean a = true;
+        if (status.equals("unavailable")) {
+            a = false;
+        }
+        HashMap<String, String> submission_data = zkClient.create_submission_data(j, t, a);
+        JSONObject json_obj = new JSONObject(submission_data);
+        Log.d("[GG] ZK_SUBMISSION", "Trying to submit the following data: " + json_obj);
+        DataHelper.getInstance(context).sendPost(fmt.toString(), device_uuid, json_obj);
     }
 
     public void sendRequestProfileHistory(int num_last) {
@@ -180,10 +311,16 @@ public class MapViewModel extends AndroidViewModel {
         creditBalance = new MutableLiveData<>();
         creditBalance.setValue( 0 );
 
+        zkBalance = new MutableLiveData<>();
+        zkBalance.setValue( "0" );
+
         hashmap_parkingSpot = new HashMap<Integer,ParkingSpot > ();
 
         mParkingSpots = new MutableLiveData<>();
         mParkingSpots.setValue( hashmap_parkingSpot );
+
+        zkHasRegistered = new MutableLiveData<>();
+        zkHasRegistered.setValue(false);
 
 
         mChangedParkingSpot = new MutableLiveData<>();
@@ -199,6 +336,9 @@ public class MapViewModel extends AndroidViewModel {
         hashmap_participation = new HashMap<Integer,Participation> ();
         mParticipations = new MutableLiveData<>();
         mParticipations.setValue( hashmap_participation );
+
+        zkToastMessage = new MutableLiveData<>();
+        zkToastMessage.setValue("");
 
         serverConnectionEstablished = new MutableLiveData<>();
         Pair<Boolean, String> pair = new Pair<Boolean, String>(false, "");
@@ -218,6 +358,11 @@ public class MapViewModel extends AndroidViewModel {
     public LiveData<Location> getLocation() {
         return mLocation;
     }
+    public LiveData<String> getZkBalance() {
+        return zkBalance;
+    }
+    public LiveData<Boolean> getZkHasRegistered() { return zkHasRegistered; }
+    public LiveData<String> getZkToastMessage() { return zkToastMessage; }
     public LiveData<HashMap<Integer,ParkingSpot>> getParkingSpots() {
         return mParkingSpots;
     }
@@ -256,6 +401,10 @@ public class MapViewModel extends AndroidViewModel {
         if(path.matches("/api/profile/summary")) {
             JSONObject jo = obj.getJSONObject("data");
             process_profile_summary(jo);
+            // ubah can_participate jadi true.
+            // if dia bisa claim credit (based on /api/profile/summary result)
+                // tembak API untuk claim, kasih param ZK + beberapa info dari returnan si /api/profile/summary supaya server bisa validate lagi kalo datanya ada di db. (TEMBAK MQ)
+            // MAKE REQUEST PAKE OKHTTP buath lgsg aja, gausah volley. (kalo bisa, kalo computenya kuat)
         }
         else if(path.matches("/api/zones/all")) {
             JSONArray ja = obj.getJSONArray("data");
@@ -289,6 +438,82 @@ public class MapViewModel extends AndroidViewModel {
         else if(path.matches("/api/zones/\\d+/spots/\\d+")) {
             JSONObject jo = obj.getJSONObject("data");
             process_update_parking_spot(jo);
+        }
+        // [ZK]
+        else if(path.matches(Constants.URL_API_ZK_GET_CRYPTO_INFO)) {
+            String json = obj.getJSONObject("zk").toString();
+            HashMap<String, String> crypto_info = gson.fromJson(json, HashMap.class);
+            // set crypto info to zkClient
+            zkClient.set_crypt_info(crypto_info);
+            zk_registerCredential();
+        }
+        else if (path.matches(Constants.URL_API_ZK_REGISTER)) {
+            String json = obj.getJSONObject("zk").toString();
+            HashMap<String, String> regis_response = gson.fromJson(json, HashMap.class);
+            // configure client credentials, computing secret s.
+            zkClient.configure_credentials(regis_response);
+
+            zk_update_shared_preference_to_latest_zk_data();
+            zkBalance.setValue(zkClient.getReadableBalance());
+
+            if(zkHasRegistered.getValue().equals(false)) {
+                zkHasRegistered.setValue(true);
+            }
+        }
+        else if (path.matches(Constants.URL_API_ZK_DATA_SUBMISSION_ELIGIBILITY_RESULT)) {
+            // [GG] if goes here, it means client is eligible to claim data
+            // [GG] mulai chaining disini buat verify credential.
+            String json = obj.getJSONObject("zk").toString();
+            HashMap<String, String> submission_response = gson.fromJson(json, HashMap.class);
+            // "true" => eligible to claim reward, "false" => not eligible
+            if(submission_response.get("eligibility").equals("true")) {
+                zkToastMessage.setValue(Constants.ZK_MESSAGE_ELIGIBLE_TO_CLAIM_REWARD);
+                // chain to next claiming step (verify credential)
+                zk_claimRewardVerifyCredential();
+
+            } else {
+                zkToastMessage.setValue(Constants.ZK_MESSAGE_NOT_ELIGIBLE_TO_CLAIM_REWARD);
+                can_submit_data = true; // client now can submit another data
+            }
+        }
+        else if (path.matches(Constants.URL_API_ZK_CLAIM_VERIFY_CREDENTIAL)) {
+            String json = obj.getJSONObject("zk").toString();
+            HashMap<String, String> claim_response_verify_credential = gson.fromJson(json, HashMap.class);
+            if (claim_response_verify_credential.get("verification_success").equals("true")) {
+                zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_CREDENTIAL_VERIFIED);
+                // chain to next claiming step (verify credential)
+                zk_claimRewardVerifyQ();
+            }else {
+                zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_CREDENTIAL_NOT_VERIFIED);
+                can_submit_data = true; // client now can submit another data
+                // TODO: handle failed verification in next PROTOCOL enhancement.
+            }
+        }
+        else if (path.matches(Constants.URL_API_ZK_CLAIM_VERIFY_Q)) {
+            String json = obj.getJSONObject("zk").toString();
+            HashMap<String, String> claim_response_verify_q = gson.fromJson(json, HashMap.class);
+            if (claim_response_verify_q.get("verification_success").equals("true")) {
+                zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_Q_VERIFIED);
+                // chain to next claiming step (verify credential)
+                zk_claimReward();
+            }else {
+                zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_Q_NOT_VERIFIED);
+                can_submit_data = true; // client now can submit another data
+                // TODO: handle failed verification in next PROTOCOL enhancement.
+            }
+        }
+        else if (path.matches(Constants.URL_API_ZK_CLAIM_REWARD)) {
+            String json = obj.getJSONObject("zk").toString();
+            HashMap<String, String> claim_reward_response = gson.fromJson(json, HashMap.class);
+            if (claim_reward_response.get("success").equals("true")) {
+                zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_REWARD_SUCCESS);
+                // chain to next claiming step (verify credential)
+                zk_acceptReward(claim_reward_response);
+            }else {
+                zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_REWARD_FAILED);
+                can_submit_data = true; // client now can submit another data
+                // TODO: handle failed verification in next PROTOCOL enhancement.
+            }
         }
         else {
             Log.d("ELSE", msg);

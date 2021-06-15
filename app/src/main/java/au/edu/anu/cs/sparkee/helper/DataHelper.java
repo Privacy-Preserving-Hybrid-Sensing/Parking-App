@@ -15,6 +15,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.rabbitmq.client.AMQP;
@@ -23,6 +24,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -71,7 +74,7 @@ public class DataHelper extends IntentService {
     public boolean sendGet(String url, final String device_uuid, final String trx_id) {
         Log.d("GET", url);
         RequestQueue queue = Volley.newRequestQueue(context);
-        StringRequest request = new StringRequest(Request.Method.GET, url, okHttpListener, errorHttpListener) {
+        StringRequest request = new StringRequest(Request.Method.GET, url, okHttpGetListener, errorHttpListener) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
@@ -84,7 +87,30 @@ public class DataHelper extends IntentService {
         return true;
     }
 
-    private Response.Listener okHttpListener = new Response.Listener<String>() {
+    // [ZK]
+    public boolean sendPost(String url, final String device_uuid, JSONObject data) {
+        String trx_id = UUID.randomUUID().toString();
+        return sendPost("http://" + http_host_port +  url, device_uuid, trx_id, data);
+    }
+    //[ZK]
+    public boolean sendPost(String url, final String device_uuid, final String trx_id, JSONObject data) {
+        Log.d("POST", url);
+        RequestQueue queue = Volley.newRequestQueue(context);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, data, okHttpPostListener, errorHttpListener) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Subscriber-UUID", device_uuid);
+                params.put("Trx-id", trx_id);
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+        queue.add(request);
+        return true;
+    }
+
+    private Response.Listener okHttpGetListener = new Response.Listener<String>() {
         @Override
         public void onResponse(String msg) {
             Intent intent = new Intent();
@@ -92,6 +118,18 @@ public class DataHelper extends IntentService {
             intent.putExtra(Constants.BROADCAST_DATA_STATUS_IDENTIFIER, Constants.BROADCAST_STATUS_OK);
             intent.putExtra(Constants.BROADCAST_HTTP_BODY_IDENTIFIER, msg);
             Log.d("RESP", msg);
+            context.sendBroadcast(intent);
+        }
+    };
+
+    private Response.Listener okHttpPostListener = new Response.Listener<JSONObject>() {
+        @Override
+        public void onResponse(JSONObject msg) {
+            Intent intent = new Intent();
+            intent.setAction(Constants.BROADCAST_DATA_HELPER_IDENTIFIER);
+            intent.putExtra(Constants.BROADCAST_DATA_STATUS_IDENTIFIER, Constants.BROADCAST_STATUS_OK);
+            intent.putExtra(Constants.BROADCAST_HTTP_BODY_IDENTIFIER, msg.toString());
+            Log.d("RESP", msg.toString());
             context.sendBroadcast(intent);
         }
     };

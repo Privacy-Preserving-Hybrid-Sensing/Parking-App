@@ -130,6 +130,32 @@ public class MapFragment extends Fragment {
         folderOverlayParkingSpot = new HashFolderOverlay();
 
 
+        mapViewModel.getZkToastMessage().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                Log.d("[GG] test Toast", s);
+                if (!s.equals("")) {
+                    Toast.makeText(getActivity().getApplicationContext(), s, Toast.LENGTH_LONG);
+                }
+            }
+        });
+
+        mapViewModel.getZkHasRegistered().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                // DO NOTHING FOR ZK, just to follow MVVM Design Pattern
+                Log.d("[GG] ZK_FRAGMENT_REGIS", "ZK registered success indicator is changed to " + Boolean.toString(aBoolean));
+            }
+        });
+
+        mapViewModel.getZkBalance().observe( getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String val) {
+                TextView ic_credit_zk = (TextView) getView().findViewById(R.id.ic_balance_zk);
+                ic_credit_zk.setText(val);
+            }
+        });
+
         mapViewModel.getServerConnectionEstablished().observe( getViewLifecycleOwner(), new Observer<Pair<Boolean, String>>() {
             @Override
             public void onChanged(@Nullable Pair<Boolean, String> stat) {
@@ -227,6 +253,7 @@ public class MapFragment extends Fragment {
             }
         });
 
+
         btCenterMap = view.findViewById(R.id.ic_center_map);
         btCenterMap.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -243,6 +270,7 @@ public class MapFragment extends Fragment {
         addHandleMapEvent();
         addOverlayRotation();
 
+        mapViewModel.zk_initCredentialOrMakeNewIfNotExist();
         mapViewModel.sendRequestProfileSummary();
         mapViewModel.sendRequestZonesAll();
     }

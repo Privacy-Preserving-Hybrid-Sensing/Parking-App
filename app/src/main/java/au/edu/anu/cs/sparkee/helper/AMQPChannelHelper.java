@@ -18,7 +18,7 @@ import au.edu.anu.cs.sparkee.Constants;
 import au.edu.anu.cs.sparkee.helper.AMQPConnectionHelper;
 
 public class AMQPChannelHelper extends IntentService {
-    // Must create a default constructor
+    // Must create a.properties default constructor
     public AMQPChannelHelper() {
         // Used to name the worker thread, important only for debugging.
         super("AMQPChannelHelper");
@@ -28,7 +28,7 @@ public class AMQPChannelHelper extends IntentService {
 
     public void onCreate() {
         super.onCreate(); // if you override onCreate(), make sure to call super().
-        // If a Context object is needed, call getApplicationContext() here.
+        // If a.properties Context object is needed, call getApplicationContext() here.
         try {
 
             final Channel channel = amqpConnectionHelper.getOutgoingChannel();

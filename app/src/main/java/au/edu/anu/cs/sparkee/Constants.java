@@ -6,7 +6,7 @@ public class Constants {
     public static final int HISTORY_TYPE_SUBSCRIPTION = 2001;
     public static final int HISTORY_TYPE_PARTICIPATION = 2002;
 
-    public static final String HTTP_IP_PORT = "192.168.0.73:8000";
+    public static final String HTTP_IP_PORT = "103.219.249.10:48000";
     public static final String HTTP_IP_PORT_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.HTTP.IP_PORT";
 
     public static final String URL_API_ZONES_ALL = "/api/zones/all";
@@ -17,8 +17,29 @@ public class Constants {
     public static final String URL_API_PARTICIPATE = "/api/participate/%d/%d/%s";
     public static final String URL_API_PROFILE_HISTORY_NUM_LAST = "/api/profile/history/%d";
 
+    // ZK URLS
+    public static final String URL_API_ZK_GET_CRYPTO_INFO = "/api/zk/cryptoinfo";
+    public static final String URL_API_ZK_REGISTER = "/api/zk/register";
+    public static final String URL_API_ZK_CLAIM_VERIFY_CREDENTIAL = "/api/zk/claim-verify-credential";
+    public static final String URL_API_ZK_CLAIM_VERIFY_Q = "/api/zk/claim-verify-q";
+    public static final String URL_API_ZK_CLAIM_REWARD = "/api/zk/claim-reward";
 
-    public static final String RABBIT_HOST = "192.168.0.73";
+    public static final String URL_API_ZK_DATA_SUBMISSION_ELIGIBILITY_RESULT = "/api/zk/submission-accepted-init-reward";
+
+    // ZK MESSAGES
+    public static final String ZK_MESSAGE_WAIT_BEFORE_SENDING_ANOTHER_PARTICIPATION_DATA =
+            "Please wait before sending another submission.";
+    public static final String ZK_MESSAGE_ELIGIBLE_TO_CLAIM_REWARD = "You are eligible to claim reward, claiming is in progres...";
+    public static final String ZK_MESSAGE_NOT_ELIGIBLE_TO_CLAIM_REWARD = "You are not eligible to claim reward for your latest submission";
+    public static final String ZK_MESSAGE_CLAIM_CREDENTIAL_VERIFIED = "Your credentials are verified, proceeding to computing new q";
+    public static final String ZK_MESSAGE_CLAIM_CREDENTIAL_NOT_VERIFIED = "Your credentials can't be verified. Please contact our support";
+    public static final String ZK_MESSAGE_CLAIM_Q_VERIFIED = "Your q are verified, proceeding to claiming reward";
+    public static final String ZK_MESSAGE_CLAIM_Q_NOT_VERIFIED = "Your q can't be verified. Please contact our support";
+    public static final String ZK_MESSAGE_CLAIM_REWARD_SUCCESS = "Reward claim success, your balance is now:";
+    public static final String ZK_MESSAGE_CLAIM_REWARD_FAILED = "Your reward claim failed. Please contact our support";
+
+
+    public static final String RABBIT_HOST = "103.219.249.10";
     public static final String RABBIT_HOST_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.AMQP.HOST";
     public static final String RABBIT_PORT_IDENTIFIER = "au.edu.anu.cs.sparkee.broadcast.AMQP.PORT";
     public static final int  RABBIT_PORT = 5672;
@@ -49,6 +70,29 @@ public class Constants {
 
     public static final String SHARED_PREFERENCE_FILE_SPARKEE = "au.edu.anu.cs.sparkee.shared_preference";
     public static final String SHARED_PREFERENCE_KEY_SPARKEE_HOST_UUID = "au.edu.anu.cs.sparkee.shared_preference.host.uuid";
+
+    // ZK credentials and required values
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_S = "au.edu.anu.cs.sparkee.shared_preference.zk.s"; // secret s
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_Q = "au.edu.anu.cs.sparkee.shared_preference.zk.q"; // uid q
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_B = "au.edu.anu.cs.sparkee.shared_preference.zk.b"; //balance b
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_SIGN_Q = "au.edu.anu.cs.sparkee.shared_preference.zk.signq"; // sign q
+
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_S = "au.edu.anu.cs.sparkee.shared_preference.zk.commitment.s"; // commitment s
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_Q = "au.edu.anu.cs.sparkee.shared_preference.zk.commitment.q"; // commitment q
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_B = "au.edu.anu.cs.sparkee.shared_preference.zk.commitment.b"; // commitment b
+
+    // s_ used for first registration
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_S_ = "au.edu.anu.cs.sparkee.shared_preference.zk.s_";
+
+    // mask q used in credit claiming
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_MASK_Q= "au.edu.anu.cs.sparkee.shared_preference.zk.maskq";
+
+    // nzkpCm[s] data
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_RANDOM_S = "au.edu.anu.cs.sparkee.shared_preference.zk.commitment.random_s"; // commitment random_s
+    public static final String SHARED_PREFERENCE_KEY_SPARKEE_ZK_ZS = "au.edu.anu.cs.sparkee.shared_preference.zk.zs"; // secret s
+
+
+
 
     public static final int MARKER_PARTICIPATION_UNAVAILABLE_RECEIVED = -101;
     public static final int MARKER_PARTICIPATION_AVAILABLE_RECEIVED = 101;

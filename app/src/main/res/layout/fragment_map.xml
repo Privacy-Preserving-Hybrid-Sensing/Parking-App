@@ -52,5 +52,30 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="50dp"
+        android:padding="5dp"
+
+        android:layout_width="wrap_content"
+        android:background="@drawable/custom_rectangle"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Balance ZK: "
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/ic_balance_zk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="-"
+            android:textStyle="bold" />
+    </LinearLayout>
+
 
 </RelativeLayout>
