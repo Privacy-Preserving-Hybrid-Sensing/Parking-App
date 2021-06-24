@@ -35,7 +35,7 @@ public class Constants {
     public static final String ZK_MESSAGE_CLAIM_CREDENTIAL_NOT_VERIFIED = "Your credentials can't be verified. Please contact our support";
     public static final String ZK_MESSAGE_CLAIM_Q_VERIFIED = "Your q are verified, proceeding to claiming reward";
     public static final String ZK_MESSAGE_CLAIM_Q_NOT_VERIFIED = "Your q can't be verified. Please contact our support";
-    public static final String ZK_MESSAGE_CLAIM_REWARD_SUCCESS = "Reward claim success, your balance is now:";
+    public static final String ZK_MESSAGE_CLAIM_REWARD_SUCCESS = "Reward claim success";
     public static final String ZK_MESSAGE_CLAIM_REWARD_FAILED = "Your reward claim failed. Please contact our support";
 
 

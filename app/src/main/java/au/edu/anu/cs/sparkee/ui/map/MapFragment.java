@@ -133,9 +133,9 @@ public class MapFragment extends Fragment {
         mapViewModel.getZkToastMessage().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                Log.d("[GG] test Toast", s);
-                if (!s.equals("")) {
-                    Toast.makeText(getActivity().getApplicationContext(), s, Toast.LENGTH_LONG);
+//                if (!s.equals("")) {
+                if (s.equals(Constants.ZK_MESSAGE_CLAIM_REWARD_SUCCESS) || s.equals(Constants.ZK_MESSAGE_CLAIM_REWARD_FAILED)) {
+                    Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -144,7 +144,6 @@ public class MapFragment extends Fragment {
             @Override
             public void onChanged(Boolean aBoolean) {
                 // DO NOTHING FOR ZK, just to follow MVVM Design Pattern
-                Log.d("[GG] ZK_FRAGMENT_REGIS", "ZK registered success indicator is changed to " + Boolean.toString(aBoolean));
             }
         });
 
@@ -270,6 +269,7 @@ public class MapFragment extends Fragment {
         addHandleMapEvent();
         addOverlayRotation();
 
+        // Make system setup and/or registration for privacy preserving protocol
         mapViewModel.zk_initCredentialOrMakeNewIfNotExist();
         mapViewModel.sendRequestProfileSummary();
         mapViewModel.sendRequestZonesAll();

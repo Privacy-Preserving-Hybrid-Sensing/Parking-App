@@ -76,7 +76,7 @@ public class MapViewModel extends AndroidViewModel {
     private SharedPreferences sharedPref =  getApplication().getSharedPreferences(Constants.SHARED_PREFERENCE_FILE_SPARKEE, Context.MODE_PRIVATE);
     private Gson gson = new GsonBuilder().disableHtmlEscaping().create();
     private boolean can_submit_data = true;
-    private MutableLiveData<Boolean> zkHasRegistered;
+    private MutableLiveData<Boolean> zkHasRegistered = new MutableLiveData<>();
     private MutableLiveData<String> zkToastMessage;
 
 
@@ -119,6 +119,8 @@ public class MapViewModel extends AndroidViewModel {
         else {
             Log.d("[GG] ZK_SYSTEM_SETUP", "Credential exist, loading from shared preference");
             // when we already have S in our shared preference, that means we only need to load it in our zkClient.
+            zkHasRegistered.setValue(true);
+            zk_initSystemSetup();
             zkClient.setS(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_S, ""));
             zkClient.setS_(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_S_, ""));
             zkClient.setQ(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_Q, ""));
@@ -130,7 +132,10 @@ public class MapViewModel extends AndroidViewModel {
             zkClient.setCommitment_random_s(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_COMMITMENT_RANDOM_S, ""));
             zkClient.setZs(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_ZS, ""));
             zkClient.setMask_q(sharedPref.getString(Constants.SHARED_PREFERENCE_KEY_SPARKEE_ZK_MASK_Q, ""));
-            zkHasRegistered.setValue(true);
+
+            can_submit_data = true;
+            zkBalance.setValue(zkClient.getReadableBalance());
+            Log.d("[GG] ZK_SYSTEM_SETUP", "Loading from shared preference completed.");
         }
     }
 
@@ -138,7 +143,7 @@ public class MapViewModel extends AndroidViewModel {
         // make registration process, command client to create credentials ans then send those credentials to server
         HashMap<String, String> regis_data = zkClient.create_registration_data();
         JSONObject json_obj = new JSONObject(regis_data);
-        Log.d("[GG] ZK_REGISTER", "Trying to register with following data: " + json_obj);
+        Log.d("[GG] ZK_USER_REGIS", "Trying to register");
         DataHelper.getInstance(context).sendPost(Constants.URL_API_ZK_REGISTER, device_uuid,
                 json_obj);
     }
@@ -151,7 +156,7 @@ public class MapViewModel extends AndroidViewModel {
     private void zk_claimRewardVerifyCredential() {
         HashMap<String, String> claim_verify_credential_data = zkClient.create_credit_claim_data();
         JSONObject json_obj = new JSONObject(claim_verify_credential_data);
-        Log.d("[GG] ZK_CLAIM_step_1", "Trying to claim_verify_credential with following data: " + json_obj);
+        Log.d("[GG] ZK_CLAIM_step_1", "Trying to claim and verify_credential.");
         DataHelper.getInstance(context).sendPost(Constants.URL_API_ZK_CLAIM_VERIFY_CREDENTIAL, device_uuid,
                 json_obj);
     }
@@ -159,7 +164,7 @@ public class MapViewModel extends AndroidViewModel {
     private void zk_claimRewardVerifyQ() {
         HashMap<String, String> claim_verify_q_data = zkClient.get_q_and_mask_q();
         JSONObject json_obj = new JSONObject(claim_verify_q_data);
-        Log.d("[GG] ZK_CLAIM_step_2", "Trying to claim_verify_q with following data: " + json_obj);
+        Log.d("[GG] ZK_CLAIM_step_2", "Trying to claim reward and verify_q (q and Cm(q)).");
         DataHelper.getInstance(context).sendPost(Constants.URL_API_ZK_CLAIM_VERIFY_Q, device_uuid,
                 json_obj);
     }
@@ -167,13 +172,13 @@ public class MapViewModel extends AndroidViewModel {
     private void zk_claimReward() {
         HashMap<String, String> new_q_data = zkClient.compute_new_q();
         JSONObject json_obj = new JSONObject(new_q_data);
-        Log.d("[GG] ZK_CLAIM_step_3", "Trying to claim_reward and submit data with following new_q_data: " + json_obj);
+        Log.d("[GG] ZK_CLAIM_step_3", "Trying to claim_reward and submit data with new_q_data.");
         DataHelper.getInstance(context).sendPost(Constants.URL_API_ZK_CLAIM_REWARD, device_uuid,
                 json_obj);
     }
 
     private void zk_acceptReward(HashMap<String, String> reward_data) {
-        Log.d("[GG] ZK_CLAIM_step_4", "Reward claimed successfully :" + reward_data);
+        Log.d("[GG] ZK_CLAIM_step_4", "Reward claimed successfully.");
         zkClient.accept_reward(reward_data);
         // edit Data after getting new reward
         zk_update_shared_preference_to_latest_zk_data();
@@ -245,9 +250,10 @@ public class MapViewModel extends AndroidViewModel {
     public void sendRequestParticipation(int zone_id, int spot_id, String status) {
         if (!can_submit_data) {
             zkToastMessage.setValue(Constants.ZK_MESSAGE_WAIT_BEFORE_SENDING_ANOTHER_PARTICIPATION_DATA);
+            Log.d("[GG] SUBMISSION_LOCK", "Can not submit another data bacause another submission is in proccess");
             return;
         }
-        // [GG new] ticker flag buat menentukan client sudah bisa send data lagi atau ngga.
+        // When user can_submit_data is true, we will submit data (therefore, change the lock to false).
         can_submit_data = false;
 
         StringBuilder sbuf = new StringBuilder();
@@ -263,7 +269,7 @@ public class MapViewModel extends AndroidViewModel {
         }
         HashMap<String, String> submission_data = zkClient.create_submission_data(j, t, a);
         JSONObject json_obj = new JSONObject(submission_data);
-        Log.d("[GG] ZK_SUBMISSION", "Trying to submit the following data: " + json_obj);
+        Log.d("[GG] ZK_DATA_SUBMISSION", "Trying to submit new submission data.");
         DataHelper.getInstance(context).sendPost(fmt.toString(), device_uuid, json_obj);
     }
 
@@ -319,7 +325,7 @@ public class MapViewModel extends AndroidViewModel {
         mParkingSpots = new MutableLiveData<>();
         mParkingSpots.setValue( hashmap_parkingSpot );
 
-        zkHasRegistered = new MutableLiveData<>();
+
         zkHasRegistered.setValue(false);
 
 
@@ -401,10 +407,6 @@ public class MapViewModel extends AndroidViewModel {
         if(path.matches("/api/profile/summary")) {
             JSONObject jo = obj.getJSONObject("data");
             process_profile_summary(jo);
-            // ubah can_participate jadi true.
-            // if dia bisa claim credit (based on /api/profile/summary result)
-                // tembak API untuk claim, kasih param ZK + beberapa info dari returnan si /api/profile/summary supaya server bisa validate lagi kalo datanya ada di db. (TEMBAK MQ)
-            // MAKE REQUEST PAKE OKHTTP buath lgsg aja, gausah volley. (kalo bisa, kalo computenya kuat)
         }
         else if(path.matches("/api/zones/all")) {
             JSONArray ja = obj.getJSONArray("data");
@@ -441,13 +443,22 @@ public class MapViewModel extends AndroidViewModel {
         }
         // [ZK]
         else if(path.matches(Constants.URL_API_ZK_GET_CRYPTO_INFO)) {
+            // Response listener for receiving generator function g and h
+            Log.d("[GG] LISTENER", "Received response from " + Constants.URL_API_ZK_GET_CRYPTO_INFO);
+
             String json = obj.getJSONObject("zk").toString();
             HashMap<String, String> crypto_info = gson.fromJson(json, HashMap.class);
             // set crypto info to zkClient
             zkClient.set_crypt_info(crypto_info);
-            zk_registerCredential();
+            if (!zkHasRegistered.getValue()) {
+                // means the app has not registered yet
+                zk_registerCredential();
+            }
         }
         else if (path.matches(Constants.URL_API_ZK_REGISTER)) {
+            // Response listener for user registration
+            Log.d("[GG] LISTENER", "Received response from " + Constants.URL_API_ZK_REGISTER);
+
             String json = obj.getJSONObject("zk").toString();
             HashMap<String, String> regis_response = gson.fromJson(json, HashMap.class);
             // configure client credentials, computing secret s.
@@ -461,8 +472,9 @@ public class MapViewModel extends AndroidViewModel {
             }
         }
         else if (path.matches(Constants.URL_API_ZK_DATA_SUBMISSION_ELIGIBILITY_RESULT)) {
-            // [GG] if goes here, it means client is eligible to claim data
-            // [GG] mulai chaining disini buat verify credential.
+            // Response listener for eligibility in claiming reward
+            Log.d("[GG] LISTENER", "Received response from " + Constants.URL_API_ZK_DATA_SUBMISSION_ELIGIBILITY_RESULT);
+
             String json = obj.getJSONObject("zk").toString();
             HashMap<String, String> submission_response = gson.fromJson(json, HashMap.class);
             // "true" => eligible to claim reward, "false" => not eligible
@@ -477,6 +489,9 @@ public class MapViewModel extends AndroidViewModel {
             }
         }
         else if (path.matches(Constants.URL_API_ZK_CLAIM_VERIFY_CREDENTIAL)) {
+            // Response listener for verification in claiming reward step 1
+            Log.d("[GG] LISTENER", "Received response from " + Constants.URL_API_ZK_CLAIM_VERIFY_CREDENTIAL);
+
             String json = obj.getJSONObject("zk").toString();
             HashMap<String, String> claim_response_verify_credential = gson.fromJson(json, HashMap.class);
             if (claim_response_verify_credential.get("verification_success").equals("true")) {
@@ -486,12 +501,15 @@ public class MapViewModel extends AndroidViewModel {
             }else {
                 zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_CREDENTIAL_NOT_VERIFIED);
                 can_submit_data = true; // client now can submit another data
-                // TODO: handle failed verification in next PROTOCOL enhancement.
             }
         }
         else if (path.matches(Constants.URL_API_ZK_CLAIM_VERIFY_Q)) {
+            // Response listener for verification in claiming reward step 2
+            Log.d("[GG] LISTENER", "Received response from " + Constants.URL_API_ZK_CLAIM_VERIFY_Q);
+
             String json = obj.getJSONObject("zk").toString();
             HashMap<String, String> claim_response_verify_q = gson.fromJson(json, HashMap.class);
+            Log.d("[GG] CLAIM_DEBUG", "MENERIMA REQUEST DARI VERIFY_Q, data: " + claim_response_verify_q);
             if (claim_response_verify_q.get("verification_success").equals("true")) {
                 zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_Q_VERIFIED);
                 // chain to next claiming step (verify credential)
@@ -499,10 +517,12 @@ public class MapViewModel extends AndroidViewModel {
             }else {
                 zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_Q_NOT_VERIFIED);
                 can_submit_data = true; // client now can submit another data
-                // TODO: handle failed verification in next PROTOCOL enhancement.
             }
         }
         else if (path.matches(Constants.URL_API_ZK_CLAIM_REWARD)) {
+            // Response listener for taking reward in claiming reward step 3
+            Log.d("[GG] LISTENER", "Received response from " + Constants.URL_API_ZK_CLAIM_REWARD);
+
             String json = obj.getJSONObject("zk").toString();
             HashMap<String, String> claim_reward_response = gson.fromJson(json, HashMap.class);
             if (claim_reward_response.get("success").equals("true")) {
@@ -512,7 +532,6 @@ public class MapViewModel extends AndroidViewModel {
             }else {
                 zkToastMessage.setValue(Constants.ZK_MESSAGE_CLAIM_REWARD_FAILED);
                 can_submit_data = true; // client now can submit another data
-                // TODO: handle failed verification in next PROTOCOL enhancement.
             }
         }
         else {
@@ -555,6 +574,10 @@ public class MapViewModel extends AndroidViewModel {
 
 
     void process_participate(JSONObject jo) throws  JSONException {
+        if(jo.getString("zk_success").equals("false")) {
+            Log.d("[GG] ZK_DATA_SUBMISSION", "Submission ZK data can't be verified and was not processed.");
+            can_submit_data = true;
+        }
         int participation_id = jo.getInt("id");
         Participation participation = hashmap_participation.get(participation_id);
         if(participation == null) {

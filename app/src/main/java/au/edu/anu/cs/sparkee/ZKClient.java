@@ -21,7 +21,6 @@ public class ZKClient {
     public Pairing pairing;
     private Field G;
     public Field Zr;
-    private Field GT;
 
     // Variables for generator function g and h.
     private Element g, h;
@@ -43,19 +42,17 @@ public class ZKClient {
     // Credential Signature
     private String signQ;
 
-    // User Submission and credit claiming detail. Consists of j, t, T (TODO: ALL of these need to be stored in Database later)
+    // User Submission and credit claiming detail. Consists of j, t, T
     String j;
     String t;
     Element T;
 
     public ZKClient() {
         // setup properties to pick the base graph function
-        pairing = PairingFactory.getPairing("assets/a.properties");// TODO: TANYA PAK ADIN GIMANA CARA DAPAT a.properties DARI LOCAL FILE
+        pairing = PairingFactory.getPairing("assets/a.properties");
         // initialize the Groups based on the graph function
         G = pairing.getG1();
         Zr = pairing.getZr();
-        GT = pairing.getGT();
-
 
         // [DEBUG message] indicating initialization is complete
         System.out.println("Client constructor initialized.");
@@ -125,8 +122,7 @@ public class ZKClient {
         boolean regis_success = Boolean.parseBoolean(regis_result.get("regis_success"));
         if (!regis_success) {
             // [DEBUG message]
-            System.out.println("Client registration process failed with following info: ");
-            System.out.println(regis_result);
+            Log.d("[GG] ZK_CLIENT", "Client registration process failed");
             return;
         }
 
@@ -137,18 +133,6 @@ public class ZKClient {
         signQ = regis_result.get("signQ");
         generate_nzkpCm_s_data();
 
-        // [DEBUG message]
-        System.out.println("Client successfully receiver credentials.\nBelow are the results:\n===============");
-        System.out.println("s            = " + elementToString(s));
-        System.out.println("q            = " + elementToString(q));
-        System.out.println("b            = " + elementToString(b));
-        System.out.println("commitment_s = " + elementToString(commitment_s));
-        System.out.println("commitment_q = " + elementToString(commitment_q));
-        System.out.println("commitment_b = " + elementToString(commitment_b));
-        System.out.println("SignQ        = " + signQ);
-        System.out.println("\n");
-
-        System.out.println("initial balance: " + stringToZrElement(regis_result.get("b")));
     }
 
     /**
@@ -166,12 +150,12 @@ public class ZKClient {
      2. nzkpCm[s]
      */
     public HashMap<String, String> create_submission_data(String j, String t, boolean a) {
-        // [GG new] ini nanti dikirim sebagai body dari request ke /participate
         // Compute hash H(j|t)
         this.j = j;
         this.t = t;
         String hash_input = j + t; // concat j and t
         Element hash_jt = hash_function(hash_input);
+
         // Compute Ticket T = Cm(s, H(j|t))
         T =commitment(s, hash_jt); // initiated in constructor
 
@@ -180,32 +164,16 @@ public class ZKClient {
 
         submission_data.put("j", j);
         submission_data.put("t", t);
-        submission_data.put("a.properties", Boolean.toString(a));
+        submission_data.put("a", Boolean.toString(a));
         submission_data.put("T", elementToString(T));
-
-        // [DEBUG] message
-        System.out.println("\nClient generated data to be submitted, like following:");
-        System.out.println("j                   = " + j);
-        System.out.println("t                   = " + t);
-        System.out.println("a.properties                   = " + Boolean.toString(a));
-        System.out.println("T                   = " + submission_data.get("T"));
-        System.out.println("commitment_random_s = " + submission_data.get("commitment_random_s"));
-        System.out.println("Zs                  = " + submission_data.get("Zs"));
 
         return submission_data;
     }
 
     /**
-     This function supposedly has input parameter of String j, String t, Element T.
-     However, we want to have many submission_data (j, t, T) so we need to implement a.properties Database to hold each of it. (but only 1 credit claiming per time because q is changing).
-     In this java file implementation, I will only demonstrate for 1 data submission.
-     This function actually CAN get the data from class variable j, t, T. However, I won't use the class variable data
-     because in real android implementation, this function will take input of j, t, T that is queried from DB.
-     remember, Element T not String T.
+     Function for creating credit claim data upon data submission.
      */
     public HashMap<String, String> create_credit_claim_data() {
-        //TODO: Lihat lagi ini maunya gmn? kalo mmg cuma bisa 1 submission
-        // lalu dpt credit dan baru bisa buat submission lain, lgsg pakai aja j, t, T.
         HashMap<String, String> credit_claim_data = get_nzkpCm_s_data();
 
         credit_claim_data.put("j", j);
@@ -223,10 +191,10 @@ public class ZKClient {
         HashMap<String, String> client_q_data = new HashMap<>();
         client_q_data.put("q", elementToString(q));
         client_q_data.put("mask_q", elementToString(mask_q));
-        client_q_data.put("commitment_q", elementToString(commitment_q)); // TODO: not needed because server already know in ws implementation
+        client_q_data.put("commitment_q", elementToString(commitment_q));
 
         // [DEBUG] message
-        System.out.println("Client created credit claim data successfully");
+        Log.d("[GG] ZK_CLIENT","Client created credit claim data successfully");
 
         return client_q_data;
     }
@@ -243,13 +211,13 @@ public class ZKClient {
 
         // return Cm(q') to server
         q_data.put("commitment_random_new_q", elementToString(commitment_q));
-        q_data.put("commitment_s", elementToString(commitment_s)); // TODO: not needed because in WS implementation, commitment_s is already known by server.
-        q_data.put("commitment_b", elementToString(commitment_b)); // TODO: not needed because in WS implementation, commitment_b is already known by server.
-        q_data.put("q", elementToString(old_q)); // TODO: not needed because in WS implementation, q is already known by server.
+        q_data.put("commitment_s", elementToString(commitment_s));
+        q_data.put("commitment_b", elementToString(commitment_b));
+        q_data.put("q", elementToString(old_q));
         q_data.put("T", elementToString(T));
 
         // [DEBUG] message
-        System.out.println("Client computed new_q successfully.");
+        Log.d("[GG] ZK_CLIENT","Client computed new_q successfully.");
 
         return q_data;
     }
@@ -265,7 +233,7 @@ public class ZKClient {
         commitment_b = commitment_new_b;
 
         // [DEBUG] message
-        System.out.println("Client accepted server reward. Current balance is: " + b);
+        Log.d("[GG] ZK_CLIENT","Client accepted server reward. Current balance is: " + b);
     }
 
     private Element commitment(Element x, Element r){
@@ -327,7 +295,9 @@ public class ZKClient {
     }
 
     private Element hash_function(String hash_input) {
-        return stringToGElement(SHA1.hash(hash_input));
+        String sha = SHA1.hash(hash_input);
+        Element result = stringToGElement(sha);
+        return result;
     }
 
     public String getS() {
